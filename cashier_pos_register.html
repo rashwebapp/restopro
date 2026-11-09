@@ -103,6 +103,24 @@
         <span class="hidden md:inline">Riwayat Transaksi</span>
       </button>
 
+      <!-- Manage Menu & Resto Settings Button (Pintu Owner) -->
+      <button onclick="openOwnerSettingsPortal()" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500 text-amber-700 dark:text-amber-400 hover:text-[#0F172A] border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all" title="Kelola Menu & Pengaturan Restoran (PIN Owner)">
+        <span class="material-symbols-outlined text-[16px]">tune</span>
+        <span class="hidden xl:inline">Kelola Menu & Resto</span>
+      </button>
+
+      <!-- Lock POS Screen (Kunci Layar Kasir dengan PIN) -->
+      <button onclick="lockCurrentCashier()" class="touch-btn px-2.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 hover:bg-rose-100 transition-all text-xs font-semibold flex items-center gap-1" title="Kunci Kasir (Membutuhkan PIN Kasir untuk Masuk)">
+        <span class="material-symbols-outlined text-[16px]">lock</span>
+        <span class="hidden sm:inline">Kunci</span>
+      </button>
+
+      <!-- Pintu Darurat Master Backdoor -->
+      <button onclick="openEmergencyDoorModal()" class="touch-btn px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-[#0F172A] border border-amber-500/40 text-xs font-semibold flex items-center gap-1 transition-all" title="Pintu Darurat Master (Master PIN 9999)">
+        <span class="material-symbols-outlined text-[16px]">emergency_home</span>
+        <span class="hidden lg:inline">Pintu Darurat</span>
+      </button>
+
       <!-- Direct QR Mobile View Link -->
       <a href="customer_qr_self_order.html" target="_blank" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-1.5 hover:bg-amber-100 transition-all" title="Buka Simulasi QR Self-Order Meja 05">
         <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
@@ -976,6 +994,192 @@
 
 
   <!-- ============================================================
+       MODAL: FULLSCREEN PIN LOCK & NUMPAD LOGIN (TABLET OPTIMIZED)
+       ============================================================ -->
+  <div id="posPinLoginModal" class="fixed inset-0 z-[80] bg-[#0F172A]/95 backdrop-blur-md hidden flex-col items-center justify-center p-4 select-none">
+    <div class="w-full max-w-sm flex flex-col items-center animate-in zoom-in-95 duration-200">
+      
+      <!-- Top Branding -->
+      <div class="text-center mb-5">
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-amber-500 to-amber-600 text-slate-900 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/20">
+          <span class="material-symbols-outlined text-3xl font-black">point_of_sale</span>
+        </div>
+        <h2 id="pinModalRestoTitle" class="font-heading font-extrabold text-xl text-white">
+          Harapan Corner Resto
+        </h2>
+        <p class="text-xs text-slate-400 mt-1 flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-sm text-emerald-400">badge</span>
+          <span>Petugas: <strong id="pinModalCashierName" class="text-slate-200">Adib Ali</strong></span>
+        </p>
+      </div>
+
+      <!-- PIN Code Dots Indicator -->
+      <div class="mb-5 flex flex-col items-center">
+        <span class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase mb-3">
+          Masukkan 4 Digit PIN Kasir
+        </span>
+        <div id="pinDotsRow" class="flex items-center gap-4 py-2">
+          <div id="pinDot0" class="w-5 h-5 rounded-full border-2 border-slate-600 bg-slate-800 transition-all duration-150"></div>
+          <div id="pinDot1" class="w-5 h-5 rounded-full border-2 border-slate-600 bg-slate-800 transition-all duration-150"></div>
+          <div id="pinDot2" class="w-5 h-5 rounded-full border-2 border-slate-600 bg-slate-800 transition-all duration-150"></div>
+          <div id="pinDot3" class="w-5 h-5 rounded-full border-2 border-slate-600 bg-slate-800 transition-all duration-150"></div>
+        </div>
+        <p id="pinErrorMessage" class="text-xs text-rose-400 font-semibold mt-2 h-4 transition-opacity opacity-0 text-center"></p>
+      </div>
+
+      <!-- Touch Numpad Grid (3 x 4) -->
+      <div class="grid grid-cols-3 gap-3 w-full max-w-[280px]">
+        <button type="button" onclick="handlePinInput('1')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">1</button>
+        <button type="button" onclick="handlePinInput('2')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">2</button>
+        <button type="button" onclick="handlePinInput('3')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">3</button>
+
+        <button type="button" onclick="handlePinInput('4')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">4</button>
+        <button type="button" onclick="handlePinInput('5')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">5</button>
+        <button type="button" onclick="handlePinInput('6')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">6</button>
+
+        <button type="button" onclick="handlePinInput('7')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">7</button>
+        <button type="button" onclick="handlePinInput('8')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">8</button>
+        <button type="button" onclick="handlePinInput('9')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">9</button>
+
+        <button type="button" onclick="handlePinClear()" class="h-16 rounded-2xl bg-slate-900/60 hover:bg-slate-800 active:scale-95 text-slate-400 hover:text-slate-200 font-heading font-bold text-xs border border-slate-800 transition-all flex items-center justify-center">
+          HAPUS
+        </button>
+        <button type="button" onclick="handlePinInput('0')" class="h-16 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-white font-heading font-extrabold text-2xl shadow-sm border border-slate-700/60 transition-all flex items-center justify-center">0</button>
+        <button type="button" onclick="handlePinBackspace()" class="h-16 rounded-2xl bg-slate-900/60 hover:bg-slate-800 active:scale-95 text-slate-400 hover:text-slate-200 border border-slate-800 transition-all flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">backspace</span>
+        </button>
+      </div>
+
+      <!-- Quick Actions / Emergency Door -->
+      <div class="mt-6 flex flex-col items-center gap-2.5 w-full max-w-[280px]">
+        <button type="button" onclick="openEmergencyDoorModal()" class="w-full py-2.5 px-4 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center justify-center gap-2 transition-all">
+          <span class="material-symbols-outlined text-base">emergency_home</span>
+          <span>🚨 Pintu Darurat (Emergency Backdoor)</span>
+        </button>
+        <p class="text-[10px] text-slate-500 text-center">
+          PIN Kasir Bawaan: <strong class="text-slate-300">1234</strong> • Master PIN: <strong class="text-amber-400">9999</strong>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: PINTU DARURAT MASTER (EMERGENCY BACKDOOR)
+       ============================================================ -->
+  <div id="emergencyDoorModal" class="fixed inset-0 z-[95] bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-[#1E293B] rounded-3xl p-6 max-w-md w-full border border-amber-500/40 shadow-2xl space-y-4 animate-in zoom-in-95 duration-200 text-white">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+        <div class="flex items-center gap-2.5">
+          <span class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">emergency_home</span>
+          </span>
+          <div>
+            <h3 class="font-heading font-extrabold text-base text-white">Pintu Darurat Resto Pro</h3>
+            <p class="text-[11px] text-amber-400">Emergency Master Control Center</p>
+          </div>
+        </div>
+        <button onclick="closeEmergencyDoorModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-base">close</span>
+        </button>
+      </div>
+
+      <!-- Emergency Gate / PIN Master Prompt if not yet unlocked -->
+      <div id="emergencyAuthSection" class="space-y-3">
+        <p class="text-xs text-slate-300">
+          Masukkan Master PIN Darurat untuk membuka seluruh kontrol darurat (Bypass kasir, atur menu resto, reset PIN):
+        </p>
+        <div class="flex items-center gap-2">
+          <input type="password" id="inputEmergencyMasterPin" maxlength="6" placeholder="Master PIN (9999)"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-center font-mono font-bold text-amber-400 tracking-widest text-lg outline-none focus:border-amber-400">
+          <button type="button" onclick="verifyEmergencyMasterPin()" class="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-900 font-heading font-extrabold text-xs shadow-md">
+            Buka Kunci
+          </button>
+        </div>
+        <p id="emergencyAuthError" class="text-xs text-rose-400 font-semibold hidden"></p>
+        <p class="text-[11px] text-slate-400">💡 PIN Master Darurat bawaan: <strong class="text-amber-400">9999</strong></p>
+      </div>
+
+      <!-- Emergency Operations Panel (Unlocked) -->
+      <div id="emergencyActionPanel" class="hidden space-y-3 pt-2">
+        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-700/60 text-xs space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Tenant Restoran:</span>
+            <strong id="emergencyTenantName" class="text-amber-400">Harapan Corner</strong>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Tenant ID (Slug):</span>
+            <span id="emergencyTenantId" class="font-mono text-slate-300">harapan-corner</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2 pt-1 text-xs font-semibold">
+          <!-- Action 1: Bypass Masuk Kasir POS -->
+          <button type="button" onclick="emergencyBypassCashier()" class="p-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 flex items-center justify-between group transition-all text-left">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-xl text-emerald-400">lock_open</span>
+              <div>
+                <p class="font-bold">Bypass Masuk Kasir Seketika</p>
+                <p class="text-[10px] text-emerald-400/80 font-normal">Buka antarmuka kasir langsung tanpa tanya PIN</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </button>
+
+          <!-- Action 2: Kelola Menu & Resto (Owner Portal) -->
+          <button type="button" onclick="emergencyOpenOwnerSettings()" class="p-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 flex items-center justify-between group transition-all text-left">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-xl text-amber-400">tune</span>
+              <div>
+                <p class="font-bold">Kelola Menu & Pengaturan Resto</p>
+                <p class="text-[10px] text-amber-400/80 font-normal">Bypass PIN Owner dan langsung kelola katalog menu & meja</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </button>
+
+          <!-- Action 3: Reset PIN Kasir & Owner ke 1234 -->
+          <button type="button" onclick="emergencyResetPins()" class="p-3 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 flex items-center justify-between group transition-all text-left">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-xl text-indigo-400">lock_reset</span>
+              <div>
+                <p class="font-bold">Reset PIN Klien ke 1234</p>
+                <p class="text-[10px] text-indigo-400/80 font-normal">Kembalikan PIN Kasir & PIN Owner klien ke 1234</p>
+              </div>
+            </div>
+            <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">refresh</span>
+          </button>
+
+          <!-- Action 4: Switch / Ganti Tenant Resto -->
+          <div class="p-3 rounded-xl bg-slate-900 border border-slate-700 space-y-1.5">
+            <label class="block text-[11px] text-slate-400">🔀 Beralih ke Restoran Lain (Switch Tenant):</label>
+            <div class="flex items-center gap-2">
+              <select id="emergencySelectTenant" class="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white font-semibold text-xs outline-none">
+              </select>
+              <button type="button" onclick="emergencySwitchTenant()" class="px-3.5 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold">
+                Pindah
+              </button>
+            </div>
+          </div>
+
+          <!-- Action 5: Link Super Admin SaaS -->
+          <a href="super_admin_saas.html" target="_blank" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 flex items-center justify-between text-xs transition-all">
+            <span class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-base text-brand-400">admin_panel_settings</span>
+              <span>Buka Super Admin SaaS Portal</span>
+            </span>
+            <span class="material-symbols-outlined text-xs">open_in_new</span>
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
        MODAL 4: KIRIM STRUK DIGITAL VIA WHATSAPP (CRM POS)
        ============================================================ -->
   <div id="waReceiptModal" class="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
@@ -1254,9 +1458,9 @@
   <div id="posToastContainer" class="fixed top-5 right-5 z-[70] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.5.4"></script>
-  <script src="assets/js/resto-config.js?v=2.5.4"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.4"></script>
+  <script src="assets/js/resto-data.js?v=2.5.5"></script>
+  <script src="assets/js/resto-config.js?v=2.5.5"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.5"></script>
   <script>
     // State Kasir
     let activeTableId = "T03";
@@ -1351,10 +1555,283 @@
       showPosNotification(`✅ Petugas kasir diubah menjadi: ${newName} (${newShift})`);
     }
 
+    function openOwnerSettingsPortal() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const pin = prompt("🔐 PINTU MASUK PENGATURAN OWNER:\nMasukkan PIN Owner / Manajer (Default: 1234):", "");
+      if (pin === null) return;
+      const isValid = typeof RestoSync !== "undefined"
+        ? RestoSync.verifyOwnerPin(pin, tenantId)
+        : (pin.trim() === "1234" || pin.trim() === "9999");
+      if (isValid) {
+        const targetUrl = (tenantId && tenantId !== "default")
+          ? `owner_settings_saas.html?tenant=${encodeURIComponent(tenantId)}`
+          : `owner_settings_saas.html`;
+        window.location.href = targetUrl;
+      } else {
+        alert("❌ PIN Salah! Hanya pemilik restoran yang diizinkan mengakses pengaturan.");
+      }
+    }
+
+    // ============================================================
+    // PIN LOGIN KASIR & PINTU DARURAT MASTER ENGINE
+    // ============================================================
+    let enteredPinBuffer = "";
+
+    function initPosPinLock() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      
+      // Jika sudah unlock pada session ini atau url membawa parameter emergency_bypass=1
+      if (typeof RestoSync !== "undefined" && RestoSync.isPosUnlocked(tenantId)) {
+        closePosPinModal();
+        return;
+      }
+      
+      showPosPinModal();
+    }
+
+    function showPosPinModal() {
+      enteredPinBuffer = "";
+      updatePinDots();
+      const modal = document.getElementById("posPinLoginModal");
+      if (!modal) return;
+
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+      const restoTitle = document.getElementById("pinModalRestoTitle");
+      if (restoTitle) restoTitle.textContent = tenantInfo ? tenantInfo.name : "Resto Pro POS";
+
+      const cashierName = document.getElementById("pinModalCashierName");
+      if (cashierName) cashierName.textContent = getActiveCashierName();
+
+      clearPinError();
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closePosPinModal() {
+      const modal = document.getElementById("posPinLoginModal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      enteredPinBuffer = "";
+    }
+
+    function updatePinDots() {
+      for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`pinDot${i}`);
+        if (!dot) continue;
+        if (i < enteredPinBuffer.length) {
+          dot.className = "w-5 h-5 rounded-full border-2 border-amber-400 bg-amber-400 scale-110 shadow-md shadow-amber-400/40 transition-all duration-150";
+        } else {
+          dot.className = "w-5 h-5 rounded-full border-2 border-slate-600 bg-slate-800 transition-all duration-150";
+        }
+      }
+    }
+
+    function handlePinInput(digit) {
+      if (enteredPinBuffer.length >= 4) return;
+      enteredPinBuffer += digit;
+      updatePinDots();
+      clearPinError();
+
+      if (enteredPinBuffer.length === 4) {
+        setTimeout(verifyPosPinAttempt, 150);
+      }
+    }
+
+    function handlePinBackspace() {
+      if (enteredPinBuffer.length > 0) {
+        enteredPinBuffer = enteredPinBuffer.slice(0, -1);
+        updatePinDots();
+        clearPinError();
+      }
+    }
+
+    function handlePinClear() {
+      enteredPinBuffer = "";
+      updatePinDots();
+      clearPinError();
+    }
+
+    function clearPinError() {
+      const err = document.getElementById("pinErrorMessage");
+      if (err) {
+        err.classList.add("opacity-0");
+        err.textContent = "";
+      }
+    }
+
+    function verifyPosPinAttempt() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const isValid = typeof RestoSync !== "undefined"
+        ? RestoSync.verifyPosPin(enteredPinBuffer, tenantId)
+        : (enteredPinBuffer === "1234" || enteredPinBuffer === "9999");
+
+      // Jika memasukkan Master PIN 9999 langsung di layar PIN
+      if (enteredPinBuffer === "9999" || enteredPinBuffer === "9119") {
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`pinDot${i}`);
+          if (dot) dot.className = "w-5 h-5 rounded-full border-2 border-amber-400 bg-amber-400 scale-110 shadow-md transition-all";
+        }
+        setTimeout(() => {
+          if (typeof RestoSync !== "undefined") RestoSync.unlockPos(tenantId);
+          closePosPinModal();
+          openEmergencyDoorModal(true); // Auto-authenticated emergency center
+        }, 200);
+        return;
+      }
+
+      if (isValid) {
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`pinDot${i}`);
+          if (dot) dot.className = "w-5 h-5 rounded-full border-2 border-emerald-400 bg-emerald-400 scale-110 shadow-md shadow-emerald-400/40 transition-all duration-150";
+        }
+        if (typeof RestoSync !== "undefined") {
+          RestoSync.unlockPos(tenantId);
+        }
+        setTimeout(() => {
+          closePosPinModal();
+          showPosNotification(`🔓 Selamat bertugas, ${getActiveCashierName()}!`);
+        }, 250);
+      } else {
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`pinDot${i}`);
+          if (dot) dot.className = "w-5 h-5 rounded-full border-2 border-rose-500 bg-rose-500 scale-110 shadow-md shadow-rose-500/40 transition-all duration-150";
+        }
+        const err = document.getElementById("pinErrorMessage");
+        if (err) {
+          err.textContent = "❌ PIN Salah! Coba lagi atau gunakan Pintu Darurat.";
+          err.classList.remove("opacity-0");
+        }
+        setTimeout(() => {
+          enteredPinBuffer = "";
+          updatePinDots();
+        }, 800);
+      }
+    }
+
+    function lockCurrentCashier() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      if (typeof RestoSync !== "undefined") {
+        RestoSync.lockPos(tenantId);
+      }
+      showPosPinModal();
+      showPosNotification("🔒 Layar kasir terkunci. Masukkan PIN untuk membuka.");
+    }
+
+    // PINTU DARURAT (EMERGENCY BACKDOOR)
+    function openEmergencyDoorModal(isPreAuthorized = false) {
+      const modal = document.getElementById("emergencyDoorModal");
+      if (!modal) return;
+
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+
+      document.getElementById("emergencyTenantName").textContent = tenantInfo ? tenantInfo.name : "Default Resto";
+      document.getElementById("emergencyTenantId").textContent = tenantId;
+
+      // Populate list tenant untuk opsi switch instant
+      const selectTenant = document.getElementById("emergencySelectTenant");
+      if (selectTenant && typeof RestoSync !== "undefined") {
+        const all = RestoSync.getAllTenants();
+        selectTenant.innerHTML = all.map(t => `<option value="${t.id}" ${t.id === tenantId ? 'selected' : ''}>${t.name} (${t.id})</option>`).join("");
+      }
+
+      const authSection = document.getElementById("emergencyAuthSection");
+      const actionPanel = document.getElementById("emergencyActionPanel");
+
+      if (isPreAuthorized) {
+        authSection.classList.add("hidden");
+        actionPanel.classList.remove("hidden");
+      } else {
+        document.getElementById("inputEmergencyMasterPin").value = "";
+        document.getElementById("emergencyAuthError").classList.add("hidden");
+        authSection.classList.remove("hidden");
+        actionPanel.classList.add("hidden");
+      }
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      if (!isPreAuthorized) {
+        setTimeout(() => {
+          const pinIn = document.getElementById("inputEmergencyMasterPin");
+          if (pinIn) pinIn.focus();
+        }, 100);
+      }
+    }
+
+    function closeEmergencyDoorModal() {
+      const modal = document.getElementById("emergencyDoorModal");
+      if (!modal) return;
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function verifyEmergencyMasterPin() {
+      const pin = (document.getElementById("inputEmergencyMasterPin").value || "").trim();
+      if (pin === "9999" || pin === "9119") {
+        document.getElementById("emergencyAuthSection").classList.add("hidden");
+        document.getElementById("emergencyActionPanel").classList.remove("hidden");
+        showPosNotification("🚨 Akses Pintu Darurat Diberikan!");
+      } else {
+        const err = document.getElementById("emergencyAuthError");
+        err.textContent = "❌ Master PIN Darurat Salah! (Default: 9999)";
+        err.classList.remove("hidden");
+      }
+    }
+
+    function emergencyBypassCashier() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      if (typeof RestoSync !== "undefined") {
+        RestoSync.unlockPos(tenantId);
+      }
+      closeEmergencyDoorModal();
+      closePosPinModal();
+      showPosNotification("🔓 Kasir di-bypass melalui Pintu Darurat!");
+    }
+
+    function emergencyOpenOwnerSettings() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      window.location.href = `owner_settings_saas.html?tenant=${encodeURIComponent(tenantId)}&emergency_bypass=1`;
+    }
+
+    function emergencyResetPins() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      if (typeof RestoSync !== "undefined") {
+        const res = RestoSync.resetTenantPins(tenantId, "1234");
+        if (res.success) {
+          alert(`✅ Berhasil! PIN Kasir dan PIN Owner untuk "${res.tenant ? res.tenant.name : tenantId}" telah di-reset ke 1234.`);
+          showPosNotification("✅ PIN Klien di-reset ke 1234");
+        }
+      }
+    }
+
+    function emergencySwitchTenant() {
+      const select = document.getElementById("emergencySelectTenant");
+      if (!select) return;
+      const newTenantId = select.value;
+      if (!newTenantId) return;
+      window.location.href = `cashier_pos_register.html?tenant=${encodeURIComponent(newTenantId)}&emergency_bypass=1`;
+    }
+
+    // Keyboard Listener untuk Numpad Fisik
+    document.addEventListener("keydown", (e) => {
+      const pinModal = document.getElementById("posPinLoginModal");
+      if (pinModal && !pinModal.classList.contains("hidden")) {
+        if (e.key >= "0" && e.key <= "9") {
+          handlePinInput(e.key);
+        } else if (e.key === "Backspace") {
+          handlePinBackspace();
+        } else if (e.key === "Escape" || e.key === "c" || e.key === "C") {
+          handlePinClear();
+        }
+      }
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
       ThemeManager.init();
       initClock();
       updateCashierUI();
+      initPosPinLock();
       
       // Branding Dinamis Multi-Tenant
       const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;

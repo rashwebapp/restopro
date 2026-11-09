@@ -64,14 +64,14 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white leading-tight">
+          <h1 id="ownerDashboardTitle" class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white leading-tight">
             Resto Pro Owner Dashboard <span class="text-amber-500">✨</span>
           </h1>
           <span class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-heading font-bold text-[10px]">
             ENTERPRISE SAAS
           </span>
         </div>
-        <p class="text-[11px] text-[#78716C] dark:text-[#94A3B8] hidden sm:block">
+        <p id="ownerDashboardSub" class="text-[11px] text-[#78716C] dark:text-[#94A3B8] hidden sm:block">
           by RASH WebApp Builder • Pengaturan Lisensi, Stok Menu & Analitik
         </p>
       </div>
@@ -79,13 +79,13 @@
 
     <!-- Screen Navigation Links -->
     <nav class="hidden md:flex items-center bg-[#FAF7F2] dark:bg-[#0F172A] p-1 rounded-2xl border border-[#E7DFD5] dark:border-[#334155] gap-1 text-xs font-heading font-semibold">
-      <a href="customer_qr_self_order.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
+      <a id="navQrLink" href="customer_qr_self_order.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
         <span class="material-symbols-outlined text-[16px]">qr_code_2</span> QR Menu
       </a>
-      <a href="cashier_pos_register.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
+      <a id="navPosLink" href="cashier_pos_register.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
         <span class="material-symbols-outlined text-[16px]">point_of_sale</span> Kasir POS
       </a>
-      <a href="kitchen_display_kds.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
+      <a id="navKdsLink" href="kitchen_display_kds.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
         <span class="material-symbols-outlined text-[16px]">soup_kitchen</span> KDS Dapur
       </a>
       <a href="owner_settings_saas.html" class="px-3 py-1.5 rounded-xl bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A] shadow-xs flex items-center gap-1.5">
@@ -103,12 +103,12 @@
 
       <!-- Owner Profile -->
       <div class="flex items-center gap-2 pl-2 py-1 pr-3 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
-        <div class="w-7 h-7 rounded-lg bg-amber-500 text-[#0F172A] font-extrabold text-xs flex items-center justify-center font-heading">
+        <div id="ownerProfileAvatar" class="w-7 h-7 rounded-lg bg-amber-500 text-[#0F172A] font-extrabold text-xs flex items-center justify-center font-heading">
           RP
         </div>
         <div class="text-left hidden lg:block leading-tight">
-          <div class="text-xs font-bold font-heading text-[#1C1917] dark:text-white">RASH Partner</div>
-          <div class="text-[10px] text-stone-500">Super Administrator</div>
+          <div id="ownerProfileName" class="text-xs font-bold font-heading text-[#1C1917] dark:text-white">RASH Partner</div>
+          <div id="ownerProfileRole" class="text-[10px] text-stone-500">Super Administrator</div>
         </div>
       </div>
     </div>
@@ -1612,9 +1612,9 @@
   </div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js"></script>
-  <script src="assets/js/resto-config.js"></script>
-  <script src="assets/js/resto-sync.js"></script>
+  <script src="assets/js/resto-data.js?v=2.5.5"></script>
+  <script src="assets/js/resto-config.js?v=2.5.5"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.5"></script>
   <script>
     // State Filter Global
     let activeDatePreset = "today";
@@ -1631,6 +1631,38 @@
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js').catch(e => {});
       }
+
+      // Branding Dinamis Multi-Tenant
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+
+      if (tenantInfo && tenantInfo.name) {
+        const titleEl = document.getElementById("ownerDashboardTitle");
+        if (titleEl) titleEl.innerHTML = `${tenantInfo.name} • Pengaturan Resto <span class="text-amber-500">✨</span>`;
+        const subEl = document.getElementById("ownerDashboardSub");
+        if (subEl) subEl.textContent = `Panel Pengaturan Menu, Meja & Omset • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
+        
+        const ownerNameEl = document.getElementById("ownerProfileName");
+        if (ownerNameEl) ownerNameEl.textContent = tenantInfo.pic || tenantInfo.name;
+        const ownerSubEl = document.getElementById("ownerProfileRole");
+        if (ownerSubEl) ownerSubEl.textContent = `Owner • ${tenantInfo.name}`;
+        
+        const avatarEl = document.getElementById("ownerProfileAvatar");
+        if (avatarEl) avatarEl.textContent = tenantInfo.name.substring(0, 2).toUpperCase();
+
+        document.title = `${tenantInfo.name} • Pengaturan Owner & Menu`;
+      }
+
+      // Pertahankan parameter tenant pada navigasi antar layar
+      if (tenantId && tenantId !== "default") {
+        const posLink = document.getElementById("navPosLink");
+        if (posLink) posLink.href = `cashier_pos_register.html?tenant=${encodeURIComponent(tenantId)}`;
+        const kdsLink = document.getElementById("navKdsLink");
+        if (kdsLink) kdsLink.href = `kitchen_display_kds.html?tenant=${encodeURIComponent(tenantId)}&station=kitchen`;
+        const qrLink = document.getElementById("navQrLink");
+        if (qrLink) qrLink.href = `customer_qr_self_order.html?tenant=${encodeURIComponent(tenantId)}&table=T01`;
+      }
+
       initGasSettingsUI();
       renderCatalogManager();
       renderMembersTable();

@@ -353,7 +353,7 @@
           </div>
         </div>
 
-        <!-- PIC & No WhatsApp -->
+        <!-- PIC & No WhatsApp Pemilik -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block font-bold text-slate-300 mb-1">Nama Pemilik / Manajer (PIC)</label>
@@ -361,9 +361,31 @@
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
           </div>
           <div>
-            <label class="block font-bold text-slate-300 mb-1">Nomor WhatsApp <span class="text-rose-400">*</span></label>
-            <input type="tel" id="inputTenantPhone" required placeholder="Contoh: 081234567890"
+            <label class="block font-bold text-slate-300 mb-1">Nomor WhatsApp Pemilik (Owner) <span class="text-rose-400">*</span></label>
+            <input type="tel" id="inputTenantPhone" required placeholder="Contoh: 082286452105"
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- WhatsApp Kasir & PIN Default (Fitur Baru) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">
+              Nomor WhatsApp Kasir / Tablet POS
+              <span class="text-amber-400 font-normal text-xs">(Untuk kirim link & PIN)</span>
+            </label>
+            <input type="tel" id="inputTenantCashierPhone" placeholder="Contoh: 081299887766 (Opsional)"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+            <span class="text-[10px] text-slate-400 mt-1 block">Nomor ini akan menerima pesan link tablet kasir + PIN login 1234</span>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">
+              PIN Login Kasir & Owner
+              <span class="text-emerald-400 font-normal text-xs">(Default 4 Digit)</span>
+            </label>
+            <input type="text" id="inputTenantCashierPin" maxlength="6" value="1234" placeholder="1234"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-amber-300 font-mono font-bold text-center text-base focus:outline-hidden focus:border-brand-500">
+            <span class="text-[10px] text-slate-400 mt-1 block">PIN angka untuk masuk kasir di tablet (Default: 1234)</span>
           </div>
         </div>
 
@@ -371,7 +393,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block font-bold text-slate-300 mb-1">Kota / Cabang</label>
-            <input type="text" id="inputTenantCity" placeholder="Contoh: Bandung, Jawa Barat"
+            <input type="text" id="inputTenantCity" placeholder="Contoh: Kab. Bogor, Jawa Barat"
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
           </div>
           <div>
@@ -511,13 +533,34 @@
           <p id="successQrSheetLink" class="font-mono text-[11px] text-slate-400 truncate"></p>
         </div>
 
-        <!-- Action Buttons -->
+        <!-- Link Pengaturan Owner & Menu -->
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-slate-300 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-amber-400">tune</span>
+              <span>4. Link Kelola Menu & Resto (PIN: 1234)</span>
+            </span>
+            <button onclick="copyToClipboard(currentSuccessLinks.owner, 'Link Kelola Resto Disalin!')" class="text-[11px] font-bold text-brand-400 hover:text-brand-300">
+              Salin Link
+            </button>
+          </div>
+          <p id="successOwnerLink" class="font-mono text-[11px] text-slate-400 truncate"></p>
+        </div>
+
+        <!-- Action Buttons: WhatsApp Pemilik & WhatsApp Kasir -->
         <div class="pt-3 space-y-2">
-          <!-- WhatsApp Blast Button -->
+          <!-- WhatsApp Owner Button -->
           <a id="btnSendWhatsApp" href="#" target="_blank"
-            class="touch-btn w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-extrabold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+            class="touch-btn w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-extrabold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
             <span class="material-symbols-outlined text-lg">chat</span>
-            <span>💬 Buka WhatsApp & Kirim Akun ke Klien</span>
+            <span>💬 Kirim ke WhatsApp Pemilik (Owner Portal & QR)</span>
+          </a>
+
+          <!-- WhatsApp Kasir Button -->
+          <a id="btnSendWhatsAppCashier" href="#" target="_blank"
+            class="touch-btn w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-heading font-extrabold text-xs shadow-lg shadow-amber-600/20 flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">point_of_sale</span>
+            <span>📱 Kirim ke WhatsApp Kasir (Link POS + PIN 1234)</span>
           </a>
 
           <div class="flex items-center gap-2">
@@ -543,9 +586,9 @@
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Shared Application Scripts -->
-  <script src="assets/js/resto-config.js?v=2.5.4"></script>
-  <script src="assets/js/resto-data.js?v=2.5.4"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.4"></script>
+  <script src="assets/js/resto-config.js?v=2.5.5"></script>
+  <script src="assets/js/resto-data.js?v=2.5.5"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.5"></script>
 
   <!-- ========================================================================= -->
   <!-- 6. SUPER ADMIN APPLICATION ENGINE                                         -->
@@ -631,9 +674,12 @@
         {
           id: "harapan-corner",
           name: "Harapan Corner Resto & Coffee",
-          pic: "Bpk. Budi Santoso",
-          phone: "081234567890",
-          city: "Bandung, Jawa Barat",
+          pic: "Adib Ali",
+          phone: "082286452105",
+          cashierPhone: "081299887766",
+          cashierPin: "1234",
+          ownerPin: "1234",
+          city: "Kab Bogor, Jawa Barat",
           plan: "pro",
           planName: "Paket Pro (Multi-Stasiun + GrabFood/GoFood)",
           price: 199000,
@@ -674,6 +720,9 @@
         name: rawName,
         pic: data.pic || "Pemilik Resto",
         phone: data.phone || "",
+        cashierPhone: data.cashierPhone || "",
+        cashierPin: String(data.cashierPin || "1234").trim(),
+        ownerPin: String(data.ownerPin || "1234").trim(),
         city: data.city || "-",
         plan: data.plan || "pro",
         planName: data.plan === "trial" ? "Trial (14 Hari Gratis)" : (data.plan === "basic" ? "Paket Basic" : "Paket Pro"),
@@ -695,6 +744,10 @@
 
       try {
         localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+      } catch (e) {}
+
+      return newTenant;
+    }
       } catch (e) {}
 
       return newTenant;
@@ -789,26 +842,47 @@
         }
 
         const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${t.id}`;
+        const emergencyPosUrl = `${baseUrl}cashier_pos_register.html?tenant=${t.id}&emergency_bypass=1`;
         const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${t.id}&station=kitchen`;
         const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${t.id}`;
         const guestSampleUrl = `${baseUrl}customer_qr_self_order.html?tenant=${t.id}&table=T01`;
+        const ownerUrl = `${baseUrl}owner_settings_saas.html?tenant=${t.id}`;
+        const clientPin = t.cashierPin || "1234";
 
-        // Format Pesan WhatsApp
-        const waMsg = encodeURIComponent(
+        // Format Pesan WhatsApp Khusus Pemilik (Owner)
+        const waMsgOwner = encodeURIComponent(
           `Halo ${t.pic || 'Bpk/Ibu'} (${t.name}),\n\n` +
-          `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF.\n\n` +
+          `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF dan siap digunakan:\n\n` +
           `📱 *LINK OPERASIONAL RESTORAN ANDA:*\n` +
           `1. Kasir POS Tablet: ${posUrl}\n` +
           `2. Display Dapur KDS: ${kdsUrl}\n` +
           `3. Lembaran Cetak QR Meja: ${qrSheetUrl}\n` +
-          `4. Contoh Menu Meja 01: ${guestSampleUrl}\n\n` +
+          `4. Contoh Menu Meja 01: ${guestSampleUrl}\n` +
+          `5. Kelola Menu & Resto (Owner): ${ownerUrl} (PIN Owner: ${clientPin})\n\n` +
           `Paket: ${t.planName}\n` +
           `Masa Aktif Hingga: ${new Date(t.expiresAt).toLocaleDateString('id-ID')}\n\n` +
           `Buka link Kasir di tablet/laptop dan pilih "Add to Home Screen". Selamat berjualan! 🚀`
         );
-        const waCleanPhone = (t.phone || '').replace(/[^0-9]/g, '');
-        const waFinalPhone = waCleanPhone.startsWith('0') ? '62' + waCleanPhone.substring(1) : waCleanPhone;
-        const waLink = `https://wa.me/${waFinalPhone}?text=${waMsg}`;
+        const waOwnerClean = (t.phone || '').replace(/[^0-9]/g, '');
+        const waOwnerFinal = waOwnerClean.startsWith('0') ? '62' + waOwnerClean.substring(1) : waOwnerClean;
+        const waOwnerLink = `https://wa.me/${waOwnerFinal}?text=${waMsgOwner}`;
+
+        // Format Pesan WhatsApp Khusus Tim Kasir Toko
+        const waMsgCashier = encodeURIComponent(
+          `Halo Tim Kasir ${t.name},\n\n` +
+          `Berikut adalah link aplikasi Kasir POS Tablet Anda:\n` +
+          `🔗 ${posUrl}\n\n` +
+          `🔑 *PIN LOGIN KASIR:* ${clientPin}\n\n` +
+          `*Instruksi Penggunaan Cepat di Tablet Kasir:*\n` +
+          `1. Buka link di atas di browser Google Chrome / Safari tablet\n` +
+          `2. Tekan menu browser -> Pilih "Tambahkan ke Layar Utama" (Add to Home Screen)\n` +
+          `3. Masukkan PIN ${clientPin} untuk mulai melayani transaksi meja & takeaway.\n\n` +
+          `🚨 *Pintu Darurat Master PIN:* 9999\n\n` +
+          `Selamat bertugas & sukses selalu! 🚀`
+        );
+        const waCashierClean = (t.cashierPhone || t.phone || '').replace(/[^0-9]/g, '');
+        const waCashierFinal = waCashierClean.startsWith('0') ? '62' + waCashierClean.substring(1) : waCashierClean;
+        const waCashierLink = `https://wa.me/${waCashierFinal}?text=${waMsgCashier}`;
 
         return `
           <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-brand-500/40 transition-all flex flex-col justify-between space-y-4">
@@ -837,11 +911,22 @@
                   <span class="font-semibold text-slate-200">${t.pic || '-'}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                  <span>No. WhatsApp:</span>
-                  <a href="${waLink}" target="_blank" class="font-mono text-emerald-400 hover:underline flex items-center gap-1">
+                  <span>WA Pemilik:</span>
+                  <a href="${waOwnerLink}" target="_blank" class="font-mono text-emerald-400 hover:underline flex items-center gap-1">
                     <span>${t.phone || '-'}</span>
                     <span class="material-symbols-outlined text-xs">open_in_new</span>
                   </a>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>WA Kasir:</span>
+                  <a href="${waCashierLink}" target="_blank" class="font-mono text-amber-400 hover:underline flex items-center gap-1">
+                    <span>${t.cashierPhone || '(Sama dg Owner)'}</span>
+                    <span class="material-symbols-outlined text-xs">open_in_new</span>
+                  </a>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>PIN Kasir & Owner:</span>
+                  <span class="font-mono font-bold text-amber-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">${clientPin}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span>Paket:</span>
@@ -856,18 +941,40 @@
 
             <!-- Action Buttons -->
             <div class="pt-3 border-t border-slate-800/80 space-y-2">
-              <div class="flex items-center gap-2">
-                <a href="${waLink}" target="_blank" class="touch-btn flex-1 py-2 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-center font-bold text-xs flex items-center justify-center gap-1.5">
+              <div class="grid grid-cols-2 gap-2">
+                <a href="${waOwnerLink}" target="_blank" class="touch-btn py-2 px-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-center font-bold text-xs flex items-center justify-center gap-1" title="Kirim Akun ke Pemilik">
                   <span class="material-symbols-outlined text-base">chat</span>
-                  <span>Kirim WA</span>
+                  <span>WA Owner</span>
                 </a>
 
-                <a href="${qrSheetUrl}" target="_blank" class="touch-btn py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1" title="Cetak Lembaran QR Meja">
+                <a href="${waCashierLink}" target="_blank" class="touch-btn py-2 px-2.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-center font-bold text-xs flex items-center justify-center gap-1" title="Kirim Link POS & PIN ke Kasir">
+                  <span class="material-symbols-outlined text-base">point_of_sale</span>
+                  <span>WA Kasir</span>
+                </a>
+              </div>
+
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <a href="${emergencyPosUrl}" target="_blank" class="touch-btn flex-1 py-2 px-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center justify-center gap-1" title="Buka Kasir Langsung (Bypass PIN Darurat)">
+                  <span class="material-symbols-outlined text-base">emergency_home</span>
+                  <span>🚨 Darurat</span>
+                </a>
+
+                <a href="${ownerUrl}" target="_blank" class="touch-btn py-2 px-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold flex items-center gap-1" title="Buka Panel Pengaturan Menu & Resto Klien">
+                  <span class="material-symbols-outlined text-base">tune</span>
+                  <span>Kelola</span>
+                </a>
+
+                <button onclick="handleResetTenantPin('${t.id}', '${t.name}')" class="touch-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-bold flex items-center gap-1" title="Reset PIN Kasir & Owner ke 1234">
+                  <span class="material-symbols-outlined text-base">lock_reset</span>
+                  <span>Reset</span>
+                </button>
+
+                <a href="${qrSheetUrl}" target="_blank" class="touch-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1" title="Cetak Lembaran QR Meja">
                   <span class="material-symbols-outlined text-base">print</span>
-                  <span>QR Meja</span>
+                  <span>QR</span>
                 </a>
 
-                <button onclick="handleRenewTenant('${t.id}')" class="touch-btn py-2 px-3 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-bold flex items-center gap-1" title="Perpanjang Lisensi +30 Hari">
+                <button onclick="handleRenewTenant('${t.id}')" class="touch-btn py-2 px-2 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-bold flex items-center gap-1" title="Perpanjang Lisensi +30 Hari">
                   <span class="material-symbols-outlined text-base">autorenew</span>
                   <span>+30H</span>
                 </button>
@@ -878,6 +985,10 @@
                   Tampilkan Semua Tautan
                 </button>
                 <button onclick="confirmDeleteTenant('${t.id}', '${t.name}')" class="text-rose-400 hover:text-rose-300">
+                  Hapus Klien
+                </button>
+              </div>
+            </div>
                   Hapus Klien
                 </button>
               </div>
@@ -945,6 +1056,8 @@
       const slug = document.getElementById("inputTenantSlug").value.trim();
       const pic = document.getElementById("inputTenantPic").value.trim();
       const phone = document.getElementById("inputTenantPhone").value.trim();
+      const cashierPhone = (document.getElementById("inputTenantCashierPhone").value || "").trim();
+      const cashierPin = (document.getElementById("inputTenantCashierPin").value || "1234").trim();
       const city = document.getElementById("inputTenantCity").value.trim();
       const tables = document.getElementById("inputTenantTables").value;
       const plan = document.querySelector('input[name="planChoice"]:checked').value;
@@ -962,6 +1075,9 @@
           name: name,
           pic: pic,
           phone: phone,
+          cashierPhone: cashierPhone,
+          cashierPin: cashierPin,
+          ownerPin: cashierPin,
           city: city,
           plan: plan,
           tablesCount: tables,
@@ -985,42 +1101,84 @@
       const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${tenant.id}&station=kitchen`;
       const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${tenant.id}`;
       const sampleGuest = `${baseUrl}customer_qr_self_order.html?tenant=${tenant.id}&table=T01`;
+      const ownerUrl = `${baseUrl}owner_settings_saas.html?tenant=${tenant.id}`;
+      const clientPin = tenant.cashierPin || "1234";
 
       currentSuccessLinks = {
         pos: posUrl,
         kds: kdsUrl,
         qrSheet: qrSheetUrl,
-        sample: sampleGuest
+        sample: sampleGuest,
+        owner: ownerUrl
       };
 
       document.getElementById("successModalTitle").textContent = `🎉 Akun "${tenant.name}" Berhasil Terbit!`;
-      document.getElementById("successModalSub").textContent = `Tenant ID: ${tenant.id} • Paket: ${tenant.planName}`;
+      document.getElementById("successModalSub").textContent = `Tenant ID: ${tenant.id} • PIN Kasir & Owner: ${clientPin}`;
 
-      document.getElementById("successPosLink").textContent = posUrl;
+      document.getElementById("successPosLink").textContent = `${posUrl} (PIN: ${clientPin})`;
       document.getElementById("successKdsLink").textContent = kdsUrl;
       document.getElementById("successQrSheetLink").textContent = qrSheetUrl;
+      const ownerLinkEl = document.getElementById("successOwnerLink");
+      if (ownerLinkEl) ownerLinkEl.textContent = `${ownerUrl} (PIN: ${clientPin})`;
 
       // Link Cetak QR Meja
       document.getElementById("btnOpenQrSheet").href = qrSheetUrl;
 
-      // Format Pesan WhatsApp
-      const waMsg = encodeURIComponent(
+      // Format Pesan WhatsApp Pemilik (Owner)
+      const waMsgOwner = encodeURIComponent(
         `Halo ${tenant.pic || 'Bpk/Ibu'} (${tenant.name}),\n\n` +
         `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF dan siap digunakan:\n\n` +
         `📱 *LINK OPERASIONAL RESTORAN:*\n` +
         `1. Kasir POS Tablet: ${posUrl}\n` +
         `2. Display Dapur KDS: ${kdsUrl}\n` +
         `3. Lembaran Cetak QR Meja (PDF): ${qrSheetUrl}\n` +
-        `4. Contoh Pemesanan Meja 01: ${sampleGuest}\n\n` +
+        `4. Contoh Pemesanan Meja 01: ${sampleGuest}\n` +
+        `5. Kelola Menu & Resto (Owner): ${ownerUrl} (PIN: ${clientPin})\n\n` +
         `Paket: ${tenant.planName}\n` +
         `Masa Berlaku: s/d ${new Date(tenant.expiresAt).toLocaleDateString('id-ID')}\n\n` +
         `Cukup buka link Kasir di tablet kasir Anda dan pilih "Add to Home Screen". Selamat berjualan! 🚀`
       );
       const cleanPhone = (tenant.phone || '').replace(/[^0-9]/g, '');
       const finalPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.substring(1) : cleanPhone;
-      document.getElementById("btnSendWhatsApp").href = `https://wa.me/${finalPhone}?text=${waMsg}`;
+      document.getElementById("btnSendWhatsApp").href = `https://wa.me/${finalPhone}?text=${waMsgOwner}`;
+
+      // Format Pesan WhatsApp Khusus Kasir
+      const waMsgCashier = encodeURIComponent(
+        `Halo Tim Kasir ${tenant.name},\n\n` +
+        `Berikut adalah link aplikasi Kasir POS Tablet Anda:\n` +
+        `🔗 ${posUrl}\n\n` +
+        `🔑 *PIN LOGIN KASIR:* ${clientPin}\n\n` +
+        `*Instruksi Penggunaan Cepat di Tablet Kasir:*\n` +
+        `1. Buka link di browser Google Chrome / Safari tablet\n` +
+        `2. Tekan menu browser -> Pilih "Tambahkan ke Layar Utama" (Add to Home Screen)\n` +
+        `3. Masukkan 4 angka PIN: ${clientPin} untuk mulai melayani transaksi pesanan meja.\n\n` +
+        `🚨 Pintu Darurat Master PIN: 9999\n\n` +
+        `Selamat bertugas! 🚀`
+      );
+      const cashierClean = (tenant.cashierPhone || tenant.phone || '').replace(/[^0-9]/g, '');
+      const cashierFinal = cashierClean.startsWith('0') ? '62' + cashierClean.substring(1) : cashierClean;
+      const cashierBtn = document.getElementById("btnSendWhatsAppCashier");
+      if (cashierBtn) cashierBtn.href = `https://wa.me/${cashierFinal}?text=${waMsgCashier}`;
 
       document.getElementById("tenantSuccessModal").classList.remove("hidden");
+    }
+
+    function handleResetTenantPin(tenantId, name) {
+      if (!confirm(`⚠️ Konfirmasi Reset PIN:\nApakah Anda yakin ingin me-reset PIN Kasir dan PIN Owner untuk "${name}" kembali ke default 1234?`)) return;
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.resetTenantPins === "function") {
+        const res = RestoSync.resetTenantPins(tenantId, "1234");
+        showToast(res.message || "PIN berhasil di-reset ke 1234", "success");
+      } else {
+        const tenants = getAllTenantsSafe();
+        const idx = tenants.findIndex(t => t.id === tenantId);
+        if (idx >= 0) {
+          tenants[idx].cashierPin = "1234";
+          tenants[idx].ownerPin = "1234";
+          localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+          showToast(`✅ PIN untuk ${name} berhasil di-reset ke 1234`, "success");
+        }
+      }
+      renderAllTenants();
     }
 
     function closeSuccessModal() {

