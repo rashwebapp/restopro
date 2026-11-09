@@ -169,6 +169,14 @@ const RestoSync = {
     }
   },
 
+  createLicenseToken(payload = {}) {
+    const appCode = "RESTO";
+    const clientTag = (payload.tenantId || payload.restaurantName || "CLIENT").replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toUpperCase();
+    const expiryYear = new Date(payload.expiresAt || (Date.now() + 365 * 86400000)).getFullYear();
+    const randChecksum = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `RASH-${appCode}-PRO-${clientTag}-${expiryYear}-${randChecksum}`;
+  },
+
   registerNewTenant(data) {
     if (!data || !data.name) throw new Error("Nama resto wajib diisi");
     const rawName = data.name.trim();

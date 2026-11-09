@@ -543,9 +543,9 @@
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Shared Application Scripts -->
-  <script src="assets/js/resto-config.js"></script>
-  <script src="assets/js/resto-data.js"></script>
-  <script src="assets/js/resto-sync.js"></script>
+  <script src="assets/js/resto-config.js?v=2.5.3"></script>
+  <script src="assets/js/resto-data.js?v=2.5.3"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.3"></script>
 
   <!-- ========================================================================= -->
   <!-- 6. SUPER ADMIN APPLICATION ENGINE                                         -->
@@ -607,12 +607,148 @@
     }
 
     // -------------------------------------------------------------------------
+    // FAIL-SAFE TENANT HELPERS (Bebas Masalah Cache Browser)
+    // -------------------------------------------------------------------------
+    const TENANTS_STORAGE_KEY = "resto_pro_super_admin_tenants_v1";
+
+    function getAllTenantsSafe() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.getAllTenants === "function") {
+        try {
+          const list = RestoSync.getAllTenants();
+          if (Array.isArray(list) && list.length > 0) return list;
+        } catch (e) {}
+      }
+      try {
+        const raw = localStorage.getItem(TENANTS_STORAGE_KEY);
+        if (raw) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list) && list.length > 0) return list;
+        }
+      } catch (e) {}
+
+      // Default demo tenants jika kosong
+      const defaultTenants = [
+        {
+          id: "harapan-corner",
+          name: "Harapan Corner Resto & Coffee",
+          pic: "Bpk. Budi Santoso",
+          phone: "081234567890",
+          city: "Bandung, Jawa Barat",
+          plan: "pro",
+          planName: "Paket Pro (Multi-Stasiun + GrabFood/GoFood)",
+          price: 199000,
+          billingCycle: "monthly",
+          tablesCount: 12,
+          status: "active",
+          createdAt: "2026-11-01T08:00:00Z",
+          expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+          gasUrl: "",
+          apiKey: "",
+          licenseKey: "RASH-RESTO-PRO-HARAPAN-2027-99A1"
+        }
+      ];
+      try { localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(defaultTenants)); } catch (e) {}
+      return defaultTenants;
+    }
+
+    function registerTenantSafe(data) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.registerNewTenant === "function") {
+        try {
+          return RestoSync.registerNewTenant(data);
+        } catch (err) {
+          console.warn("RestoSync.registerNewTenant threw, using fallback:", err);
+        }
+      }
+
+      const rawName = (data.name || "").trim();
+      const slug = (data.id || rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")) || ("resto-" + Date.now().toString().slice(-4));
+      let durationDays = 30;
+      if (data.plan === "trial") durationDays = 14;
+      else if (data.billingCycle === "yearly" || data.plan === "enterprise") durationDays = 365;
+
+      const expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
+      const licenseKey = `RASH-RESTO-PRO-${slug.toUpperCase()}-${new Date(expiresAt).getFullYear()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+
+      const newTenant = {
+        id: slug,
+        name: rawName,
+        pic: data.pic || "Pemilik Resto",
+        phone: data.phone || "",
+        city: data.city || "-",
+        plan: data.plan || "pro",
+        planName: data.plan === "trial" ? "Trial (14 Hari Gratis)" : (data.plan === "basic" ? "Paket Basic" : "Paket Pro"),
+        price: Number(data.price || (data.plan === "trial" ? 0 : (data.plan === "basic" ? 99000 : 199000))),
+        billingCycle: data.billingCycle || (data.plan === "trial" ? "trial" : "monthly"),
+        tablesCount: Number(data.tablesCount || 12),
+        status: data.plan === "trial" ? "trial" : "active",
+        createdAt: new Date().toISOString(),
+        expiresAt: expiresAt,
+        gasUrl: (data.gasUrl || "").trim(),
+        apiKey: (data.apiKey || "").trim(),
+        licenseKey: licenseKey
+      };
+
+      const tenants = getAllTenantsSafe();
+      const existingIdx = tenants.findIndex(t => t.id === slug);
+      if (existingIdx >= 0) tenants[existingIdx] = newTenant;
+      else tenants.unshift(newTenant);
+
+      try {
+        localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+      } catch (e) {}
+
+      return newTenant;
+    }
+
+    function renewTenantSafe(tenantId, addDays = 30) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.renewTenantSubscription === "function") {
+        try {
+          return RestoSync.renewTenantSubscription(tenantId, addDays);
+        } catch (e) {}
+      }
+      const tenants = getAllTenantsSafe();
+      const idx = tenants.findIndex(t => t.id === tenantId);
+      if (idx === -1) return { success: false, message: "Klien tidak ditemukan" };
+      const t = tenants[idx];
+      const currentExp = new Date(t.expiresAt).getTime();
+      const baseTime = currentExp > Date.now() ? currentExp : Date.now();
+      const newExp = new Date(baseTime + addDays * 86400000).toISOString();
+      t.expiresAt = newExp;
+      t.status = "active";
+      tenants[idx] = t;
+      localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+      return { success: true, message: `Langganan ${t.name} berhasil diperpanjang hingga ${new Date(newExp).toLocaleDateString("id-ID")}`, tenant: t };
+    }
+
+    function deleteTenantSafe(tenantId) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.deleteTenant === "function") {
+        try {
+          return RestoSync.deleteTenant(tenantId);
+        } catch (e) {}
+      }
+      const tenants = getAllTenantsSafe().filter(t => t.id !== tenantId);
+      localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+      return { success: true };
+    }
+
+    function getTenantInfoSafe(tenantId) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.getTenantInfo === "function") {
+        try {
+          const info = RestoSync.getTenantInfo(tenantId);
+          if (info) return info;
+        } catch (e) {}
+      }
+      const all = getAllTenantsSafe();
+      return all.find(t => t.id === tenantId) || null;
+    }
+
+    // -------------------------------------------------------------------------
     // TENANT DIRECTORY RENDERING & SEARCH
     // -------------------------------------------------------------------------
     function renderAllTenants() {
       const grid = document.getElementById("tenantsGrid");
       const empty = document.getElementById("emptyState");
-      const tenants = RestoSync.getAllTenants();
+      const tenants = getAllTenantsSafe();
       const baseUrl = getBaseUrl();
 
       const query = (document.getElementById("tenantSearchInput").value || "").toLowerCase().trim();
@@ -757,7 +893,7 @@
     }
 
     function updateKpis() {
-      const tenants = RestoSync.getAllTenants();
+      const tenants = getAllTenantsSafe();
       const total = tenants.length;
       let active = 0;
       let trial = 0;
@@ -821,7 +957,7 @@
       }
 
       try {
-        const newTenant = RestoSync.registerNewTenant({
+        const newTenant = registerTenantSafe({
           id: slug,
           name: name,
           pic: pic,
@@ -893,7 +1029,7 @@
 
     function handleRenewTenant(tenantId) {
       if (!confirm("Perpanjang masa aktif lisensi restoran ini selama 30 Hari?")) return;
-      const res = RestoSync.renewTenantSubscription(tenantId, 30);
+      const res = renewTenantSafe(tenantId, 30);
       if (res.success) {
         renderAllTenants();
         updateKpis();
@@ -903,14 +1039,14 @@
 
     function confirmDeleteTenant(tenantId, name) {
       if (!confirm(`Apakah Anda yakin ingin menghapus klien "${name}" (${tenantId}) dari sistem?`)) return;
-      RestoSync.deleteTenant(tenantId);
+      deleteTenantSafe(tenantId);
       renderAllTenants();
       updateKpis();
       showToast(`Klien "${name}" telah dihapus.`, "info");
     }
 
     function openTenantLinksModal(tenantId) {
-      const tenant = RestoSync.getTenantInfo(tenantId);
+      const tenant = getTenantInfoSafe(tenantId);
       if (tenant) {
         showTenantSuccessModal(tenant);
       }
