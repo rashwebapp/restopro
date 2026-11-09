@@ -5,20 +5,270 @@
  */
 
 const RestoSync = {
-  CHANNEL_NAME: "resto_pro_live_sync",
-  STORAGE_EVENT_KEY: "resto_pro_sync_event",
-  KDS_STORAGE_KEY: "resto_pro_kds_tickets",
-  ONLINE_ORDERS_STORAGE_KEY: "resto_pro_online_delivery_orders_v1",
-  TRANSACTIONS_STORAGE_KEY: "resto_pro_daily_transactions",
-  MEMBERS_STORAGE_KEY: "resto_pro_crm_members",
-  MENU_STORAGE_KEY: "resto_pro_menu_catalog",
-  RESERVATIONS_STORAGE_KEY: "resto_pro_table_reservations",
-  TABLES_STORAGE_KEY: "resto_pro_tables_list",
-  LICENSE_STORAGE_KEY: "resto_pro_saas_license",
-  GAS_URL_STORAGE_KEY: "resto_pro_gas_url",
-  GAS_API_KEY_STORAGE_KEY: "resto_pro_gas_api_key",
-  SUPABASE_URL_STORAGE_KEY: "resto_pro_supabase_url",
-  SUPABASE_KEY_STORAGE_KEY: "resto_pro_supabase_key",
+  TENANTS_DIRECTORY_KEY: "resto_pro_super_admin_tenants_v1",
+
+  // --------------------------------------------------------------------------
+  // MULTI-TENANT SAAS ROUTING & NAMESPACE ISOLATION
+  // --------------------------------------------------------------------------
+  getTenantId() {
+    try {
+      if (typeof window !== "undefined") {
+        if (window.location && window.location.search) {
+          const params = new URLSearchParams(window.location.search);
+          const t = params.get("tenant") || params.get("resto");
+          if (t && t.trim()) {
+            const clean = t.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "-");
+            sessionStorage.setItem("resto_pro_active_tenant", clean);
+            return clean;
+          }
+        }
+        const cached = sessionStorage.getItem("resto_pro_active_tenant");
+        if (cached && cached.trim()) return cached.trim();
+      }
+    } catch (e) {}
+    return "default";
+  },
+
+  setTenantId(tenantId) {
+    try {
+      const clean = (tenantId || "default").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "-");
+      sessionStorage.setItem("resto_pro_active_tenant", clean);
+      return clean;
+    } catch (e) {
+      return "default";
+    }
+  },
+
+  getStorageKey(baseKey) {
+    const tenant = this.getTenantId();
+    if (tenant && tenant !== "default") {
+      return `${baseKey}_tenant_${tenant}`;
+    }
+    return baseKey;
+  },
+
+  get CHANNEL_NAME() {
+    const t = this.getTenantId();
+    return (t && t !== "default") ? `resto_pro_live_sync_${t}` : "resto_pro_live_sync";
+  },
+
+  get STORAGE_EVENT_KEY() {
+    const t = this.getTenantId();
+    return (t && t !== "default") ? `resto_pro_sync_event_${t}` : "resto_pro_sync_event";
+  },
+
+  get KDS_STORAGE_KEY() { return this.getStorageKey("resto_pro_kds_tickets"); },
+  get ONLINE_ORDERS_STORAGE_KEY() { return this.getStorageKey("resto_pro_online_delivery_orders_v1"); },
+  get TRANSACTIONS_STORAGE_KEY() { return this.getStorageKey("resto_pro_daily_transactions"); },
+  get MEMBERS_STORAGE_KEY() { return this.getStorageKey("resto_pro_crm_members"); },
+  get MENU_STORAGE_KEY() { return this.getStorageKey("resto_pro_menu_catalog"); },
+  get RESERVATIONS_STORAGE_KEY() { return this.getStorageKey("resto_pro_table_reservations"); },
+  get TABLES_STORAGE_KEY() { return this.getStorageKey("resto_pro_tables_list"); },
+  get LICENSE_STORAGE_KEY() { return this.getStorageKey("resto_pro_saas_license"); },
+  get GAS_URL_STORAGE_KEY() { return this.getStorageKey("resto_pro_gas_url"); },
+  get GAS_API_KEY_STORAGE_KEY() { return this.getStorageKey("resto_pro_gas_api_key"); },
+  get SUPABASE_URL_STORAGE_KEY() { return this.getStorageKey("resto_pro_supabase_url"); },
+  get SUPABASE_KEY_STORAGE_KEY() { return this.getStorageKey("resto_pro_supabase_key"); },
+
+  // Super Admin Tenant Directory Helpers
+  getAllTenants() {
+    try {
+      const raw = localStorage.getItem(this.TENANTS_DIRECTORY_KEY);
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list) && list.length > 0) return list;
+      }
+    } catch (e) {}
+
+    // Inisialisasi default demo tenants jika masih kosong
+    const defaultTenants = [
+      {
+        id: "harapan-corner",
+        name: "Harapan Corner Resto & Coffee",
+        pic: "Bpk. Budi Santoso",
+        phone: "081234567890",
+        city: "Bandung, Jawa Barat",
+        plan: "pro",
+        planName: "Paket Pro (Multi-Stasiun + GrabFood/GoFood)",
+        price: 199000,
+        billingCycle: "monthly",
+        tablesCount: 12,
+        status: "active",
+        createdAt: "2026-11-01T08:00:00Z",
+        expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+        gasUrl: "",
+        apiKey: "",
+        licenseKey: "RP-PRO-HARAPAN-CORNER-L9X4K2"
+      },
+      {
+        id: "kopi-senja",
+        name: "Kopi Senja Heritage",
+        pic: "Ibu Rahmawati S.",
+        phone: "081198765432",
+        city: "Jakarta Selatan",
+        plan: "trial",
+        planName: "Trial (14 Hari Gratis)",
+        price: 0,
+        billingCycle: "trial",
+        tablesCount: 8,
+        status: "trial",
+        createdAt: "2026-11-05T10:30:00Z",
+        expiresAt: new Date(Date.now() + 10 * 86400000).toISOString(),
+        gasUrl: "",
+        apiKey: "",
+        licenseKey: "RP-TRL-KOPI-SENJA-88A92F"
+      },
+      {
+        id: "warung-bu-siti",
+        name: "Warung Sate Khas Madura Bu Siti",
+        pic: "Cak H. Imron",
+        phone: "081388776655",
+        city: "Surabaya",
+        plan: "basic",
+        planName: "Paket Basic (Kasir POS + QR Meja)",
+        price: 99000,
+        billingCycle: "monthly",
+        tablesCount: 10,
+        status: "active",
+        createdAt: "2026-10-20T09:00:00Z",
+        expiresAt: new Date(Date.now() + 20 * 86400000).toISOString(),
+        gasUrl: "",
+        apiKey: "",
+        licenseKey: "RP-BSC-WARUNG-BU-SITI-33C14E"
+      }
+    ];
+    this.saveAllTenants(defaultTenants);
+    return defaultTenants;
+  },
+
+  saveAllTenants(tenants) {
+    try {
+      localStorage.setItem(this.TENANTS_DIRECTORY_KEY, JSON.stringify(tenants || []));
+      this.emit("TENANTS_UPDATED", { count: (tenants || []).length });
+      return true;
+    } catch (e) {
+      console.warn("Gagal simpan tenant directory:", e);
+      return false;
+    }
+  },
+
+  getTenantInfo(targetTenantId) {
+    try {
+      const tenantId = targetTenantId || this.getTenantId();
+      if (!tenantId || tenantId === "default") return null;
+      const all = this.getAllTenants();
+      return all.find(t => t.id === tenantId) || {
+        id: tenantId,
+        name: tenantId.replace(/-/g, " ").toUpperCase(),
+        plan: "pro",
+        status: "active",
+        tablesCount: 12
+      };
+    } catch (e) {
+      return null;
+    }
+  },
+
+  registerNewTenant(data) {
+    if (!data || !data.name) throw new Error("Nama resto wajib diisi");
+    const rawName = data.name.trim();
+    const slug = (data.id || rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")) || ("resto-" + Date.now().toString().slice(-4));
+    
+    // Hitung tanggal kedaluwarsa
+    let durationDays = 30;
+    if (data.plan === "trial") durationDays = 14;
+    else if (data.billingCycle === "yearly" || data.plan === "enterprise") durationDays = 365;
+
+    const expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
+    
+    // Bangkitkan token lisensi HMAC-SHA256
+    const licensePayload = {
+      tenantId: slug,
+      restaurantName: rawName,
+      plan: data.plan || "pro",
+      billingCycle: data.billingCycle || (data.plan === "trial" ? "trial" : "monthly"),
+      issuedAt: new Date().toISOString(),
+      expiresAt: expiresAt,
+      maxTables: Number(data.tablesCount || 12),
+      isUnlimited: (data.plan === "enterprise" || data.plan === "pro")
+    };
+    const licenseToken = this.createLicenseToken(licensePayload);
+
+    const newTenant = {
+      id: slug,
+      name: rawName,
+      pic: data.pic || "Pemilik Resto",
+      phone: data.phone || "",
+      city: data.city || "-",
+      plan: data.plan || "pro",
+      planName: data.planName || (data.plan === "trial" ? "Trial (14 Hari Gratis)" : (data.plan === "basic" ? "Paket Basic" : "Paket Pro")),
+      price: Number(data.price || (data.plan === "trial" ? 0 : (data.plan === "basic" ? 99000 : 199000))),
+      billingCycle: data.billingCycle || (data.plan === "trial" ? "trial" : "monthly"),
+      tablesCount: Number(data.tablesCount || 12),
+      status: data.plan === "trial" ? "trial" : "active",
+      createdAt: new Date().toISOString(),
+      expiresAt: expiresAt,
+      gasUrl: (data.gasUrl || "").trim(),
+      apiKey: (data.apiKey || "").trim(),
+      licenseKey: licenseToken
+    };
+
+    const tenants = this.getAllTenants();
+    // Cek jika ID sudah ada, timpa
+    const existingIdx = tenants.findIndex(t => t.id === slug);
+    if (existingIdx >= 0) {
+      tenants[existingIdx] = newTenant;
+    } else {
+      tenants.unshift(newTenant);
+    }
+
+    this.saveAllTenants(tenants);
+    return newTenant;
+  },
+
+  renewTenantSubscription(tenantId, addDays = 30) {
+    const tenants = this.getAllTenants();
+    const idx = tenants.findIndex(t => t.id === tenantId);
+    if (idx === -1) return { success: false, message: "Klien tidak ditemukan" };
+
+    const t = tenants[idx];
+    const currentExp = new Date(t.expiresAt).getTime();
+    const baseTime = currentExp > Date.now() ? currentExp : Date.now();
+    const newExp = new Date(baseTime + addDays * 86400000).toISOString();
+
+    t.expiresAt = newExp;
+    t.status = "active";
+    if (t.plan === "trial") {
+      t.plan = "pro";
+      t.planName = "Paket Pro (Berlangganan)";
+      t.price = 199000;
+      t.billingCycle = "monthly";
+    }
+
+    // Perbarui token lisensi
+    const licensePayload = {
+      tenantId: t.id,
+      restaurantName: t.name,
+      plan: t.plan,
+      billingCycle: t.billingCycle,
+      issuedAt: new Date().toISOString(),
+      expiresAt: newExp,
+      maxTables: t.tablesCount,
+      isUnlimited: true
+    };
+    t.licenseKey = this.createLicenseToken(licensePayload);
+
+    tenants[idx] = t;
+    this.saveAllTenants(tenants);
+    return { success: true, message: `Langganan ${t.name} berhasil diperpanjang hingga ${new Date(newExp).toLocaleDateString("id-ID")}`, tenant: t };
+  },
+
+  deleteTenant(tenantId) {
+    const tenants = this.getAllTenants().filter(t => t.id !== tenantId);
+    this.saveAllTenants(tenants);
+    return { success: true };
+  },
+
   channel: null,
   listeners: {},
   audioCtx: null,
@@ -2331,11 +2581,17 @@ const RestoSync = {
 
   getGasUrl() {
     try {
-      // 1. Prioritaskan URL yang tersimpan di LocalStorage
+      // 1. Cek dari konfigurasi Tenant khusus jika ada
+      const tenant = this.getTenantInfo();
+      if (tenant && tenant.gasUrl && tenant.gasUrl.trim()) {
+        return tenant.gasUrl.trim();
+      }
+
+      // 2. Prioritaskan URL yang tersimpan di LocalStorage
       const local = localStorage.getItem(this.GAS_URL_STORAGE_KEY);
       if (local && local.trim()) return local.trim();
 
-      // 2. Fallback otomatis ke konfigurasi sentral resto-config.js
+      // 3. Fallback otomatis ke konfigurasi sentral resto-config.js
       if (typeof window !== "undefined" && window.RESTO_CLOUD_CONFIG && window.RESTO_CLOUD_CONFIG.GAS_URL) {
         const fileUrl = window.RESTO_CLOUD_CONFIG.GAS_URL.trim();
         if (fileUrl) return fileUrl;
@@ -2360,11 +2616,17 @@ const RestoSync = {
 
   getGasApiKey() {
     try {
-      // 1. Prioritaskan API Key yang tersimpan di LocalStorage
+      // 1. Cek dari konfigurasi Tenant khusus jika ada
+      const tenant = this.getTenantInfo();
+      if (tenant && tenant.apiKey && tenant.apiKey.trim()) {
+        return tenant.apiKey.trim();
+      }
+
+      // 2. Prioritaskan API Key yang tersimpan di LocalStorage
       const local = localStorage.getItem(this.GAS_API_KEY_STORAGE_KEY);
       if (local && local.trim()) return local.trim();
 
-      // 2. Fallback otomatis ke konfigurasi sentral resto-config.js
+      // 3. Fallback otomatis ke konfigurasi sentral resto-config.js
       if (typeof window !== "undefined" && window.RESTO_CLOUD_CONFIG && window.RESTO_CLOUD_CONFIG.API_SECRET_KEY) {
         const fileKey = window.RESTO_CLOUD_CONFIG.API_SECRET_KEY.trim();
         if (fileKey) return fileKey;

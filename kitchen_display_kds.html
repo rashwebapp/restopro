@@ -89,14 +89,14 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-heading font-extrabold text-base lg:text-lg text-white leading-tight">
+          <h1 id="kdsBrandTitle" class="font-heading font-extrabold text-base lg:text-lg text-white leading-tight">
             Resto Pro KDS • Layar Monitor Dapur <span class="text-amber-400">🍳</span>
           </h1>
           <span id="activeTicketCountBadge" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-heading font-bold text-xs tabular-nums">
             3 Pesanan Aktif
           </span>
         </div>
-        <p class="text-[11px] text-[#94A3B8] hidden sm:block">
+        <p id="kdsBrandSub" class="text-[11px] text-[#94A3B8] hidden sm:block">
           Kitchen Display System • Arab, Malaysia & Thai Fusion Hotline
         </p>
       </div>
@@ -200,6 +200,16 @@
     document.addEventListener("DOMContentLoaded", () => {
       ThemeManager.init();
       initKdsClock();
+
+      // Branding Dinamis Multi-Tenant
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+      if (tenantInfo && tenantInfo.name) {
+        const titleEl = document.getElementById("kdsBrandTitle");
+        if (titleEl) titleEl.innerHTML = `${tenantInfo.name} • KDS <span class="text-amber-400">🍳</span>`;
+        const subEl = document.getElementById("kdsBrandSub");
+        if (subEl) subEl.textContent = `Kitchen Display System • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
+        document.title = `${tenantInfo.name} • KDS Kitchen Display`;
+      }
 
       // Cek parameter URL ?station=drinks atau ?station=kitchen dari device bar/dapur
       const urlParams = new URLSearchParams(window.location.search);

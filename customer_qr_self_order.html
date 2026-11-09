@@ -64,7 +64,7 @@
         </div>
         <div class="flex flex-col min-w-0">
           <div class="flex items-center gap-1.5">
-            <h1 class="font-heading font-bold text-[16px] leading-tight text-[#1C1917] dark:text-white truncate">Resto Pro</h1>
+            <h1 id="headerRestoName" class="font-heading font-bold text-[16px] leading-tight text-[#1C1917] dark:text-white truncate">Resto Pro</h1>
             <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">FUSION</span>
           </div>
           <div class="flex items-center gap-1 mt-0.5 cursor-pointer touch-btn group" onclick="openTableSwitchModal()" title="Klik untuk ganti nomor meja">
@@ -692,7 +692,12 @@
       const submitBtnText = document.getElementById("submitOrderTableBtnText");
       if (submitBtnText) submitBtnText.textContent = `Kirim Pesanan ke Dapur (${t.name})`;
 
-      document.title = `Resto Pro • QR Self-Order (${t.name})`;
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+      const restoName = tenantInfo ? tenantInfo.name : "Resto Pro";
+      const restoHeader = document.getElementById("headerRestoName");
+      if (restoHeader) restoHeader.textContent = restoName;
+
+      document.title = `${restoName} • QR Self-Order (${t.name})`;
     }
 
     function openTableSwitchModal() {

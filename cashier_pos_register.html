@@ -64,14 +64,14 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-heading font-extrabold text-base lg:text-lg text-[#1C1917] dark:text-white leading-tight">
+          <h1 id="posBrandTitle" class="font-heading font-extrabold text-base lg:text-lg text-[#1C1917] dark:text-white leading-tight">
             Aplikasi Resto Pro by RASH WebApp Builder <span class="text-amber-500">✨</span>
           </h1>
           <span class="hidden md:inline-flex px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-heading font-bold text-[10px]">
             POS REGISTER v2.4
           </span>
         </div>
-        <p class="text-[11px] text-[#78716C] dark:text-[#94A3B8] hidden sm:block">
+        <p id="posBrandSub" class="text-[11px] text-[#78716C] dark:text-[#94A3B8] hidden sm:block">
           Authentic Eastern Fusion (Arabian 🕌 • Malaysian 🇲🇾 • Thai 🇹🇭)
         </p>
       </div>
@@ -1225,6 +1225,16 @@
     document.addEventListener("DOMContentLoaded", () => {
       ThemeManager.init();
       initClock();
+      
+      // Branding Dinamis Multi-Tenant
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+      if (tenantInfo && tenantInfo.name) {
+        const brandTitle = document.getElementById("posBrandTitle");
+        if (brandTitle) brandTitle.innerHTML = `${tenantInfo.name} <span class="text-amber-500">✨</span>`;
+        const brandSub = document.getElementById("posBrandSub");
+        if (brandSub) brandSub.textContent = `Aplikasi Kasir POS • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
+        document.title = `${tenantInfo.name} • Cashier POS & Table Map`;
+      }
       
       // Sinkronkan RESTO_TABLES dengan master meja dinamis dari RestoSync
       const liveTables = RestoSync.getTables();

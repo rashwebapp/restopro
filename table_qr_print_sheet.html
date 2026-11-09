@@ -135,6 +135,16 @@
       const filter = document.getElementById("sectionFilter").value;
       const tables = RestoSync.getTables();
       const baseUrl = getBaseUrl();
+      const tenantId = RestoSync.getTenantId();
+      const tenantInfo = RestoSync.getTenantInfo();
+      const restoName = tenantInfo ? tenantInfo.name : "Resto Pro • Halal Food";
+      const restoSub = tenantInfo ? (tenantInfo.city || "Restoran & Kafe Modern") : "Arabian, Malaysian & Thai Culinary";
+
+      // Perbarui judul halaman jika ada tenant aktif
+      if (tenantInfo && tenantInfo.name) {
+        const titleEl = document.querySelector("h1");
+        if (titleEl) titleEl.innerText = `Cetak QR Code Meja • ${tenantInfo.name}`;
+      }
 
       grid.innerHTML = "";
 
@@ -154,7 +164,9 @@
       }
 
       filteredTables.forEach((table, index) => {
-        const qrTargetUrl = `${baseUrl}customer_qr_self_order.html?table=${table.id}`;
+        const qrTargetUrl = (tenantId && tenantId !== "default")
+          ? `${baseUrl}customer_qr_self_order.html?table=${table.id}&tenant=${encodeURIComponent(tenantId)}`
+          : `${baseUrl}customer_qr_self_order.html?table=${table.id}`;
         const cardId = `qr_card_${table.id}`;
         const qrContainerId = `qrcode_${table.id}`;
 
@@ -168,14 +180,14 @@
           <div class="w-full flex items-center justify-between pb-3 border-b-2 border-dashed border-slate-200">
             <div class="flex items-center gap-2 text-left">
               <span class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-heading font-extrabold text-sm shadow-xs">
-                RP
+                ${restoName.substring(0, 2).toUpperCase()}
               </span>
               <div>
                 <span class="font-heading font-extrabold text-xs uppercase tracking-wider block text-slate-900">
-                  Resto Pro • Halal Food
+                  ${restoName}
                 </span>
                 <span class="text-[9px] text-slate-500 block font-medium">
-                  Arabian, Malaysian & Thai Culinary
+                  ${restoSub}
                 </span>
               </div>
             </div>

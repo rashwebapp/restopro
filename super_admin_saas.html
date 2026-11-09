@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RASH Super Admin Portal • Resto Pro Multi-Tenant SaaS Engine ⚡</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+              900: '#312E81',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts & Material Symbols Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <style>
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .touch-btn {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+    }
+    .touch-btn:active {
+      transform: scale(0.97);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0F172A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-[#0B0F19] text-slate-100 min-h-screen font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- ========================================================================= -->
+  <!-- 1. MASTER PIN SECURITY LOCK SCREEN (GATED PORTAL)                         -->
+  <!-- ========================================================================= -->
+  <div id="pinLockScreen" class="fixed inset-0 z-50 bg-[#0B0F19]/95 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="glass-card max-w-md w-full p-8 rounded-3xl shadow-2xl text-center border border-indigo-500/20">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 text-white flex items-center justify-center mx-auto mb-5 shadow-lg shadow-brand-500/30">
+        <span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
+      </div>
+      <h2 class="font-heading font-extrabold text-2xl text-white mb-2">RASH Super Admin Portal</h2>
+      <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+        Pusat Penerbitan & Pengelolaan Klien Multi-Tenant Resto Pro SaaS. Masukkan PIN Master Vendor Anda:
+      </p>
+
+      <form onsubmit="handlePinLogin(event)" class="space-y-4">
+        <div class="relative">
+          <input type="password" id="masterPinInput" maxlength="6" autofocus placeholder="Masukkan PIN Master (Default: 9999)"
+            class="w-full text-center tracking-[0.5em] text-2xl font-mono py-3.5 px-4 rounded-2xl bg-slate-900/80 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 transition-all placeholder:text-slate-600 placeholder:text-sm placeholder:tracking-normal">
+        </div>
+        <p id="pinErrorMessage" class="text-xs text-rose-400 font-semibold hidden">PIN Salah! Silakan coba lagi (Default: 9999).</p>
+
+        <button type="submit" class="touch-btn w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-heading font-bold text-sm shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2">
+          <span>Buka Portal Super Admin</span>
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </button>
+      </form>
+      <div class="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-500">
+        Hak Cipta © 2026 RASH WebApp Builder • Resto Pro SaaS Engine
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN APPLICATION CONTENT (VISIBLE AFTER PIN UNLOCKED)                   -->
+  <!-- ========================================================================= -->
+  <div id="mainPortalContent" class="hidden min-h-screen flex flex-col">
+    
+    <!-- Top Navigation Bar -->
+    <header class="glass-card border-b border-slate-800 sticky top-0 z-30 px-4 lg:px-8 py-3.5">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        
+        <!-- Left: Branding & Status -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 text-white flex items-center justify-center shadow-md shadow-brand-500/30">
+            <span class="material-symbols-outlined text-2xl">hub</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="font-heading font-extrabold text-base lg:text-lg text-white">
+                RASH Super Admin <span class="text-brand-400">⚡</span>
+              </h1>
+              <span class="px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[10px] font-bold uppercase tracking-wider">
+                Multi-Tenant v2.5
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400 flex items-center gap-2">
+              <span>SaaS Tenant Provisioner & Client Management</span>
+              <span class="text-slate-600">•</span>
+              <span class="text-emerald-400 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                Cloud Engine Aktif
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Global Actions -->
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+          <a href="index.html" target="_blank" class="touch-btn px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 border border-slate-700">
+            <span class="material-symbols-outlined text-base">storefront</span>
+            <span class="hidden md:inline">Lihat Showroom</span>
+          </a>
+
+          <button onclick="openNewTenantModal()" class="touch-btn px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white text-xs font-heading font-bold shadow-md shadow-brand-600/20 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">add_business</span>
+            <span>+ Daftarkan Klien Baru</span>
+          </button>
+
+          <button onclick="lockPortal()" title="Kunci Layar Admin" class="touch-btn p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700">
+            <span class="material-symbols-outlined text-lg">lock</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-8">
+
+      <!-- ===================================================================== -->
+      <!-- SECTION 1: EXECUTIVE KPI DASHBOARD STATS                              -->
+      <!-- ===================================================================== -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- KPI 1: Total Klien -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Klien Resto</span>
+            <span class="w-8 h-8 rounded-xl bg-brand-500/20 text-brand-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-lg">store</span>
+            </span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statTotalTenants" class="font-heading font-extrabold text-2xl lg:text-3xl text-white">0</h3>
+            <span class="text-xs text-slate-500">Restoran</span>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-400">Semua tenant di database</div>
+        </div>
+
+        <!-- KPI 2: Klien Aktif Berbayar -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pelanggan Aktif</span>
+            <span class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-lg">verified</span>
+            </span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statActiveTenants" class="font-heading font-extrabold text-2xl lg:text-3xl text-emerald-400">0</h3>
+            <span class="text-xs text-slate-500">SaaS Berbayar</span>
+          </div>
+          <div class="mt-2 text-[11px] text-emerald-400/80 font-medium">Langganan Basic & Pro</div>
+        </div>
+
+        <!-- KPI 3: Klien Trial -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Masa Uji Coba</span>
+            <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-lg">hourglass_top</span>
+            </span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statTrialTenants" class="font-heading font-extrabold text-2xl lg:text-3xl text-amber-400">0</h3>
+            <span class="text-xs text-slate-500">Free Trial</span>
+          </div>
+          <div class="mt-2 text-[11px] text-amber-400/80 font-medium">Potensi konversi closing</div>
+        </div>
+
+        <!-- KPI 4: Estimasi MRR -->
+        <div class="glass-card p-5 rounded-2xl relative overflow-hidden group">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Estimasi MRR</span>
+            <span class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center">
+              <span class="material-symbols-outlined text-lg">payments</span>
+            </span>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <h3 id="statMrr" class="font-heading font-extrabold text-xl lg:text-2xl text-purple-400 truncate">Rp 0</h3>
+          </div>
+          <div class="mt-2 text-[11px] text-slate-400">Pendapatan bulanan rutin</div>
+        </div>
+
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- SECTION 2: TENANT CLIENT DIRECTORY & SEARCH TABLE                     -->
+      <!-- ===================================================================== -->
+      <section class="glass-card rounded-3xl p-6 lg:p-8 space-y-6">
+        
+        <!-- Directory Header & Filters -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          <div>
+            <h2 class="font-heading font-extrabold text-xl text-white flex items-center gap-2">
+              <span>Direktori Klien Resto Pro</span>
+              <span id="badgeTenantCount" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-bold">0</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              Kelola akses, perpanjang lisensi, dapatkan link operasional, dan kirim akun via WhatsApp dalam 1 klik.
+            </p>
+          </div>
+
+          <!-- Controls: Search & Filter Tabs -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            <!-- Search Bar -->
+            <div class="relative w-full sm:w-64">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-500 text-lg">search</span>
+              <input type="text" id="tenantSearchInput" oninput="filterTenants()" placeholder="Cari nama resto / WA..."
+                class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-hidden focus:border-brand-500">
+            </div>
+
+            <!-- Status Filter -->
+            <select id="tenantStatusFilter" onchange="filterTenants()" class="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-hidden focus:border-brand-500 font-medium">
+              <option value="all">Semua Status</option>
+              <option value="active">🟢 Aktif Berbayar</option>
+              <option value="trial">🟡 Masa Free Trial</option>
+              <option value="expired">🔴 Telah Kedaluwarsa</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tenant Cards Container -->
+        <div id="tenantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Populated dynamically via JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-16 text-slate-500">
+          <span class="material-symbols-outlined text-5xl mb-3 text-slate-600">store_mall_directory</span>
+          <h4 class="font-heading font-bold text-base text-slate-300 mb-1">Belum Ada Klien Ditemukan</h4>
+          <p class="text-xs max-w-sm mx-auto mb-4">Mulai daftarkan restoran pertama Anda (misal: Harapan Corner) sekarang!</p>
+          <button onclick="openNewTenantModal()" class="touch-btn px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-heading font-bold">
+            + Daftarkan Restoran Baru
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- SECTION 3: SYSTEM ARCHITECTURE & ONBOARDING GUIDE                     -->
+      <!-- ===================================================================== -->
+      <section class="glass-card rounded-3xl p-6 lg:p-8 space-y-4">
+        <h3 class="font-heading font-bold text-base text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-brand-400">tips_and_updates</span>
+          <span>Bagaimana Cara Kerja Multi-Tenant SaaS Ini?</span>
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-400 leading-relaxed">
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+            <h4 class="font-bold text-slate-200 mb-1 flex items-center gap-1.5">
+              <span class="text-brand-400">1.</span> Satu Domain, Ribuan Klien
+            </h4>
+            <p>Anda hanya perlu 1 domain di Vercel (<code class="text-slate-300 font-mono text-[11px]">restopro-beta.vercel.app</code>). Klien dibedakan secara otomatis lewat parameter <code class="text-brand-300 font-mono">?tenant=slug</code> tanpa perlu deploy berulang kali!</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+            <h4 class="font-bold text-slate-200 mb-1 flex items-center gap-1.5">
+              <span class="text-emerald-400">2.</span> Isolasi Data 100% Aman
+            </h4>
+            <p>Pesanan Meja, Tiket KDS Dapur, CRM Member, dan Omset Kasir otomatis dipisahkan ke wadah penyimpanan masing-masing tenant. Data Harapan Corner tidak akan pernah bocor ke resto lain.</p>
+          </div>
+          <div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
+            <h4 class="font-bold text-slate-200 mb-1 flex items-center gap-1.5">
+              <span class="text-purple-400">3.</span> Onboarding 100% Jarak Jauh
+            </h4>
+            <p>Cukup klik tombol <strong>"Kirim via WhatsApp"</strong> di bawah nama klien. Klien akan langsung menerima link login kasir berlisensi resmi dan lembaran PDF QR Meja siap cetak!</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-card border-t border-slate-800 mt-12 py-4 px-6 text-center text-xs text-slate-500">
+      Resto Pro Multi-Tenant SaaS Provisioner Engine • Dikembangkan oleh RASH WebApp Builder ✨
+    </footer>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3. MODAL: PENDAFTARAN KLIEN BARU (30-SECOND WIZARD)                       -->
+  <!-- ========================================================================= -->
+  <div id="newTenantModal" class="fixed inset-0 z-50 bg-[#0B0F19]/80 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card max-w-xl w-full p-6 lg:p-8 rounded-3xl border border-slate-700 shadow-2xl my-8">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-600/30 text-brand-300 border border-brand-500/30 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">add_business</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-lg text-white">Daftarkan Klien Resto Baru</h3>
+            <p class="text-xs text-slate-400">Terbitkan akun dan link operasional dalam hitungan detik.</p>
+          </div>
+        </div>
+        <button onclick="closeNewTenantModal()" class="touch-btn text-slate-400 hover:text-white p-1 rounded-lg">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="newTenantForm" onsubmit="handleCreateTenant(event)" class="space-y-4 text-xs">
+        
+        <!-- Nama Restoran & Slug Auto-Generate -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nama Restoran <span class="text-rose-400">*</span></label>
+            <input type="text" id="inputTenantName" required oninput="autoGenerateSlug()" placeholder="Contoh: Harapan Corner"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Tenant ID (Slug URL) <span class="text-slate-500">(Auto)</span></label>
+            <input type="text" id="inputTenantSlug" required placeholder="harapan-corner"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-brand-300 font-mono focus:outline-hidden">
+          </div>
+        </div>
+
+        <!-- PIC & No WhatsApp -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nama Pemilik / Manajer (PIC)</label>
+            <input type="text" id="inputTenantPic" placeholder="Contoh: Bpk. Budi Santoso"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nomor WhatsApp <span class="text-rose-400">*</span></label>
+            <input type="tel" id="inputTenantPhone" required placeholder="Contoh: 081234567890"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- Kota & Jumlah Meja -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Kota / Cabang</label>
+            <input type="text" id="inputTenantCity" placeholder="Contoh: Bandung, Jawa Barat"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Jumlah Meja Restoran</label>
+            <input type="number" id="inputTenantTables" min="1" max="50" value="12"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- Pilihan Paket SaaS -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">Pilihan Paket Langganan</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border border-slate-700 cursor-pointer hover:border-brand-500 transition-all">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-amber-400 text-xs">Trial 14 Hari</span>
+                <input type="radio" name="planChoice" value="trial" checked class="text-brand-500">
+              </div>
+              <span class="text-[11px] text-slate-400">Gratis uji coba</span>
+              <span class="font-extrabold text-white text-xs mt-1">Rp 0</span>
+            </label>
+
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border border-slate-700 cursor-pointer hover:border-brand-500 transition-all">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-indigo-400 text-xs">Paket Basic</span>
+                <input type="radio" name="planChoice" value="basic" class="text-brand-500">
+              </div>
+              <span class="text-[11px] text-slate-400">Kasir + QR Meja</span>
+              <span class="font-extrabold text-white text-xs mt-1">Rp 99.000<span class="text-[9px] font-normal text-slate-400">/bln</span></span>
+            </label>
+
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border-2 border-brand-500/60 cursor-pointer hover:border-brand-400 transition-all bg-brand-950/20">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-emerald-400 text-xs">Paket Pro ⭐</span>
+                <input type="radio" name="planChoice" value="pro" class="text-brand-500">
+              </div>
+              <span class="text-[11px] text-slate-400">KDS + Grab/Gojek + CRM</span>
+              <span class="font-extrabold text-white text-xs mt-1">Rp 199.000<span class="text-[9px] font-normal text-slate-400">/bln</span></span>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- Opsi Database Google Spreadsheet Khusus (Opsional) -->
+        <div class="pt-2">
+          <details class="group rounded-xl bg-slate-900/60 border border-slate-800 p-3">
+            <summary class="font-semibold text-slate-400 cursor-pointer flex items-center justify-between">
+              <span>⚙️ Database Khusus Klien (Opsional - Jika Klien Ingin Spreadsheet Sendiri)</span>
+              <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
+            </summary>
+            <div class="mt-3 space-y-3 pt-2 border-t border-slate-800">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-0.5">Google Apps Script Web App URL (berakhiran /exec)</label>
+                <input type="url" id="inputTenantGasUrl" placeholder="Kosongkan jika ingin memakai Database Cloud RASH bawaan"
+                  class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-[11px]">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-0.5">API Secret Key Khusus Klien (RP-SEC-...)</label>
+                <input type="text" id="inputTenantApiKey" placeholder="Kosongkan untuk otomatis"
+                  class="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white font-mono text-[11px]">
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-800">
+          <button type="button" onclick="closeNewTenantModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">
+            Batal
+          </button>
+          <button type="submit" class="touch-btn px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-heading font-extrabold shadow-lg shadow-brand-600/30 flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">bolt</span>
+            <span>⚡ Terbitkan Akun Resto Sekarang</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 4. MODAL: SHOWCASE HASIL PENERBITAN KLIEN & SHARE WHATSAPP                 -->
+  <!-- ========================================================================= -->
+  <div id="tenantSuccessModal" class="fixed inset-0 z-50 bg-[#0B0F19]/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card max-w-xl w-full p-6 lg:p-8 rounded-3xl border border-emerald-500/30 shadow-2xl my-8">
+      
+      <div class="text-center pb-4 mb-4 border-b border-slate-800">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3 border border-emerald-500/40">
+          <span class="material-symbols-outlined text-3xl">check_circle</span>
+        </div>
+        <h3 id="successModalTitle" class="font-heading font-extrabold text-xl text-white">Akun Klien Berhasil Diterbitkan!</h3>
+        <p id="successModalSub" class="text-xs text-slate-400 mt-1">Harapan Corner sudah aktif dan siap digunakan secara remote.</p>
+      </div>
+
+      <div class="space-y-3.5 text-xs">
+        
+        <!-- Link Kasir POS -->
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-slate-300 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-amber-400">point_of_sale</span>
+              <span>1. Link Kasir POS & Meja</span>
+            </span>
+            <button onclick="copyToClipboard(currentSuccessLinks.pos, 'Link Kasir Disalin!')" class="text-[11px] font-bold text-brand-400 hover:text-brand-300">
+              Salin Link
+            </button>
+          </div>
+          <p id="successPosLink" class="font-mono text-[11px] text-slate-400 truncate"></p>
+        </div>
+
+        <!-- Link KDS Dapur -->
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-slate-300 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-rose-400">soup_kitchen</span>
+              <span>2. Link Layar Monitor Dapur KDS</span>
+            </span>
+            <button onclick="copyToClipboard(currentSuccessLinks.kds, 'Link Dapur Disalin!')" class="text-[11px] font-bold text-brand-400 hover:text-brand-300">
+              Salin Link
+            </button>
+          </div>
+          <p id="successKdsLink" class="font-mono text-[11px] text-slate-400 truncate"></p>
+        </div>
+
+        <!-- Link Lembaran Cetak QR -->
+        <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-slate-300 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-indigo-400">qr_code_2</span>
+              <span>3. Lembaran Cetak QR Meja (PDF)</span>
+            </span>
+            <button onclick="copyToClipboard(currentSuccessLinks.qrSheet, 'Link Cetak QR Disalin!')" class="text-[11px] font-bold text-brand-400 hover:text-brand-300">
+              Salin Link
+            </button>
+          </div>
+          <p id="successQrSheetLink" class="font-mono text-[11px] text-slate-400 truncate"></p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-3 space-y-2">
+          <!-- WhatsApp Blast Button -->
+          <a id="btnSendWhatsApp" href="#" target="_blank"
+            class="touch-btn w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-heading font-extrabold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">chat</span>
+            <span>💬 Buka WhatsApp & Kirim Akun ke Klien</span>
+          </a>
+
+          <div class="flex items-center gap-2">
+            <a id="btnOpenQrSheet" href="#" target="_blank"
+              class="touch-btn flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 border border-slate-700">
+              <span class="material-symbols-outlined text-base">print</span>
+              <span>Cetak Lembaran QR Meja</span>
+            </a>
+            <button onclick="closeSuccessModal()" class="touch-btn py-2.5 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700">
+              Tutup
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 5. TOAST NOTIFICATION CONTAINER                                           -->
+  <!-- ========================================================================= -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Shared Application Scripts -->
+  <script src="assets/js/resto-config.js"></script>
+  <script src="assets/js/resto-data.js"></script>
+  <script src="assets/js/resto-sync.js"></script>
+
+  <!-- ========================================================================= -->
+  <!-- 6. SUPER ADMIN APPLICATION ENGINE                                         -->
+  <!-- ========================================================================= -->
+  <script>
+    const MASTER_PIN = "9999";
+    let isUnlocked = false;
+    let currentSuccessLinks = {};
+
+    function getBaseUrl() {
+      const loc = window.location.href;
+      const idx = loc.lastIndexOf("/");
+      return idx !== -1 ? loc.substring(0, idx + 1) : "";
+    }
+
+    // -------------------------------------------------------------------------
+    // PIN GATE / AUTHENTICATION
+    // -------------------------------------------------------------------------
+    function checkSessionAuth() {
+      const auth = sessionStorage.getItem("resto_pro_super_admin_unlocked");
+      if (auth === "true") {
+        unlockPortal();
+      } else {
+        document.getElementById("pinLockScreen").classList.remove("hidden");
+        document.getElementById("mainPortalContent").classList.add("hidden");
+        document.getElementById("masterPinInput").focus();
+      }
+    }
+
+    function handlePinLogin(e) {
+      e.preventDefault();
+      const input = document.getElementById("masterPinInput").value.trim();
+      const err = document.getElementById("pinErrorMessage");
+
+      if (input === MASTER_PIN) {
+        sessionStorage.setItem("resto_pro_super_admin_unlocked", "true");
+        err.classList.add("hidden");
+        unlockPortal();
+        showToast("Selamat datang kembali di Super Admin Portal!", "success");
+      } else {
+        err.classList.remove("hidden");
+        document.getElementById("masterPinInput").select();
+      }
+    }
+
+    function unlockPortal() {
+      isUnlocked = true;
+      document.getElementById("pinLockScreen").classList.add("hidden");
+      document.getElementById("mainPortalContent").classList.remove("hidden");
+      renderAllTenants();
+      updateKpis();
+    }
+
+    function lockPortal() {
+      sessionStorage.removeItem("resto_pro_super_admin_unlocked");
+      document.getElementById("masterPinInput").value = "";
+      document.getElementById("pinLockScreen").classList.remove("hidden");
+      document.getElementById("mainPortalContent").classList.add("hidden");
+    }
+
+    // -------------------------------------------------------------------------
+    // TENANT DIRECTORY RENDERING & SEARCH
+    // -------------------------------------------------------------------------
+    function renderAllTenants() {
+      const grid = document.getElementById("tenantsGrid");
+      const empty = document.getElementById("emptyState");
+      const tenants = RestoSync.getAllTenants();
+      const baseUrl = getBaseUrl();
+
+      const query = (document.getElementById("tenantSearchInput").value || "").toLowerCase().trim();
+      const statusFilter = document.getElementById("tenantStatusFilter").value;
+
+      const filtered = tenants.filter(t => {
+        const matchesQuery = (t.name || "").toLowerCase().includes(query) ||
+                             (t.id || "").toLowerCase().includes(query) ||
+                             (t.pic || "").toLowerCase().includes(query) ||
+                             (t.phone || "").includes(query);
+        const matchesStatus = (statusFilter === "all") || (t.status === statusFilter);
+        return matchesQuery && matchesStatus;
+      });
+
+      document.getElementById("badgeTenantCount").textContent = `${filtered.length} Klien`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = "";
+        empty.classList.remove("hidden");
+        return;
+      }
+
+      empty.classList.add("hidden");
+
+      grid.innerHTML = filtered.map(t => {
+        // Hitung sisa hari
+        const expTime = new Date(t.expiresAt).getTime();
+        const diffDays = Math.ceil((expTime - Date.now()) / (1000 * 60 * 60 * 24));
+        const isExpired = diffDays <= 0;
+        
+        let statusBadge = '';
+        if (isExpired) {
+          statusBadge = '<span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">🔴 Expired</span>';
+        } else if (t.status === 'trial') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">🟡 Trial (${diffDays} Hari)</span>`;
+        } else {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">🟢 Aktif (${diffDays} Hari)</span>`;
+        }
+
+        const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${t.id}`;
+        const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${t.id}&station=kitchen`;
+        const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${t.id}`;
+        const guestSampleUrl = `${baseUrl}customer_qr_self_order.html?tenant=${t.id}&table=T01`;
+
+        // Format Pesan WhatsApp
+        const waMsg = encodeURIComponent(
+          `Halo ${t.pic || 'Bpk/Ibu'} (${t.name}),\n\n` +
+          `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF.\n\n` +
+          `📱 *LINK OPERASIONAL RESTORAN ANDA:*\n` +
+          `1. Kasir POS Tablet: ${posUrl}\n` +
+          `2. Display Dapur KDS: ${kdsUrl}\n` +
+          `3. Lembaran Cetak QR Meja: ${qrSheetUrl}\n` +
+          `4. Contoh Menu Meja 01: ${guestSampleUrl}\n\n` +
+          `Paket: ${t.planName}\n` +
+          `Masa Aktif Hingga: ${new Date(t.expiresAt).toLocaleDateString('id-ID')}\n\n` +
+          `Buka link Kasir di tablet/laptop dan pilih "Add to Home Screen". Selamat berjualan! 🚀`
+        );
+        const waCleanPhone = (t.phone || '').replace(/[^0-9]/g, '');
+        const waFinalPhone = waCleanPhone.startsWith('0') ? '62' + waCleanPhone.substring(1) : waCleanPhone;
+        const waLink = `https://wa.me/${waFinalPhone}?text=${waMsg}`;
+
+        return `
+          <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-brand-500/40 transition-all flex flex-col justify-between space-y-4">
+            
+            <!-- Top Row: Resto Name & Status -->
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-1.5">
+                <div class="flex items-center gap-2 min-w-0">
+                  <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white font-extrabold text-xs flex items-center justify-center shrink-0">
+                    ${t.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="font-heading font-extrabold text-sm text-white truncate" title="${t.name}">
+                      ${t.name}
+                    </h3>
+                    <span class="font-mono text-[10px] text-brand-300">tenant: ${t.id}</span>
+                  </div>
+                </div>
+                ${statusBadge}
+              </div>
+
+              <!-- Meta info -->
+              <div class="mt-2.5 pt-2.5 border-t border-slate-800/80 space-y-1 text-xs text-slate-400">
+                <div class="flex items-center justify-between">
+                  <span>PIC / Pemilik:</span>
+                  <span class="font-semibold text-slate-200">${t.pic || '-'}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>No. WhatsApp:</span>
+                  <a href="${waLink}" target="_blank" class="font-mono text-emerald-400 hover:underline flex items-center gap-1">
+                    <span>${t.phone || '-'}</span>
+                    <span class="material-symbols-outlined text-xs">open_in_new</span>
+                  </a>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Paket:</span>
+                  <span class="font-semibold text-indigo-300">${t.planName}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Kapasitas:</span>
+                  <span class="text-slate-300">${t.tablesCount || 12} Meja</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="pt-3 border-t border-slate-800/80 space-y-2">
+              <div class="flex items-center gap-2">
+                <a href="${waLink}" target="_blank" class="touch-btn flex-1 py-2 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-center font-bold text-xs flex items-center justify-center gap-1.5">
+                  <span class="material-symbols-outlined text-base">chat</span>
+                  <span>Kirim WA</span>
+                </a>
+
+                <a href="${qrSheetUrl}" target="_blank" class="touch-btn py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold flex items-center gap-1" title="Cetak Lembaran QR Meja">
+                  <span class="material-symbols-outlined text-base">print</span>
+                  <span>QR Meja</span>
+                </a>
+
+                <button onclick="handleRenewTenant('${t.id}')" class="touch-btn py-2 px-3 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-bold flex items-center gap-1" title="Perpanjang Lisensi +30 Hari">
+                  <span class="material-symbols-outlined text-base">autorenew</span>
+                  <span>+30H</span>
+                </button>
+              </div>
+
+              <div class="flex items-center justify-between pt-1 text-[11px] text-slate-500">
+                <button onclick="openTenantLinksModal('${t.id}')" class="text-slate-400 hover:text-white underline">
+                  Tampilkan Semua Tautan
+                </button>
+                <button onclick="confirmDeleteTenant('${t.id}', '${t.name}')" class="text-rose-400 hover:text-rose-300">
+                  Hapus Klien
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join("");
+    }
+
+    function filterTenants() {
+      renderAllTenants();
+    }
+
+    function updateKpis() {
+      const tenants = RestoSync.getAllTenants();
+      const total = tenants.length;
+      let active = 0;
+      let trial = 0;
+      let mrr = 0;
+
+      tenants.forEach(t => {
+        const expTime = new Date(t.expiresAt).getTime();
+        const isExpired = expTime <= Date.now();
+
+        if (!isExpired) {
+          if (t.status === "trial" || t.plan === "trial") {
+            trial++;
+          } else {
+            active++;
+            mrr += (Number(t.price) || 0);
+          }
+        }
+      });
+
+      document.getElementById("statTotalTenants").textContent = total;
+      document.getElementById("statActiveTenants").textContent = active;
+      document.getElementById("statTrialTenants").textContent = trial;
+      document.getElementById("statMrr").textContent = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(mrr);
+    }
+
+    // -------------------------------------------------------------------------
+    // TENANT CREATION WIZARD
+    // -------------------------------------------------------------------------
+    function openNewTenantModal() {
+      document.getElementById("newTenantForm").reset();
+      document.getElementById("inputTenantTables").value = 12;
+      document.getElementById("newTenantModal").classList.remove("hidden");
+      document.getElementById("inputTenantName").focus();
+    }
+
+    function closeNewTenantModal() {
+      document.getElementById("newTenantModal").classList.add("hidden");
+    }
+
+    function autoGenerateSlug() {
+      const name = document.getElementById("inputTenantName").value;
+      const slug = name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+      document.getElementById("inputTenantSlug").value = slug;
+    }
+
+    function handleCreateTenant(e) {
+      e.preventDefault();
+      const name = document.getElementById("inputTenantName").value.trim();
+      const slug = document.getElementById("inputTenantSlug").value.trim();
+      const pic = document.getElementById("inputTenantPic").value.trim();
+      const phone = document.getElementById("inputTenantPhone").value.trim();
+      const city = document.getElementById("inputTenantCity").value.trim();
+      const tables = document.getElementById("inputTenantTables").value;
+      const plan = document.querySelector('input[name="planChoice"]:checked').value;
+      const gasUrl = document.getElementById("inputTenantGasUrl").value.trim();
+      const apiKey = document.getElementById("inputTenantApiKey").value.trim();
+
+      if (!name || !slug) {
+        alert("Nama restoran dan Slug URL wajib diisi!");
+        return;
+      }
+
+      try {
+        const newTenant = RestoSync.registerNewTenant({
+          id: slug,
+          name: name,
+          pic: pic,
+          phone: phone,
+          city: city,
+          plan: plan,
+          tablesCount: tables,
+          gasUrl: gasUrl,
+          apiKey: apiKey
+        });
+
+        closeNewTenantModal();
+        renderAllTenants();
+        updateKpis();
+        showTenantSuccessModal(newTenant);
+        showToast(`🎉 Restoran "${name}" berhasil didaftarkan!`, "success");
+      } catch (err) {
+        alert("Gagal mendaftarkan tenant: " + err.message);
+      }
+    }
+
+    function showTenantSuccessModal(tenant) {
+      const baseUrl = getBaseUrl();
+      const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${tenant.id}`;
+      const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${tenant.id}&station=kitchen`;
+      const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${tenant.id}`;
+      const sampleGuest = `${baseUrl}customer_qr_self_order.html?tenant=${tenant.id}&table=T01`;
+
+      currentSuccessLinks = {
+        pos: posUrl,
+        kds: kdsUrl,
+        qrSheet: qrSheetUrl,
+        sample: sampleGuest
+      };
+
+      document.getElementById("successModalTitle").textContent = `🎉 Akun "${tenant.name}" Berhasil Terbit!`;
+      document.getElementById("successModalSub").textContent = `Tenant ID: ${tenant.id} • Paket: ${tenant.planName}`;
+
+      document.getElementById("successPosLink").textContent = posUrl;
+      document.getElementById("successKdsLink").textContent = kdsUrl;
+      document.getElementById("successQrSheetLink").textContent = qrSheetUrl;
+
+      // Link Cetak QR Meja
+      document.getElementById("btnOpenQrSheet").href = qrSheetUrl;
+
+      // Format Pesan WhatsApp
+      const waMsg = encodeURIComponent(
+        `Halo ${tenant.pic || 'Bpk/Ibu'} (${tenant.name}),\n\n` +
+        `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF dan siap digunakan:\n\n` +
+        `📱 *LINK OPERASIONAL RESTORAN:*\n` +
+        `1. Kasir POS Tablet: ${posUrl}\n` +
+        `2. Display Dapur KDS: ${kdsUrl}\n` +
+        `3. Lembaran Cetak QR Meja (PDF): ${qrSheetUrl}\n` +
+        `4. Contoh Pemesanan Meja 01: ${sampleGuest}\n\n` +
+        `Paket: ${tenant.planName}\n` +
+        `Masa Berlaku: s/d ${new Date(tenant.expiresAt).toLocaleDateString('id-ID')}\n\n` +
+        `Cukup buka link Kasir di tablet kasir Anda dan pilih "Add to Home Screen". Selamat berjualan! 🚀`
+      );
+      const cleanPhone = (tenant.phone || '').replace(/[^0-9]/g, '');
+      const finalPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.substring(1) : cleanPhone;
+      document.getElementById("btnSendWhatsApp").href = `https://wa.me/${finalPhone}?text=${waMsg}`;
+
+      document.getElementById("tenantSuccessModal").classList.remove("hidden");
+    }
+
+    function closeSuccessModal() {
+      document.getElementById("tenantSuccessModal").classList.add("hidden");
+    }
+
+    function handleRenewTenant(tenantId) {
+      if (!confirm("Perpanjang masa aktif lisensi restoran ini selama 30 Hari?")) return;
+      const res = RestoSync.renewTenantSubscription(tenantId, 30);
+      if (res.success) {
+        renderAllTenants();
+        updateKpis();
+        showToast(res.message, "success");
+      }
+    }
+
+    function confirmDeleteTenant(tenantId, name) {
+      if (!confirm(`Apakah Anda yakin ingin menghapus klien "${name}" (${tenantId}) dari sistem?`)) return;
+      RestoSync.deleteTenant(tenantId);
+      renderAllTenants();
+      updateKpis();
+      showToast(`Klien "${name}" telah dihapus.`, "info");
+    }
+
+    function openTenantLinksModal(tenantId) {
+      const tenant = RestoSync.getTenantInfo(tenantId);
+      if (tenant) {
+        showTenantSuccessModal(tenant);
+      }
+    }
+
+    function copyToClipboard(text, msg = "Tautan berhasil disalin!") {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(msg, "info");
+      });
+    }
+
+    function showToast(message, type = "info") {
+      const c = document.getElementById("toastContainer");
+      const el = document.createElement("div");
+      el.className = "py-3 px-4 rounded-xl text-xs font-bold shadow-xl border flex items-center gap-2 pointer-events-auto transition-all animate-bounce bg-slate-900 text-white border-slate-700";
+      
+      let icon = "info";
+      if (type === "success") {
+        el.classList.add("border-emerald-500/40", "text-emerald-300");
+        icon = "check_circle";
+      }
+
+      el.innerHTML = `
+        <span class="material-symbols-outlined text-base">${icon}</span>
+        <span>${message}</span>
+      `;
+      c.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        setTimeout(() => el.remove(), 300);
+      }, 3500);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      checkSessionAuth();
+    });
+  </script>
+
+</body>
+</html>
