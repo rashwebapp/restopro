@@ -95,21 +95,9 @@
       </div>
     </div>
 
-    <!-- Right: Header Controls -->
+    <!-- Right: Streamlined Header Controls (v2.0 Clean POS) -->
     <div class="flex items-center gap-2">
-      <!-- Transaction History Button -->
-      <button onclick="openTransactionHistoryModal()" class="touch-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 text-xs font-semibold flex items-center gap-1.5 transition-colors" title="Lihat Riwayat Transaksi Hari Ini">
-        <span class="material-symbols-outlined text-[16px] text-amber-500">receipt_long</span>
-        <span class="hidden md:inline">Riwayat Transaksi</span>
-      </button>
-
-      <!-- Manage Menu & Resto Settings Button (Pintu Owner) -->
-      <button onclick="openOwnerSettingsPortal()" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500 text-amber-700 dark:text-amber-400 hover:text-[#0F172A] border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all" title="Kelola Menu & Pengaturan Restoran (PIN Owner)">
-        <span class="material-symbols-outlined text-[16px]">tune</span>
-        <span class="hidden xl:inline">Kelola Menu & Resto</span>
-      </button>
-
-      <!-- Lock POS Screen (Kunci Layar Kasir dengan PIN) -->
+      <!-- Lock POS Screen (Kunci Layar Kasir) -->
       <button onclick="lockCurrentCashier()" class="touch-btn px-2.5 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 hover:bg-rose-100 transition-all text-xs font-semibold flex items-center gap-1" title="Kunci Kasir (Membutuhkan PIN Kasir untuk Masuk)">
         <span class="material-symbols-outlined text-[16px]">lock</span>
         <span class="hidden sm:inline">Kunci</span>
@@ -121,17 +109,43 @@
         <span class="hidden lg:inline">Pintu Darurat</span>
       </button>
 
-      <!-- Direct QR Mobile View Link -->
-      <a href="customer_qr_self_order.html" target="_blank" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-1.5 hover:bg-amber-100 transition-all" title="Buka Simulasi QR Self-Order Meja 05">
-        <span class="material-symbols-outlined text-[18px]">qr_code_2</span>
-        <span class="hidden md:inline">Layar QR Meja 05</span>
-      </a>
+      <!-- Menu Kasir Dropdown (Konsolidasi Menu agar Navbar Bersih) -->
+      <div class="relative" id="posNavMenuContainer">
+        <button onclick="togglePosNavMenu()" class="touch-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-700 dark:text-stone-300 hover:text-amber-600 dark:hover:text-amber-400 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs" title="Menu Opsi & Pengaturan">
+          <span class="material-symbols-outlined text-[18px]">menu</span>
+          <span class="hidden md:inline">Opsi</span>
+          <span class="material-symbols-outlined text-[14px]">expand_more</span>
+        </button>
 
-      <!-- Dark / Light Mode Toggle Button -->
-      <button onclick="ThemeManager.toggle()" class="theme-toggle-btn touch-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:scale-105 transition-all shadow-xs" title="Beralih Tema">
-        <span class="material-symbols-outlined text-[18px] theme-icon">dark_mode</span>
-        <span class="theme-label hidden md:inline">Dark Mode</span>
-      </button>
+        <div id="posNavDropdown" class="hidden absolute right-0 top-full mt-2 w-60 bg-white dark:bg-[#1E293B] border border-stone-200 dark:border-stone-700 rounded-2xl shadow-xl z-50 py-1.5 text-xs text-stone-700 dark:text-stone-200 animate-in fade-in zoom-in-95 duration-100 divide-y divide-stone-100 dark:divide-stone-800">
+          <div class="py-1">
+            <button onclick="openTransactionHistoryModal(); togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
+              <span class="material-symbols-outlined text-amber-500 text-[18px]">receipt_long</span>
+              <span>Riwayat Transaksi Hari Ini</span>
+            </button>
+            <button onclick="openOwnerSettingsPortal(); togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
+              <span class="material-symbols-outlined text-amber-500 text-[18px]">tune</span>
+              <span>Kelola Menu & Resto (Owner)</span>
+            </button>
+          </div>
+          <div class="py-1">
+            <a href="table_qr_print_sheet.html" target="_blank" onclick="togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
+              <span class="material-symbols-outlined text-indigo-500 text-[18px]">print</span>
+              <span>Cetak Lembaran QR Meja (PDF)</span>
+            </a>
+            <a href="customer_qr_self_order.html" target="_blank" onclick="togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
+              <span class="material-symbols-outlined text-amber-500 text-[18px]">qr_code_2</span>
+              <span>Simulasi QR Meja Tamu</span>
+            </a>
+          </div>
+          <div class="py-1">
+            <button onclick="ThemeManager.toggle(); togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
+              <span class="material-symbols-outlined text-amber-500 text-[18px] theme-icon">dark_mode</span>
+              <span class="theme-label">Mode Gelap / Terang</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Staff Avatar (Click to edit) -->
       <div onclick="openSwitchCashierModal()" id="activeCashierAvatar" class="cursor-pointer touch-btn w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-500 text-[#0F172A] font-heading font-extrabold text-sm flex items-center justify-center shadow-sm" title="Klik untuk ganti kasir / shift">
@@ -142,160 +156,67 @@
   </header>
 
   <!-- ============================================================
-       MAIN 3-ZONE TOUCH INTERFACE
+       MAIN 2-ZONE CLEAN TOUCH INTERFACE (v2.0 LEAN POS)
        ============================================================ -->
   <main class="flex-1 p-3 lg:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 overflow-hidden">
 
     <!-- ============================================================
-         COLUMN 1: TABLE MAP & FLOOR GRID (3 Cols ~ 25%)
+         ZONE 1: MENU CATALOG & ORDER ACTION BAR (8 Cols ~ 67%)
          ============================================================ -->
-    <section class="lg:col-span-3 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
+    <section class="lg:col-span-8 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
       
-      <!-- Switcher Mode: Meja Makan Dine-In vs Online Delivery & Takeaway -->
-      <div class="grid grid-cols-2 gap-1 p-1 bg-stone-100 dark:bg-stone-900 rounded-xl mb-2.5 border border-stone-200 dark:border-stone-800 shrink-0">
-        <button id="posTabDineInBtn" onclick="switchPosFloorMode('dinein')" class="touch-btn py-1.5 px-2 rounded-lg text-xs font-heading font-extrabold flex items-center justify-center gap-1.5 bg-white dark:bg-[#1E293B] text-amber-600 dark:text-amber-400 shadow-xs">
-          <span class="material-symbols-outlined text-[16px]">table_restaurant</span>
-          <span>Dine-In (12)</span>
-        </button>
-        <button id="posTabDeliveryBtn" onclick="switchPosFloorMode('delivery')" class="touch-btn py-1.5 px-2 rounded-lg text-xs font-heading font-extrabold flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200">
-          <span class="material-symbols-outlined text-[16px]">moped</span>
-          <span>Online (<span id="activeOnlineOrdersCountBadge">0</span>)</span>
-        </button>
-      </div>
-
-      <!-- PANEL DINE-IN (12 MEJA) -->
-      <div id="posDineInPanel" class="flex flex-col flex-1 overflow-hidden">
-        <!-- Table Grid Header -->
-        <div class="flex items-center justify-between pb-2 border-b border-[#E7DFD5] dark:border-[#334155]">
-          <div class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[18px]">table_restaurant</span>
-            <h2 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">Denah Meja Resto</h2>
-          </div>
-          <button onclick="openCashierReservationModal()" class="touch-btn px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-[10px] flex items-center gap-1 hover:bg-indigo-100 transition-colors" title="Lihat & Buat Reservasi Meja">
-            <span class="material-symbols-outlined text-[13px]">event_seat</span>
-            <span>Reservasi (<span id="activeReservationBadge">2</span>)</span>
-          </button>
-        </div>
-
-        <!-- Status Indicator Legend (4 Statuses: Kosong, Terisi, Bill, Booking) -->
-        <div class="grid grid-cols-4 gap-1 py-1.5 text-[9px] font-semibold text-center border-b border-[#E7DFD5] dark:border-[#334155] mb-2">
-          <div class="p-1 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center gap-0.5 border border-emerald-200 dark:border-emerald-800/40">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Kosong
-          </div>
-          <div class="p-1 rounded bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 flex items-center justify-center gap-0.5 border border-red-200 dark:border-red-800/40">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Terisi
-          </div>
-          <div class="p-1 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 flex items-center justify-center gap-0.5 border border-amber-200 dark:border-amber-800/40">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Bill
-          </div>
-          <div class="p-1 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 flex items-center justify-center gap-0.5 border border-indigo-200 dark:border-indigo-800/40">
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Booking
-          </div>
-        </div>
-
-        <!-- Table Filter Pills -->
-        <div class="flex items-center gap-1 overflow-x-auto pb-1 mb-1.5 text-[10px] font-heading font-bold" id="tableFilterPills">
-          <button onclick="filterTableGrid('all')" class="table-pill px-2 py-0.5 rounded-lg bg-amber-500 text-[#0F172A]">Semua (12)</button>
-          <button onclick="filterTableGrid('available')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Kosong</button>
-          <button onclick="filterTableGrid('occupied')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Terisi</button>
-          <button onclick="filterTableGrid('bill_requested')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Bill</button>
-          <button onclick="filterTableGrid('reserved')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Booking</button>
-        </div>
-
-        <!-- Interactive 12 Tables Grid (Scrollable) -->
-        <div id="tablesGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto flex-1 pr-1">
-          <!-- Tables populated by JS -->
-        </div>
-
-        <!-- Quick Floor KPI Summary -->
-        <div class="mt-2 pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between text-xs text-[#78716C] dark:text-[#94A3B8]">
-          <span>Okupansi Meja:</span>
-          <span id="occupancyRateDisplay" class="font-heading font-bold text-amber-600 dark:text-amber-400">
-            7 / 12 (58%)
-          </span>
-        </div>
-      </div>
-
-      <!-- PANEL ONLINE DELIVERY & TAKEAWAY -->
-      <div id="posDeliveryPanel" class="hidden flex-col flex-1 overflow-hidden">
-        <!-- Actions & Header -->
-        <div class="flex items-center justify-between pb-2 border-b border-[#E7DFD5] dark:border-[#334155]">
-          <div class="flex items-center gap-1.5">
-            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">two_wheeler</span>
-            <h2 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">Pesanan Online</h2>
-          </div>
-          <button onclick="openOnlineDeliveryModal()" class="touch-btn px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] flex items-center gap-1 transition-colors">
-            <span class="material-symbols-outlined text-[13px]">add_circle</span>
-            <span>+ Order Baru</span>
-          </button>
-        </div>
-
-        <!-- Platform Filter Pills -->
-        <div class="flex items-center gap-1 overflow-x-auto py-1.5 mb-1 text-[10px] font-heading font-bold" id="deliveryFilterPills">
-          <button onclick="filterDeliveryOrders('all')" class="delivery-pill px-2 py-0.5 rounded-lg bg-emerald-600 text-white font-bold">Semua</button>
-          <button onclick="filterDeliveryOrders('gofood')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GoFood</button>
-          <button onclick="filterDeliveryOrders('grabfood')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GrabFood</button>
-          <button onclick="filterDeliveryOrders('shopeefood')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">ShopeeFood</button>
-        </div>
-
-        <!-- Online Delivery Cards List (Scrollable) -->
-        <div id="onlineOrdersContainer" class="flex flex-col gap-2 overflow-y-auto flex-1 pr-1 py-1">
-          <!-- Populated by JS -->
-        </div>
-
-        <!-- Simulation Helper Button Bar -->
-        <div class="mt-2 pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex flex-col gap-1.5 shrink-0">
-          <div class="text-[10px] font-bold text-stone-500 uppercase tracking-wider flex items-center justify-between">
-            <span>⚡ Simulasi Order Masuk:</span>
-          </div>
-          <div class="grid grid-cols-3 gap-1">
-            <button onclick="triggerQuickOnlineOrder('gofood')" class="touch-btn py-1 px-1 rounded-lg bg-[#00AA13]/15 hover:bg-[#00AA13]/30 text-[#00AA13] dark:text-emerald-400 font-extrabold text-[10px] border border-[#00AA13]/30 flex items-center justify-center gap-0.5" title="Simulasi Order Masuk dari GoFood">
-              <span>+ GoFood</span>
-            </button>
-            <button onclick="triggerQuickOnlineOrder('grabfood')" class="touch-btn py-1 px-1 rounded-lg bg-[#00B14F]/15 hover:bg-[#00B14F]/30 text-[#00B14F] dark:text-emerald-400 font-extrabold text-[10px] border border-[#00B14F]/30 flex items-center justify-center gap-0.5" title="Simulasi Order Masuk dari GrabFood">
-              <span>+ GrabFood</span>
-            </button>
-            <button onclick="triggerQuickOnlineOrder('shopeefood')" class="touch-btn py-1 px-1 rounded-lg bg-[#EE4D2D]/15 hover:bg-[#EE4D2D]/30 text-[#EE4D2D] dark:text-orange-400 font-extrabold text-[10px] border border-[#EE4D2D]/30 flex items-center justify-center gap-0.5" title="Simulasi Order Masuk dari ShopeeFood">
-              <span>+ Shopee</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- ============================================================
-         COLUMN 2: QUICK-TOUCH MENU CATALOG (5 Cols ~ 42%)
-         ============================================================ -->
-    <section class="lg:col-span-5 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
-      
-      <!-- Catalog Header & Search -->
-      <div class="flex flex-col gap-2.5 pb-2.5 border-b border-[#E7DFD5] dark:border-[#334155]">
+      <!-- Top Action Bar: Quick Table Selector + Dine-in/Online Mode + Search -->
+      <div class="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-[#E7DFD5] dark:border-[#334155] shrink-0">
         
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[20px]">menu_book</span>
-            <h2 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Katalog Menu Kasir</h2>
+        <!-- Left: Quick Table Selector Pop-up & Mode Switcher -->
+        <div class="flex items-center gap-2">
+          <!-- Pop-up Table Selector Button -->
+          <button onclick="openTablePickerModal()" class="touch-btn group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-900 dark:text-amber-300 transition-all text-left shadow-2xs" title="Buka Denah Meja untuk Memilih atau Mengubah Meja">
+            <div class="w-8 h-8 rounded-lg bg-amber-500 text-[#0F172A] font-heading font-black text-xs flex items-center justify-center shadow-xs">
+              #<span id="activeSelectorTableNum">03</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-1 font-heading font-bold text-xs leading-none text-stone-900 dark:text-white">
+                <span id="activeSelectorTableName">Meja 03 (Indoor)</span>
+                <span class="material-symbols-outlined text-[16px] text-amber-600 dark:text-amber-400 group-hover:translate-y-0.5 transition-transform">expand_more</span>
+              </div>
+              <p id="activeSelectorTableSub" class="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 truncate max-w-[140px] sm:max-w-[200px]">Minta Tagihan • Ganti Meja</p>
+            </div>
+          </button>
+
+          <!-- Floor Mode Switcher (Meja Makan vs Online Delivery) -->
+          <div class="flex items-center bg-stone-100 dark:bg-stone-900 p-1 rounded-xl border border-stone-200 dark:border-stone-800">
+            <button id="posTabDineInBtn" onclick="switchPosFloorMode('dinein')" class="touch-btn py-1.5 px-2.5 rounded-lg text-xs font-heading font-extrabold flex items-center gap-1.5 bg-white dark:bg-[#1E293B] text-amber-600 dark:text-amber-400 shadow-xs">
+              <span class="material-symbols-outlined text-[16px]">restaurant</span>
+              <span>Dine-In</span>
+            </button>
+            <button id="posTabDeliveryBtn" onclick="switchPosFloorMode('delivery')" class="touch-btn py-1.5 px-2.5 rounded-lg text-xs font-heading font-extrabold flex items-center gap-1.5 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200">
+              <span class="material-symbols-outlined text-[16px]">moped</span>
+              <span>Online (<span id="activeOnlineOrdersCountBadge">0</span>)</span>
+            </button>
           </div>
-          <span class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Klik hidangan untuk input instan</span>
         </div>
 
-        <!-- Search Bar -->
-        <div class="relative w-full">
+        <!-- Right: Search Bar Menu -->
+        <div class="relative flex-1 min-w-[180px] max-w-xs">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-[18px]">search</span>
           <input 
             id="posMenuSearch" 
             type="text" 
             oninput="handlePosSearch(this.value)"
-            placeholder="Cari menu Arab, Malaysia, Thai, minuman..." 
+            placeholder="Cari menu Arab, Malaysia, Thai..." 
             class="w-full h-9 pl-9 pr-3 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs text-[#1C1917] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
 
+      </div>
+
+      <!-- PANEL DINE-IN (KATALOG MENU LEGA) -->
+      <div id="posDineInPanel" class="flex flex-col flex-1 overflow-hidden pt-2">
         <!-- Category Tabs -->
-        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 shrink-0">
           <button onclick="filterPosCategory('all')" data-poscat="all" class="pos-cat-btn active touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A] shadow-xs">
-            Semua
+            Semua Menu
           </button>
           <button onclick="filterPosCategory('arabian')" data-poscat="arabian" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
             Arabian 🕌
@@ -311,17 +232,62 @@
           </button>
         </div>
 
+        <!-- Touch Food Tile Grid (4 Kolom Lega pada Layar Besar, 3 Kolom pada Tablet, 2 pada HP) -->
+        <div id="posTilesContainer" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5 overflow-y-auto flex-1 pr-1">
+          <!-- Rendered by JS -->
+        </div>
       </div>
 
-      <!-- Touch Food Tile Grid (Scrollable) -->
-      <div id="posTilesContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto flex-1 pt-2.5 pr-1">
-        <!-- Rendered by JS -->
+      <!-- PANEL ONLINE DELIVERY & TAKEAWAY -->
+      <div id="posDeliveryPanel" class="hidden flex-col flex-1 overflow-hidden pt-2">
+        <!-- Actions & Header -->
+        <div class="flex items-center justify-between pb-2 border-b border-[#E7DFD5] dark:border-[#334155] shrink-0">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">two_wheeler</span>
+            <h2 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">Daftar Pesanan Online Delivery</h2>
+          </div>
+          <button onclick="openOnlineDeliveryModal()" class="touch-btn px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-[14px]">add_circle</span>
+            <span>+ Pesanan Manual</span>
+          </button>
+        </div>
+
+        <!-- Platform Filter Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto py-2 shrink-0 text-xs font-heading font-bold" id="deliveryFilterPills">
+          <button onclick="filterDeliveryOrders('all')" class="delivery-pill px-3 py-1 rounded-xl bg-emerald-600 text-white font-bold">Semua</button>
+          <button onclick="filterDeliveryOrders('gofood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GoFood</button>
+          <button onclick="filterDeliveryOrders('grabfood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GrabFood</button>
+          <button onclick="filterDeliveryOrders('shopeefood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">ShopeeFood</button>
+        </div>
+
+        <!-- Online Delivery Cards List (Scrollable) -->
+        <div id="onlineOrdersContainer" class="flex flex-col gap-2 overflow-y-auto flex-1 pr-1 py-1">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Simulation Helper Button Bar -->
+        <div class="mt-2 pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex flex-col gap-1.5 shrink-0">
+          <div class="text-[10px] font-bold text-stone-500 uppercase tracking-wider flex items-center justify-between">
+            <span>⚡ Simulasi Order Masuk:</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="triggerQuickOnlineOrder('gofood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#00AA13]/15 hover:bg-[#00AA13]/30 text-[#00AA13] dark:text-emerald-400 font-extrabold text-xs border border-[#00AA13]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari GoFood">
+              <span>+ GoFood</span>
+            </button>
+            <button onclick="triggerQuickOnlineOrder('grabfood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#00B14F]/15 hover:bg-[#00B14F]/30 text-[#00B14F] dark:text-emerald-400 font-extrabold text-xs border border-[#00B14F]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari GrabFood">
+              <span>+ GrabFood</span>
+            </button>
+            <button onclick="triggerQuickOnlineOrder('shopeefood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#EE4D2D]/15 hover:bg-[#EE4D2D]/30 text-[#EE4D2D] dark:text-orange-400 font-extrabold text-xs border border-[#EE4D2D]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari ShopeeFood">
+              <span>+ Shopee</span>
+            </button>
+          </div>
+        </div>
       </div>
 
     </section>
 
     <!-- ============================================================
-         COLUMN 3: ORDER TICKET & CHECKOUT ACTION (4 Cols ~ 33%)
+         ZONE 2: ORDER TICKET & CHECKOUT ACTION (4 Cols ~ 33%)
          ============================================================ -->
     <section class="lg:col-span-4 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
       
@@ -486,6 +452,83 @@
     </section>
 
   </main>
+
+  <!-- ============================================================
+       MODAL 0: POP-UP DENAH MEJA RESTORAN (LEAN 2-ZONE POS SELECTOR)
+       ============================================================ -->
+  <div id="tablePickerModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-2xl rounded-3xl border border-[#E7DFD5] dark:border-[#334155] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
+      
+      <!-- Header -->
+      <div class="p-4 border-b border-[#E7DFD5] dark:border-[#334155] bg-[#FAF7F2] dark:bg-[#0F172A] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500 text-[#0F172A] flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[20px]">table_restaurant</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-base text-[#1C1917] dark:text-white">Pilih Meja Resto</h3>
+            <p class="text-xs text-[#78716C] dark:text-[#94A3B8]">Sentuh salah satu meja untuk membuka pesanan atau input menu</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openCashierReservationModal()" class="touch-btn px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center gap-1 hover:bg-indigo-100 transition-colors" title="Lihat & Buat Reservasi Meja">
+            <span class="material-symbols-outlined text-[15px]">event_seat</span>
+            <span>Reservasi (<span id="activeReservationBadge">2</span>)</span>
+          </button>
+          <button onclick="closeTablePickerModal()" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center transition-colors">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content Body -->
+      <div class="p-4 flex flex-col flex-1 overflow-hidden">
+        
+        <!-- Legend (Kosong, Terisi, Bill, Booking) -->
+        <div class="grid grid-cols-4 gap-2 py-1 text-[10px] font-semibold text-center mb-3 shrink-0">
+          <div class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center gap-1 border border-emerald-200 dark:border-emerald-800/40">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Kosong
+          </div>
+          <div class="p-1.5 rounded-lg bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 flex items-center justify-center gap-1 border border-red-200 dark:border-red-800/40">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span> Terisi
+          </div>
+          <div class="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 flex items-center justify-center gap-1 border border-amber-200 dark:border-amber-800/40">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Bill
+          </div>
+          <div class="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 flex items-center justify-center gap-1 border border-indigo-200 dark:border-indigo-800/40">
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Booking
+          </div>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 mb-3 text-xs font-heading font-bold shrink-0" id="tableFilterPills">
+          <button onclick="filterTableGrid('all')" class="table-pill px-3 py-1 rounded-xl bg-amber-500 text-[#0F172A]">Semua (12)</button>
+          <button onclick="filterTableGrid('available')" class="table-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Kosong</button>
+          <button onclick="filterTableGrid('occupied')" class="table-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Terisi</button>
+          <button onclick="filterTableGrid('bill_requested')" class="table-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Bill</button>
+          <button onclick="filterTableGrid('reserved')" class="table-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Booking</button>
+        </div>
+
+        <!-- Tables Grid (Lega, grid 2-4 kolom di dalam modal) -->
+        <div id="tablesGridContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 overflow-y-auto flex-1 pr-1">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Footer Info -->
+        <div class="mt-3 pt-3 border-t border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between text-xs text-[#78716C] dark:text-[#94A3B8] shrink-0">
+          <div class="flex items-center gap-1.5">
+            <span>Okupansi Meja Saat Ini:</span>
+            <span id="occupancyRateDisplay" class="font-heading font-bold text-amber-600 dark:text-amber-400">7 / 12 (58%)</span>
+          </div>
+          <button onclick="closeTablePickerModal()" class="px-4 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-bold transition-colors">
+            Tutup
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <!-- ============================================================
        MODAL 1: TENDER & INTEGRATED PAYMENT MODAL
@@ -1458,9 +1501,9 @@
   <div id="posToastContainer" class="fixed top-5 right-5 z-[70] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.5.6"></script>
-  <script src="assets/js/resto-config.js?v=2.5.6"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.6"></script>
+  <script src="assets/js/resto-data.js?v=2.6.0"></script>
+  <script src="assets/js/resto-config.js?v=2.6.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
   <script>
     // State Kasir
     let activeTableId = "T03";
@@ -2322,6 +2365,46 @@
       setInterval(update, 10000);
     }
 
+    // ============================================================
+    // MODAL SELEKTOR DENAH MEJA POP-UP & DROPDOWN NAV (v2.0 LEAN POS)
+    // ============================================================
+    function openTablePickerModal() {
+      renderTablesGrid();
+      const modal = document.getElementById("tablePickerModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeTablePickerModal() {
+      const modal = document.getElementById("tablePickerModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function togglePosNavMenu(force) {
+      const dropdown = document.getElementById("posNavDropdown");
+      if (!dropdown) return;
+      if (typeof force === "boolean") {
+        if (force) dropdown.classList.remove("hidden");
+        else dropdown.classList.add("hidden");
+      } else {
+        dropdown.classList.toggle("hidden");
+      }
+    }
+
+    // Auto-close dropdown saat klik di luar
+    document.addEventListener("click", function(e) {
+      const container = document.getElementById("posNavMenuContainer");
+      const dropdown = document.getElementById("posNavDropdown");
+      if (container && dropdown && !container.contains(e.target)) {
+        dropdown.classList.add("hidden");
+      }
+    });
+
     // Filter Meja berdasarkan Status (Semua, Kosong, Terisi, Bill, Booking)
     function filterTableGrid(status) {
       activeTableFilter = status;
@@ -2492,13 +2575,34 @@
       // Salin item pesanan meja
       currentTicketItems = JSON.parse(JSON.stringify(table.items || []));
       renderTicketItems();
+
+      // Sinkronkan Chip Selektor Meja Pop-up di Action Bar Kasir
+      const selNum = document.getElementById("activeSelectorTableNum");
+      const selName = document.getElementById("activeSelectorTableName");
+      const selSub = document.getElementById("activeSelectorTableSub");
+      if (selNum) selNum.textContent = table.id.replace("T", "");
+      if (selName) selName.textContent = `${table.name} (${table.section})`;
+      if (selSub) {
+        if (activeRes && table.status === "available") {
+          selSub.textContent = `Dibooking (${activeRes.timeStr}) • Ganti`;
+        } else if (table.status === "available") {
+          selSub.textContent = `Meja Kosong • Ganti`;
+        } else if (table.status === "occupied") {
+          selSub.textContent = `Terisi (${table.customer || "Tamu"}) • Ganti`;
+        } else {
+          selSub.textContent = `Minta Tagihan • Ganti`;
+        }
+      }
+
+      // Tutup modal pop-up meja jika sedang terbuka
+      closeTablePickerModal();
     }
 
     // Render Ubin Makanan Kasir (Quick-Touch Tiles)
     function renderPosTiles(items) {
       const container = document.getElementById("posTilesContainer");
       if (!items || items.length === 0) {
-        container.innerHTML = `<div class="col-span-3 py-10 text-center text-xs text-stone-400">Tidak ada menu yang sesuai.</div>`;
+        container.innerHTML = `<div class="col-span-4 py-12 text-center text-xs text-stone-400">Tidak ada hidangan yang cocok dengan pencarian.</div>`;
         return;
       }
 
@@ -2506,31 +2610,31 @@
         const isSoldOut = !!item.isSoldOut;
 
         return `
-          <div onclick="${isSoldOut ? '' : `addDishToTicket('${item.id}')`}" class="touch-btn ${isSoldOut ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] p-2 flex flex-col justify-between hover:border-amber-500 transition-all shadow-xs relative overflow-hidden group">
+          <div onclick="${isSoldOut ? '' : `addDishToTicket('${item.id}')`}" class="touch-btn ${isSoldOut ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] p-2.5 flex flex-col justify-between hover:border-amber-500 hover:shadow-md transition-all shadow-xs relative overflow-hidden group">
             
-            <div class="relative h-20 w-full rounded-lg overflow-hidden bg-stone-200 dark:bg-stone-800 mb-1.5">
+            <div class="relative h-24 w-full rounded-xl overflow-hidden bg-stone-200 dark:bg-stone-800 mb-2">
               <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy" />
               
               ${isSoldOut ? `
                 <div class="absolute inset-0 bg-black/75 flex items-center justify-center p-1 text-center">
-                  <span class="text-[9px] font-bold text-white uppercase bg-red-600 px-1.5 py-0.5 rounded">Sold Out</span>
+                  <span class="text-[10px] font-bold text-white uppercase bg-red-600 px-2 py-0.5 rounded-md">Habis</span>
                 </div>
               ` : `
-                <span class="absolute bottom-1 right-1 w-6 h-6 rounded-md bg-amber-500 text-[#0F172A] flex items-center justify-center font-bold shadow-sm">
-                  <span class="material-symbols-outlined text-[14px]">add</span>
+                <span class="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-lg bg-amber-500 text-[#0F172A] flex items-center justify-center font-bold shadow-sm group-hover:scale-110 transition-transform">
+                  <span class="material-symbols-outlined text-[16px]">add</span>
                 </span>
               `}
             </div>
 
             <div>
-              <h4 class="font-heading font-bold text-[11px] text-[#1C1917] dark:text-white line-clamp-1 leading-tight">
+              <h4 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white line-clamp-1 leading-snug">
                 ${item.name}
               </h4>
-              <div class="flex items-center justify-between mt-1">
-                <span class="font-heading font-extrabold text-[11px] text-amber-600 dark:text-amber-400 tabular-nums">
+              <div class="flex items-center justify-between mt-1.5">
+                <span class="font-heading font-extrabold text-xs text-amber-600 dark:text-amber-400 tabular-nums">
                   ${formatRupiah(item.price)}
                 </span>
-                ${item.spicyLevel > 0 ? `<span class="text-[9px]">🌶️${item.spicyLevel}</span>` : ''}
+                ${item.spicyLevel > 0 ? `<span class="text-[10px]">🌶️${item.spicyLevel}</span>` : ''}
               </div>
             </div>
 

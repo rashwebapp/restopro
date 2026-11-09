@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resto Pro Hub • Pusat Komando Operasional Restoran</title>
+  
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cream: "#FAF7F2",
+              saffron: "#D97706",
+              gold: "#F59E0B",
+              terracotta: "#C2410C",
+              emerald: "#059669",
+              darkBg: "#0F172A",
+              darkCard: "#1E293B",
+              darkBorder: "#334155"
+            }
+          },
+          fontFamily: {
+            sans: ["'Plus Jakarta Sans'", "sans-serif"],
+            heading: ["'Plus Jakarta Sans'", "sans-serif"],
+            serif: ["'Playfair Display'", "serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    .touch-btn {
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+  </style>
+</head>
+<body class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-800 dark:text-stone-100 min-h-screen flex flex-col antialiased transition-colors duration-200">
+
+  <!-- ========================================================================= -->
+  <!-- 1. TOP NAVBAR HEADER                                                      -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-[#1E293B]/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      
+      <!-- Logo & Brand Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 text-[#0F172A] flex items-center justify-center font-heading font-black text-lg shadow-sm">
+          RP
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-heading font-extrabold text-sm md:text-base text-stone-900 dark:text-white leading-tight">
+              Resto Pro <span class="text-amber-600 dark:text-amber-400">Hub</span>
+            </h1>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-300/40">
+              v2.0 Unified
+            </span>
+          </div>
+          <p class="text-[11px] text-stone-500 dark:text-stone-400">Pusat Akses 1-Pintu Operasional Restoran Anda</p>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2">
+        <!-- Dark Mode Toggle Button -->
+        <button onclick="ThemeManager.toggle()" class="touch-btn px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs" title="Beralih Tema">
+          <span class="material-symbols-outlined text-[18px] text-amber-500 theme-icon">dark_mode</span>
+          <span class="theme-label hidden sm:inline">Tema</span>
+        </button>
+
+        <!-- Super Admin Link -->
+        <a href="super_admin_saas.html" class="touch-btn px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-800 dark:hover:bg-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs" title="Masuk ke Portal Super Admin RASH SaaS">
+          <span class="material-symbols-outlined text-[16px] text-amber-400">shield_person</span>
+          <span class="hidden md:inline">Admin RASH</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 2. MAIN CONTENT WRAPPER                                                   -->
+  <!-- ========================================================================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 md:py-8 flex flex-col gap-6">
+
+    <!-- HERO RESTAURANT IDENTITY BANNER -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-stone-900 via-stone-800 to-amber-950 text-white p-6 md:p-8 shadow-xl border border-stone-800">
+      
+      <!-- Background Ambient Glow -->
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        
+        <!-- Left: Restaurant Details -->
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="tenantStatusBadge" class="text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="tenantStatusText">Akun Aktif</span>
+            </span>
+            <span id="tenantPlanBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              Paket Pro Enterprise
+            </span>
+            <span class="text-xs font-mono text-stone-400 flex items-center gap-1">
+              ID: <strong id="tenantIdDisplay" class="text-white">harapan-corner</strong>
+            </span>
+          </div>
+
+          <h2 id="restaurantTitle" class="font-heading font-black text-2xl md:text-3xl text-white tracking-tight mt-1">
+            Harapan Corner
+          </h2>
+
+          <div class="flex items-center gap-4 text-xs text-stone-300 flex-wrap">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-400">person</span>
+              <span id="tenantPicDisplay">Adib Ali (Pemilik)</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-400">location_on</span>
+              <span id="tenantCityDisplay">Kab. Bogor</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-400">table_restaurant</span>
+              <span id="tenantTablesDisplay">12 Meja Operasional</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Right: Expiry & Quick Share -->
+        <div class="flex flex-col sm:flex-row md:flex-col items-start md:items-end justify-between gap-3 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 shrink-0">
+          <div>
+            <p class="text-[11px] text-stone-400 uppercase tracking-wider font-semibold">Masa Berlaku Lisensi:</p>
+            <p id="tenantExpiryDisplay" class="font-heading font-extrabold text-sm md:text-base text-amber-400 mt-0.5">
+              s/d 23 November 2026
+            </p>
+            <p id="tenantDaysRemaining" class="text-[11px] text-stone-300">Sisa 14 Hari Masa Aktif</p>
+          </div>
+
+          <button onclick="copyRestoHubLink()" class="touch-btn px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-heading font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95" title="Salin Link Resto Hub ini untuk dibagikan ke staf / dibuka di tablet">
+            <span class="material-symbols-outlined text-[16px]">content_copy</span>
+            <span>Salin 1-Link Hub</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PIN QUICK-CARD BANNER (DEFAULT ACCESS) -->
+    <div class="bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-2xl">pin</span>
+        </div>
+        <div>
+          <h4 class="font-heading font-bold text-sm text-stone-900 dark:text-white">
+            PIN Akses Operasional Kasir & Owner
+          </h4>
+          <p class="text-xs text-stone-600 dark:text-stone-300">
+            Gunakan PIN berikut saat membuka layar Kasir POS atau Panel Owner:
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 bg-white dark:bg-[#1E293B] px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 shadow-2xs">
+          <span class="text-xs text-stone-500">PIN Kasir:</span>
+          <span id="displayCashierPin" class="font-mono font-black text-sm text-amber-600 dark:text-amber-400 tracking-wider">1234</span>
+        </div>
+        <div class="flex items-center gap-1.5 bg-white dark:bg-[#1E293B] px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 shadow-2xs">
+          <span class="text-xs text-stone-500">PIN Owner:</span>
+          <span id="displayOwnerPin" class="font-mono font-black text-sm text-indigo-600 dark:text-indigo-400 tracking-wider">1234</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 3. THE 4 OPERATIONAL LAUNCH CARDS                                         -->
+    <!-- ========================================================================= -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+
+      <!-- CARD 1: KASIR POS TABLET -->
+      <div class="bg-white dark:bg-[#1E293B] rounded-3xl border border-stone-200 dark:border-stone-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-amber-500/50 transition-all group">
+        <div>
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-3xl">point_of_sale</span>
+            </div>
+            <span class="text-[10px] font-heading font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+              Layar Tablet Kasir
+            </span>
+          </div>
+
+          <h3 class="font-heading font-black text-xl text-stone-900 dark:text-white mt-4 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+            1. Aplikasi Kasir POS
+          </h3>
+          <p class="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
+            Antarmuka 2-zona bersih untuk kasir resto. Catat pesanan meja makan (dine-in), input order online (GoFood/Grab/Shopee), terima pembayaran tunai / QRIS, dan cetak struk WhatsApp instan.
+          </p>
+
+          <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
+              <span>Login PIN Cepat (1234)</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">emergency_home</span>
+              <span>Pintu Darurat 9999</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-2">
+          <a id="btnLaunchPos" href="#" target="_blank" class="touch-btn w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-[#0F172A] font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]">
+            <span class="material-symbols-outlined text-[18px]">launch</span>
+            <span>Buka Aplikasi Kasir POS</span>
+          </a>
+
+          <a id="btnSimulateGuest" href="#" target="_blank" class="touch-btn w-full py-2 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+            <span class="material-symbols-outlined text-[16px] text-amber-500">phone_iphone</span>
+            <span>Simulasi HP Tamu (Scan QR Meja 01)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- CARD 2: MONITOR LAYAR DAPUR (KDS) -->
+      <div class="bg-white dark:bg-[#1E293B] rounded-3xl border border-stone-200 dark:border-stone-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-emerald-500/50 transition-all group">
+        <div>
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-3xl">soup_kitchen</span>
+            </div>
+            <span class="text-[10px] font-heading font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+              Kitchen Display (KDS)
+            </span>
+          </div>
+
+          <h3 class="font-heading font-black text-xl text-stone-900 dark:text-white mt-4 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+            2. Layar Monitor Dapur
+          </h3>
+          <p class="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
+            Monitor pesanan digital tanpa kertas (paperless) untuk chef dan kru dapur. Pesanan dari kasir atau tamu langsung muncul realtime dengan bunyi lonceng Web Audio otomatis.
+          </p>
+
+          <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-emerald-500">volume_up</span>
+              <span>Lonceng Suara Chime Otomatis</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-blue-500">timer</span>
+              <span>Timer Durasi Memasak</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-2">
+          <a id="btnLaunchKds" href="#" target="_blank" class="touch-btn w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]">
+            <span class="material-symbols-outlined text-[18px]">restaurant_menu</span>
+            <span>Buka Layar Monitor Dapur</span>
+          </a>
+
+          <p class="text-[11px] text-center text-stone-400">
+            Cocok dibuka di Smart TV atau tablet Android di area dapur.
+          </p>
+        </div>
+      </div>
+
+      <!-- CARD 3: LEMBARAN CETAK STAND QR MEJA -->
+      <div class="bg-white dark:bg-[#1E293B] rounded-3xl border border-stone-200 dark:border-stone-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-indigo-500/50 transition-all group">
+        <div>
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-3xl">qr_code_2</span>
+            </div>
+            <span class="text-[10px] font-heading font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300">
+              PDF Siap Cetak
+            </span>
+          </div>
+
+          <h3 class="font-heading font-black text-xl text-stone-900 dark:text-white mt-4 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            3. Cetak QR Stand Meja Resto
+          </h3>
+          <p class="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
+            Hasilkan lembaran stand QR Meja 01 s/d 12 siap cetak A4 atau akrilik meja. Tamu cukup arahkan kamera smartphone untuk melihat foto menu dan memesan mandiri tanpa antre.
+          </p>
+
+          <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-indigo-500">print</span>
+              <span>12 Barcode QR Otomatis</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-emerald-500">no_sim</span>
+              <span>Tanpa Download Aplikasi</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-2">
+          <a id="btnLaunchQrSheet" href="#" target="_blank" class="touch-btn w-full py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]">
+            <span class="material-symbols-outlined text-[18px]">print</span>
+            <span>Buka Lembaran Cetak QR (PDF)</span>
+          </a>
+
+          <p class="text-[11px] text-center text-stone-400">
+            Bisa langsung dicetak atau simpan sebagai file PDF.
+          </p>
+        </div>
+      </div>
+
+      <!-- CARD 4: PANEL OWNER RESTORAN -->
+      <div class="bg-white dark:bg-[#1E293B] rounded-3xl border border-stone-200 dark:border-stone-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-md hover:border-amber-600/50 transition-all group">
+        <div>
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-14 h-14 rounded-2xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-3xl">tune</span>
+            </div>
+            <span class="text-[10px] font-heading font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-stone-200">
+              Khusus Pemilik Resto
+            </span>
+          </div>
+
+          <h3 class="font-heading font-black text-xl text-stone-900 dark:text-white mt-4 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+            4. Kelola Menu & Resto (Owner)
+          </h3>
+          <p class="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
+            Portal kontrol khusus pemilik restoran. Tambah hidangan baru, ubah harga, tandai menu habis (sold out), kelola nomor WhatsApp kasir, dan pantau rekap omzet harian.
+          </p>
+
+          <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-indigo-500">lock</span>
+              <span>Proteksi PIN Owner (1234)</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">bar_chart</span>
+              <span>Rekap Penjualan</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-col gap-2">
+          <a id="btnLaunchOwner" href="#" target="_blank" class="touch-btn w-full py-3 px-4 rounded-2xl bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-100 dark:hover:bg-white dark:text-stone-950 font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]">
+            <span class="material-symbols-outlined text-[18px]">settings</span>
+            <span>Buka Panel Kelola Owner</span>
+          </a>
+
+          <p class="text-[11px] text-center text-stone-400">
+            Hanya dapat dibuka oleh pemilik / manajer restoran.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- 4. TABLET PWA INSTALL INSTRUCTION BOX                                    -->
+    <!-- ========================================================================= -->
+    <div class="rounded-3xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20 p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500 text-[#0F172A] flex items-center justify-center font-bold shrink-0 shadow-sm">
+          <span class="material-symbols-outlined text-2xl">install_mobile</span>
+        </div>
+        <div>
+          <h4 class="font-heading font-bold text-sm md:text-base text-stone-900 dark:text-white">
+            Pasang Resto Pro di Layar Utama Tablet (PWA Layar Penuh)
+          </h4>
+          <p class="text-xs text-stone-600 dark:text-stone-300 mt-0.5">
+            Di browser Chrome/Safari tablet Anda, ketuk menu <strong>(Titik Tiga)</strong> lalu pilih <strong>"Tambahkan ke Layar Utama" (Add to Home screen)</strong> agar kasir beroperasi fullscreen seperti aplikasi native tanpa bilah URL!
+          </p>
+        </div>
+      </div>
+
+      <a id="btnWhatsappSupport" href="#" target="_blank" class="touch-btn px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center gap-2 shrink-0 transition-colors shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">chat</span>
+        <span>Bantuan WhatsApp CS</span>
+      </a>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- 5. FOOTER & TOAST                                                         -->
+  <!-- ========================================================================= -->
+  <footer class="mt-auto py-6 border-t border-stone-200 dark:border-stone-800 text-center text-xs text-stone-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>© 2026 Resto Pro Multi-Tenant SaaS. Powered by <strong class="text-amber-600 dark:text-amber-400">RASH WebApp Builder</strong>.</p>
+      <div class="flex items-center gap-4">
+        <a href="index.html" class="hover:text-amber-600 transition-colors">Landing Page</a>
+        <span>•</span>
+        <a href="super_admin_saas.html" class="hover:text-amber-600 transition-colors">Super Admin Portal</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Shared Application Scripts -->
+  <script src="assets/js/resto-config.js?v=2.6.0"></script>
+  <script src="assets/js/resto-data.js?v=2.6.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
+
+  <!-- ========================================================================= -->
+  <!-- 6. RESTO HUB CONTROLLER                                                   -->
+  <!-- ========================================================================= -->
+  <script>
+    let currentTenant = null;
+
+    function getBaseUrl() {
+      const loc = window.location.href;
+      const idx = loc.lastIndexOf("/");
+      return idx !== -1 ? loc.substring(0, idx + 1) : "";
+    }
+
+    function initRestoHub() {
+      // Baca tenant ID dari URL atau session
+      const tenantId = RestoSync.getTenantId();
+      currentTenant = RestoSync.getTenantInfo(tenantId);
+
+      // Render informasi restoran
+      renderRestaurantInfo(currentTenant);
+
+      // Render link tombol operasional
+      renderOperationalLinks(currentTenant);
+    }
+
+    function renderRestaurantInfo(t) {
+      const name = t.name || "Resto Pro POS";
+      document.title = `${name} • Resto Pro Hub`;
+      document.getElementById("restaurantTitle").textContent = name;
+      document.getElementById("tenantIdDisplay").textContent = t.id;
+      document.getElementById("tenantPicDisplay").textContent = `${t.pic || "Pemilik Resto"}`;
+      document.getElementById("tenantCityDisplay").textContent = t.city || "Indonesia";
+      document.getElementById("tenantTablesDisplay").textContent = `${t.tablesCount || 12} Meja Operasional`;
+
+      // PIN
+      const cPin = t.cashierPin || "1234";
+      const oPin = t.ownerPin || cPin;
+      document.getElementById("displayCashierPin").textContent = cPin;
+      document.getElementById("displayOwnerPin").textContent = oPin;
+
+      // Status & Plan
+      const statusEl = document.getElementById("tenantStatusBadge");
+      const statusText = document.getElementById("tenantStatusText");
+      const planEl = document.getElementById("tenantPlanBadge");
+
+      if (t.status === "trial") {
+        statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
+        statusText.textContent = "Trial 14 Hari";
+      } else {
+        statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
+        statusText.textContent = "Akun Aktif";
+      }
+
+      planEl.textContent = t.planName || (t.plan === "trial" ? "Trial 14 Hari Gratis" : (t.plan === "basic" ? "Paket Basic" : "Paket Pro"));
+
+      // Expiry calculation
+      if (t.expiresAt) {
+        try {
+          const expDate = new Date(t.expiresAt);
+          const diffMs = expDate.getTime() - Date.now();
+          const daysLeft = Math.ceil(diffMs / 86400000);
+          
+          const options = { day: 'numeric', month: 'long', year: 'numeric' };
+          document.getElementById("tenantExpiryDisplay").textContent = `s/d ${expDate.toLocaleDateString("id-ID", options)}`;
+
+          if (daysLeft > 0) {
+            document.getElementById("tenantDaysRemaining").textContent = `Sisa ${daysLeft} Hari Masa Aktif`;
+          } else {
+            document.getElementById("tenantDaysRemaining").textContent = `Masa aktif telah berakhir`;
+            document.getElementById("tenantDaysRemaining").className = "text-[11px] text-red-400 font-bold";
+          }
+        } catch (e) {
+          document.getElementById("tenantExpiryDisplay").textContent = "Aktif Selamanya";
+          document.getElementById("tenantDaysRemaining").textContent = "Lisensi Terverifikasi";
+        }
+      } else {
+        document.getElementById("tenantExpiryDisplay").textContent = "Aktif Selamanya";
+        document.getElementById("tenantDaysRemaining").textContent = "Lisensi Terverifikasi";
+      }
+
+      // WhatsApp CS Button Link
+      const waCs = document.getElementById("btnWhatsappSupport");
+      const csNumber = "6282286452105";
+      const csMsg = encodeURIComponent(`Halo Tim Support RASH Resto Pro, saya pemilik dari "${t.name}" (Tenant ID: ${t.id}). Saya membutuhkan bantuan teknis operasional.`);
+      waCs.href = `https://wa.me/${csNumber}?text=${csMsg}`;
+    }
+
+    function renderOperationalLinks(t) {
+      const base = getBaseUrl();
+      const slugParam = (t.id && t.id !== "default") ? `?tenant=${t.id}` : "";
+
+      // 1. Kasir POS
+      document.getElementById("btnLaunchPos").href = `${base}cashier_pos_register.html${slugParam}`;
+
+      // Simulasi Tamu Meja 01
+      const sampleParam = (t.id && t.id !== "default") ? `?tenant=${t.id}&table=T01` : "?table=T01";
+      document.getElementById("btnSimulateGuest").href = `${base}customer_qr_self_order.html${sampleParam}`;
+
+      // 2. KDS Dapur
+      const kdsParam = (t.id && t.id !== "default") ? `?tenant=${t.id}&station=kitchen` : "?station=kitchen";
+      document.getElementById("btnLaunchKds").href = `${base}kitchen_display_kds.html${kdsParam}`;
+
+      // 3. QR Sheet PDF
+      document.getElementById("btnLaunchQrSheet").href = `${base}table_qr_print_sheet.html${slugParam}`;
+
+      // 4. Owner Portal
+      document.getElementById("btnLaunchOwner").href = `${base}owner_settings_saas.html${slugParam}`;
+    }
+
+    function copyRestoHubLink() {
+      const url = window.location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast("🎉 Link Resto Hub berhasil disalin ke clipboard!", "success");
+        }).catch(() => {
+          prompt("Salin link Resto Hub:", url);
+        });
+      } else {
+        prompt("Salin link Resto Hub:", url);
+      }
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      toast.className = `p-3.5 rounded-2xl text-xs font-semibold shadow-xl border flex items-center gap-2 pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 ${
+        type === "success" 
+          ? "bg-emerald-600 text-white border-emerald-500 shadow-emerald-900/30" 
+          : "bg-stone-900 text-white border-stone-700"
+      }`;
+
+      toast.innerHTML = `
+        <span class="material-symbols-outlined text-[18px]">info</span>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      });
+
+      setTimeout(() => {
+        toast.classList.add("translate-y-[-10px]", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Initialize on DOMContentLoaded
+    document.addEventListener("DOMContentLoaded", () => {
+      initRestoHub();
+    });
+  </script>
+</body>
+</html>

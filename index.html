@@ -156,13 +156,25 @@
         <span>4. Owner Dashboard ⚙️</span>
       </button>
 
+      <!-- Mode 5: 1-Link Unified Resto Hub -->
+      <button onclick="switchScreenMode('hub')" id="btnViewHub" class="touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-bold flex items-center gap-1.5 transition-all text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white">
+        <span class="material-symbols-outlined text-[16px] text-amber-500">hub</span>
+        <span>5. Resto Hub 🌐</span>
+      </button>
+
     </div>
 
     <!-- Right: Direct Launch & Theme Toggle -->
     <div class="flex items-center gap-2">
       
+      <!-- Self-Serve Trial 14 Hari Button -->
+      <button onclick="openSelfServeModal()" class="touch-btn px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white text-xs font-heading font-extrabold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95 transition-all" title="Daftarkan Restoran Anda & Coba Gratis 14 Hari Tanpa Kartu Kredit">
+        <span class="material-symbols-outlined text-[16px]">rocket_launch</span>
+        <span>Coba Gratis 14 Hari</span>
+      </button>
+
       <!-- Super Admin SaaS Portal Link -->
-      <a href="super_admin_saas.html" target="_blank" class="touch-btn hidden lg:flex px-3 py-1.5 rounded-xl bg-indigo-600/10 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold items-center gap-1.5 transition-all" title="Buka Portal Super Admin Multi-Resto SaaS (Kelola Klien & Kasir)">
+      <a href="super_admin_saas.html" target="_blank" class="touch-btn hidden xl:flex px-3 py-1.5 rounded-xl bg-indigo-600/10 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white border border-indigo-500/30 text-xs font-bold items-center gap-1.5 transition-all" title="Buka Portal Super Admin Multi-Resto SaaS (Kelola Klien & Kasir)">
         <span class="material-symbols-outlined text-[16px]">corporate_fare</span>
         <span>Super Admin SaaS</span>
       </a>
@@ -347,6 +359,28 @@
 
     </div>
 
+    <!-- 5. 1-Link Resto Hub Container -->
+    <div id="hubContainer" class="hidden w-full max-w-7xl">
+      
+      <div class="mb-2 flex items-center justify-between text-xs text-[#78716C] dark:text-[#94A3B8]">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-amber-500">hub</span>
+          <span class="font-semibold text-[#1C1917] dark:text-white">Simulasi 1-Link Unified Resto Hub (Pusat Akses Tunggal Klien Restoran)</span>
+        </div>
+        <span>Klien cukup menerima 1 link ini untuk mengakses Kasir POS, Monitor Dapur KDS, Cetak QR, dan Panel Owner!</span>
+      </div>
+
+      <div class="desktop-frame-wrapper bg-[#FAF7F2] dark:bg-[#0F172A]">
+        <iframe 
+          id="hubIframe" 
+          src="resto_hub.html" 
+          class="w-full h-full border-0"
+          title="Resto Hub Preview"
+        ></iframe>
+      </div>
+
+    </div>
+
   </main>
 
   <!-- ============================================================
@@ -376,6 +410,9 @@
         </a>
         <a href="owner_settings_saas.html" target="_blank" class="hover:text-amber-600 transition-colors flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-semibold">
           <span class="material-symbols-outlined text-[14px]">open_in_new</span> Layar 4: Owner SaaS ⚙️
+        </a>
+        <a href="resto_hub.html" target="_blank" class="hover:text-amber-600 transition-colors flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
+          <span class="material-symbols-outlined text-[14px]">hub</span> Layar 5: Resto Hub 🌐
         </a>
         <a href="table_qr_print_sheet.html" target="_blank" class="hover:text-amber-600 transition-colors flex items-center gap-1 text-purple-600 dark:text-purple-400 font-semibold">
           <span class="material-symbols-outlined text-[14px]">qr_code_2</span> Cetak QR Meja 🖨️
@@ -502,10 +539,90 @@
     </div>
   </div>
 
+  <!-- ============================================================
+       MODAL: REGISTRASI MANDIRI TRIAL 14 HARI (SELF-SERVE ONBOARDING)
+       ============================================================ -->
+  <div id="selfServeModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-lg rounded-3xl border border-emerald-500/30 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-stone-200 dark:border-stone-800 bg-gradient-to-r from-emerald-600/10 via-amber-500/10 to-transparent flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/30">
+            <span class="material-symbols-outlined text-[24px]">rocket_launch</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-base text-stone-900 dark:text-white">Coba Resto Pro Gratis 14 Hari</h3>
+            <p class="text-xs text-stone-500 dark:text-stone-400">Akun langsung aktif detik ini tanpa kartu kredit</p>
+          </div>
+        </div>
+        <button onclick="closeSelfServeModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-white flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body Form -->
+      <form id="selfServeForm" onsubmit="handleSelfServeRegister(event)" class="p-5 flex flex-col gap-4 overflow-y-auto">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+            Nama Restoran / Kafe / Warung <span class="text-red-500">*</span>
+          </label>
+          <input 
+            id="selfServeName" 
+            type="text" 
+            required 
+            placeholder="Contoh: Kopi Kenangan Senja" 
+            class="w-full h-11 px-3.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-sm text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+            Nama Pemilik / Manajer (PIC) <span class="text-red-500">*</span>
+          </label>
+          <input 
+            id="selfServePic" 
+            type="text" 
+            required 
+            placeholder="Contoh: Bpk. Hendra" 
+            class="w-full h-11 px-3.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-sm text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 dark:text-stone-300 mb-1">
+            Nomor WhatsApp Pemilik (Untuk Kirim Link Akses) <span class="text-red-500">*</span>
+          </label>
+          <input 
+            id="selfServePhone" 
+            type="tel" 
+            required 
+            placeholder="Contoh: 081234567890" 
+            class="w-full h-11 px-3.5 rounded-xl bg-stone-50 dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-sm text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+          />
+          <p class="text-[10px] text-stone-500 mt-1">Kami akan mengarahkan Anda langsung ke 1-Link Resto Hub untuk mulai berjualan.</p>
+        </div>
+
+        <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
+          <span class="material-symbols-outlined text-[18px] text-emerald-500 shrink-0 mt-0.5">verified_user</span>
+          <div>
+            <span class="font-bold">Termasuk dalam Paket Uji Coba:</span>
+            <p class="text-[11px] mt-0.5 text-stone-600 dark:text-stone-400">Kasir POS Tablet • Monitor Dapur (KDS) • 12 Barcode Meja QR Siap Cetak • Panel Owner & Omzet • PIN Default 1234.</p>
+          </div>
+        </div>
+
+        <button type="submit" class="touch-btn mt-2 w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all">
+          <span class="material-symbols-outlined text-[20px]">flash_on</span>
+          <span>🚀 Buka Akun Resto & Masuk Hub Sekarang</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Theme Manager, Data & Switcher Script -->
-  <script src="assets/js/resto-data.js"></script>
-  <script src="assets/js/resto-config.js"></script>
-  <script src="assets/js/resto-sync.js"></script>
+  <script src="assets/js/resto-data.js?v=2.6.0"></script>
+  <script src="assets/js/resto-config.js?v=2.6.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
   <script>
     let activeScreen = "mobile";
 
@@ -579,18 +696,20 @@
       }
     }
 
-    // Ganti Tampilan (Mobile vs Desktop vs KDS vs Owner)
+    // Ganti Tampilan (Mobile vs Desktop vs KDS vs Owner vs Resto Hub)
     function switchScreenMode(mode) {
       activeScreen = mode;
       const btnMobile = document.getElementById("btnViewMobile");
       const btnDesktop = document.getElementById("btnViewDesktop");
       const btnKds = document.getElementById("btnViewKds");
       const btnOwner = document.getElementById("btnViewOwner");
+      const btnHub = document.getElementById("btnViewHub");
       
       const mobContainer = document.getElementById("mobileContainer");
       const deskContainer = document.getElementById("desktopContainer");
       const kdsContainer = document.getElementById("kdsContainer");
       const ownerContainer = document.getElementById("ownerContainer");
+      const hubContainer = document.getElementById("hubContainer");
       const btnOpenTab = document.getElementById("btnOpenNewTab");
 
       const inactiveClass = "touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-bold flex items-center gap-1.5 transition-all text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white";
@@ -600,11 +719,13 @@
       btnDesktop.className = inactiveClass;
       btnKds.className = inactiveClass;
       btnOwner.className = inactiveClass;
+      if (btnHub) btnHub.className = inactiveClass;
 
       mobContainer.classList.add("hidden");
       deskContainer.classList.add("hidden");
       kdsContainer.classList.add("hidden");
       ownerContainer.classList.add("hidden");
+      if (hubContainer) hubContainer.classList.add("hidden");
 
       if (mode === "mobile") {
         btnMobile.className = activeClass;
@@ -626,6 +747,11 @@
         ownerContainer.classList.remove("hidden");
         btnOpenTab.href = "owner_settings_saas.html";
         btnOpenTab.querySelector("span:last-child").textContent = "Buka Owner SaaS";
+      } else if (mode === "hub") {
+        if (btnHub) btnHub.className = activeClass;
+        if (hubContainer) hubContainer.classList.remove("hidden");
+        btnOpenTab.href = "resto_hub.html";
+        btnOpenTab.querySelector("span:last-child").textContent = "Buka Resto Hub";
       }
     }
 
@@ -638,8 +764,9 @@
       const dIframe = document.getElementById("desktopIframe");
       const kIframe = document.getElementById("kdsIframe");
       const oIframe = document.getElementById("ownerIframe");
+      const hIframe = document.getElementById("hubIframe");
 
-      [mIframe, dIframe, kIframe, oIframe].forEach(iframe => {
+      [mIframe, dIframe, kIframe, oIframe, hIframe].forEach(iframe => {
         try {
           if (iframe && iframe.contentWindow && iframe.contentWindow.ThemeManager) {
             iframe.contentWindow.ThemeManager.applyTheme(newTheme);
@@ -648,6 +775,64 @@
           console.warn("Cross-frame theme sync:", e);
         }
       });
+    }
+
+    // ============================================================
+    // MODAL REGISTRASI MANDIRI TRIAL 14 HARI (SELF-SERVE SAAS)
+    // ============================================================
+    function openSelfServeModal() {
+      const modal = document.getElementById("selfServeModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.getElementById("selfServeName").focus();
+      }
+    }
+
+    function closeSelfServeModal() {
+      const modal = document.getElementById("selfServeModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function handleSelfServeRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById("selfServeName").value.trim();
+      const pic = document.getElementById("selfServePic").value.trim();
+      const phone = document.getElementById("selfServePhone").value.trim();
+
+      if (!name || !pic || !phone) {
+        alert("Semua kolom wajib diisi!");
+        return;
+      }
+
+      const slug = name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || ("resto-" + Date.now().toString().slice(-4));
+
+      try {
+        let newTenant = null;
+        if (typeof RestoSync !== "undefined" && typeof RestoSync.registerNewTenant === "function") {
+          newTenant = RestoSync.registerNewTenant({
+            id: slug,
+            name: name,
+            pic: pic,
+            phone: phone,
+            cashierPin: "1234",
+            ownerPin: "1234",
+            city: "Indonesia",
+            plan: "trial",
+            planName: "Trial (14 Hari Gratis)",
+            tablesCount: 12
+          });
+        }
+
+        closeSelfServeModal();
+        alert(`🎉 Selamat ${pic}!\nAkun "${name}" telah berhasil dibuat untuk 14 Hari Uji Coba Gratis.\n\nAnda akan dialihkan ke Resto Hub Anda sekarang.`);
+        window.location.href = `resto_hub.html?tenant=${slug}`;
+      } catch (err) {
+        alert("Gagal mendaftarkan tenant: " + err.message);
+      }
     }
 
     // Tangkap pesan perpindahan tema dari iframe jika ada

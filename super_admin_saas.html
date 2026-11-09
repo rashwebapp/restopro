@@ -491,6 +491,21 @@
 
       <div class="space-y-3.5 text-xs">
         
+        <!-- 1-Link Induk Resto Hub (Rekomendasi Utama) -->
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/40">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-amber-300 flex items-center gap-1.5 text-xs">
+              <span class="material-symbols-outlined text-base text-amber-400">hub</span>
+              <span>⭐ 1-Link Resto Hub (Pusat Akses Klien)</span>
+            </span>
+            <button onclick="copyToClipboard(currentSuccessLinks.hub, 'Link Resto Hub Disalin!')" class="text-[11px] font-bold text-amber-300 hover:text-white bg-amber-500/30 hover:bg-amber-500/50 px-2.5 py-0.5 rounded-lg border border-amber-500/40 transition-colors">
+              Salin 1-Link
+            </button>
+          </div>
+          <p id="successHubLink" class="font-mono text-[11px] text-amber-200 truncate"></p>
+          <p class="text-[10px] text-slate-400 mt-1">Cukup bagikan tautan ini ke pemilik resto! Semua menu (Kasir POS, Dapur KDS, Cetak QR, Panel Owner) terpusat di sini.</p>
+        </div>
+
         <!-- Link Kasir POS -->
         <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
           <div class="flex items-center justify-between mb-1">
@@ -586,9 +601,9 @@
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Shared Application Scripts -->
-  <script src="assets/js/resto-config.js?v=2.5.6"></script>
-  <script src="assets/js/resto-data.js?v=2.5.6"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.6"></script>
+  <script src="assets/js/resto-config.js?v=2.6.0"></script>
+  <script src="assets/js/resto-data.js?v=2.6.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
 
   <!-- ========================================================================= -->
   <!-- 6. SUPER ADMIN APPLICATION ENGINE                                         -->
@@ -841,6 +856,7 @@
           statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">🟢 Aktif (${diffDays} Hari)</span>`;
         }
 
+        const hubUrl = `${baseUrl}resto_hub.html?tenant=${t.id}`;
         const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${t.id}`;
         const emergencyPosUrl = `${baseUrl}cashier_pos_register.html?tenant=${t.id}&emergency_bypass=1`;
         const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${t.id}&station=kitchen`;
@@ -849,19 +865,21 @@
         const ownerUrl = `${baseUrl}owner_settings_saas.html?tenant=${t.id}`;
         const clientPin = t.cashierPin || "1234";
 
-        // Format Pesan WhatsApp Khusus Pemilik (Owner)
+        // Format Pesan WhatsApp Khusus Pemilik (Owner) - Mengirim 1-Link Resto Hub
         const waMsgOwner = encodeURIComponent(
           `Halo ${t.pic || 'Bpk/Ibu'} (${t.name}),\n\n` +
           `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF dan siap digunakan:\n\n` +
-          `📱 *LINK OPERASIONAL RESTORAN ANDA:*\n` +
-          `1. Kasir POS Tablet: ${posUrl}\n` +
-          `2. Display Dapur KDS: ${kdsUrl}\n` +
-          `3. Lembaran Cetak QR Meja: ${qrSheetUrl}\n` +
-          `4. Contoh Menu Meja 01: ${guestSampleUrl}\n` +
-          `5. Kelola Menu & Resto (Owner): ${ownerUrl} (PIN Owner: ${clientPin})\n\n` +
+          `🌐 *1-LINK PUSAT RESTO HUB ANDA:*\n` +
+          `👉 ${hubUrl}\n\n` +
+          `🔑 *PIN LOGIN KASIR & OWNER:* ${clientPin}\n\n` +
+          `Di dalam 1-Link Hub di atas, Anda dan staf dapat langsung mengakses:\n` +
+          `1. 💻 Layar Kasir POS Tablet\n` +
+          `2. 🍳 Layar Monitor Dapur (KDS)\n` +
+          `3. 🖨️ Lembaran Cetak QR Meja (PDF)\n` +
+          `4. ⚙️ Panel Kelola Menu, Harga & Omzet (Owner)\n\n` +
           `Paket: ${t.planName}\n` +
-          `Masa Aktif Hingga: ${new Date(t.expiresAt).toLocaleDateString('id-ID')}\n\n` +
-          `Buka link Kasir di tablet/laptop dan pilih "Add to Home Screen". Selamat berjualan! 🚀`
+          `Masa Aktif: s/d ${new Date(t.expiresAt).toLocaleDateString('id-ID')}\n\n` +
+          `Cukup buka link Hub di atas di browser tablet/laptop Anda. Selamat berjualan! 🚀`
         );
         const waOwnerClean = (t.phone || '').replace(/[^0-9]/g, '');
         const waOwnerFinal = waOwnerClean.startsWith('0') ? '62' + waOwnerClean.substring(1) : waOwnerClean;
@@ -941,6 +959,12 @@
 
             <!-- Action Buttons -->
             <div class="pt-3 border-t border-slate-800/80 space-y-2">
+              <!-- 1-Link Resto Hub Direct Button -->
+              <a href="${hubUrl}" target="_blank" class="touch-btn w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 hover:to-amber-600/30 text-amber-300 border border-amber-500/40 text-center font-heading font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-xs" title="Buka 1-Link Resto Hub Klien">
+                <span class="material-symbols-outlined text-base text-amber-400">hub</span>
+                <span>⭐ Buka 1-Link Resto Hub</span>
+              </a>
+
               <div class="grid grid-cols-2 gap-2">
                 <a href="${waOwnerLink}" target="_blank" class="touch-btn py-2 px-2.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-center font-bold text-xs flex items-center justify-center gap-1" title="Kirim Akun ke Pemilik">
                   <span class="material-symbols-outlined text-base">chat</span>
@@ -1097,6 +1121,7 @@
 
     function showTenantSuccessModal(tenant) {
       const baseUrl = getBaseUrl();
+      const hubUrl = `${baseUrl}resto_hub.html?tenant=${tenant.id}`;
       const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${tenant.id}`;
       const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${tenant.id}&station=kitchen`;
       const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${tenant.id}`;
@@ -1105,6 +1130,7 @@
       const clientPin = tenant.cashierPin || "1234";
 
       currentSuccessLinks = {
+        hub: hubUrl,
         pos: posUrl,
         kds: kdsUrl,
         qrSheet: qrSheetUrl,
@@ -1115,6 +1141,8 @@
       document.getElementById("successModalTitle").textContent = `🎉 Akun "${tenant.name}" Berhasil Terbit!`;
       document.getElementById("successModalSub").textContent = `Tenant ID: ${tenant.id} • PIN Kasir & Owner: ${clientPin}`;
 
+      const hubLinkEl = document.getElementById("successHubLink");
+      if (hubLinkEl) hubLinkEl.textContent = hubUrl;
       document.getElementById("successPosLink").textContent = `${posUrl} (PIN: ${clientPin})`;
       document.getElementById("successKdsLink").textContent = kdsUrl;
       document.getElementById("successQrSheetLink").textContent = qrSheetUrl;
@@ -1124,19 +1152,21 @@
       // Link Cetak QR Meja
       document.getElementById("btnOpenQrSheet").href = qrSheetUrl;
 
-      // Format Pesan WhatsApp Pemilik (Owner)
+      // Format Pesan WhatsApp Pemilik (Owner) - Mengirim 1-Link Hub Sederhana & Lengkap
       const waMsgOwner = encodeURIComponent(
         `Halo ${tenant.pic || 'Bpk/Ibu'} (${tenant.name}),\n\n` +
         `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF dan siap digunakan:\n\n` +
-        `📱 *LINK OPERASIONAL RESTORAN:*\n` +
-        `1. Kasir POS Tablet: ${posUrl}\n` +
-        `2. Display Dapur KDS: ${kdsUrl}\n` +
-        `3. Lembaran Cetak QR Meja (PDF): ${qrSheetUrl}\n` +
-        `4. Contoh Pemesanan Meja 01: ${sampleGuest}\n` +
-        `5. Kelola Menu & Resto (Owner): ${ownerUrl} (PIN: ${clientPin})\n\n` +
+        `🌐 *1-LINK PUSAT RESTO HUB ANDA:*\n` +
+        `👉 ${hubUrl}\n\n` +
+        `🔑 *PIN LOGIN KASIR & OWNER:* ${clientPin}\n\n` +
+        `Di dalam 1-Link Hub di atas, Anda dan tim dapat langsung mengakses:\n` +
+        `1. 💻 Layar Kasir POS Tablet\n` +
+        `2. 🍳 Layar Monitor Dapur (KDS)\n` +
+        `3. 🖨️ Lembaran Cetak QR Meja (PDF)\n` +
+        `4. ⚙️ Panel Kelola Menu & Laporan (Owner)\n\n` +
         `Paket: ${tenant.planName}\n` +
         `Masa Berlaku: s/d ${new Date(tenant.expiresAt).toLocaleDateString('id-ID')}\n\n` +
-        `Cukup buka link Kasir di tablet kasir Anda dan pilih "Add to Home Screen". Selamat berjualan! 🚀`
+        `Cukup buka link Hub di atas di browser tablet/laptop Anda. Selamat berjualan! 🚀`
       );
       const cleanPhone = (tenant.phone || '').replace(/[^0-9]/g, '');
       const finalPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.substring(1) : cleanPhone;
