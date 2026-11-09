@@ -1251,7 +1251,7 @@ const RestoSync = {
       tableId: trx.tableId || "T01",
       customer: trx.customer || "Tamu Resto",
       memberPhone: trx.memberPhone || "",
-      cashier: trx.cashier || "Siti Aminah",
+      cashier: trx.cashier || (this.getTenantInfo() && this.getTenantInfo().pic ? this.getTenantInfo().pic : "Kasir Utama"),
       shift: trx.shift || "Shift 1 (Pagi)",
       paymentMethod: trx.paymentMethod || "cash",
       channel: trx.channel || (['gofood','grabfood','shopeefood'].includes((trx.paymentMethod || '').toLowerCase()) ? trx.paymentMethod.toLowerCase() : 'dine_in'),
@@ -2280,11 +2280,14 @@ const RestoSync = {
     const itemsText = (transaction.items || []).map(i => `• ${i.qty}x ${i.name} (@ Rp ${(i.price || 0).toLocaleString('id-ID')})`).join("\n");
     const billNumber = transaction.billNo || transaction.id || 'BILL';
     const dateFormatted = transaction.dateStr ? `${transaction.dateStr} ${transaction.timeStr || ''}` : new Date(transaction.timestamp || Date.now()).toLocaleString('id-ID');
+    const tenantInfo = this.getTenantInfo();
+    const restoName = (tenantInfo && tenantInfo.name) ? tenantInfo.name.toUpperCase() : "RESTO PRO";
 
-    return `✨ *RESTO PRO - STRUK PEMBAYARAN RESMI* ✨\n` +
+    return `✨ *${restoName} - STRUK PEMBAYARAN RESMI* ✨\n` +
       `No. Struk : *${billNumber}*\n` +
       `Tanggal   : ${dateFormatted}\n` +
       `Meja      : ${transaction.table || 'Meja'}\n` +
+      `Kasir     : ${transaction.cashier || (tenantInfo ? tenantInfo.pic : 'Kasir')}\n` +
       `Tamu      : ${transaction.customer || 'Pelanggan Terhormat'}\n` +
       `------------------------------------------\n` +
       `*RINCIAN MENU:*\n${itemsText}\n` +
@@ -2295,7 +2298,7 @@ const RestoSync = {
       `*TOTAL    : Rp ${(transaction.grandTotal || 0).toLocaleString('id-ID')}*\n` +
       `Metode    : ${(transaction.paymentMethod || 'Tunai').toUpperCase()}\n` +
       `------------------------------------------\n` +
-      `Terima kasih telah bersantap di Resto Pro! 🙏\nSemoga berkah & ditunggu kedatangannya kembali!`;
+      `Terima kasih telah bersantap di ${tenantInfo ? tenantInfo.name : 'Resto Pro'}! 🙏\nSemoga berkah & ditunggu kedatangannya kembali!`;
   },
 
   sendWhatsAppReceipt(transaction, overridePhone = null) {
