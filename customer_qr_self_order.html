@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Resto Pro • QR Self-Order (Meja 05)</title>
+  
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D97706">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
+  
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN with Custom Color Extension -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#F59E0B',
+              saffron: '#D97706',
+              terracotta: '#C2410C',
+              dark: '#0F172A',
+              slate: '#1E293B',
+              emerald: '#059669',
+              mint: '#10B981'
+            }
+          },
+          fontFamily: {
+            heading: ['Plus Jakarta Sans', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Resto Pro Shared Design Styles -->
+  <link rel="stylesheet" href="assets/css/resto-theme.css">
+</head>
+<body class="bg-[#FAF7F2] dark:bg-[#0F172A] text-[#1C1917] dark:text-[#F8FAFC] min-h-screen flex flex-col font-body antialiased pb-28 select-none transition-colors duration-200">
+
+  <!-- ============================================================
+       TOP FIXED HEADER
+       ============================================================ -->
+  <header class="fixed top-0 left-0 right-0 z-40 bg-[#FAF7F2]/95 dark:bg-[#0F172A]/95 backdrop-blur-md border-b border-[#E7DFD5] dark:border-[#334155]/60 transition-colors">
+    <div class="max-w-md mx-auto px-4 h-16 flex items-center justify-between gap-2">
+      
+      <!-- Brand & Table Indicator -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D97706] to-[#C2410C] dark:from-[#F59E0B] dark:to-[#D97706] flex items-center justify-center text-white shadow-md shadow-amber-500/20 shrink-0">
+          <span class="material-symbols-outlined text-[22px]">restaurant</span>
+        </div>
+        <div class="flex flex-col min-w-0">
+          <div class="flex items-center gap-1.5">
+            <h1 class="font-heading font-bold text-[16px] leading-tight text-[#1C1917] dark:text-white truncate">Resto Pro</h1>
+            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">FUSION</span>
+          </div>
+          <div class="flex items-center gap-1 mt-0.5 cursor-pointer touch-btn group" onclick="openTableSwitchModal()" title="Klik untuk ganti nomor meja">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span id="headerTableIndicator" class="text-[12px] font-semibold text-emerald-700 dark:text-emerald-400 font-heading group-hover:underline">
+              Meja 05 • Dine-in (Indoor AC)
+            </span>
+            <span class="material-symbols-outlined text-[14px] text-stone-400 group-hover:text-emerald-500">arrow_drop_down</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Action Controls -->
+      <div class="flex items-center gap-1.5 shrink-0">
+        <!-- Table Reservation Button -->
+        <button onclick="openCustomerReservationModal()" class="touch-btn w-9 h-9 rounded-xl bg-white dark:bg-[#1E293B] border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:scale-105 transition-all shadow-xs" title="Booking / Reservasi Meja">
+          <span class="material-symbols-outlined text-[20px]">event_seat</span>
+        </button>
+
+        <!-- Call Waiter Button -->
+        <button onclick="callWaiter()" class="touch-btn w-9 h-9 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] flex items-center justify-center text-[#78716C] dark:text-[#94A3B8] hover:text-amber-600 transition-colors" title="Panggil Pelayan">
+          <span class="material-symbols-outlined text-[20px]">room_service</span>
+        </button>
+
+        <!-- Dark/Light Mode Toggle -->
+        <button onclick="ThemeManager.toggle()" class="theme-toggle-btn touch-btn w-9 h-9 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] flex items-center justify-center text-amber-600 dark:text-amber-400 hover:scale-105 transition-all shadow-sm" title="Ubah Tema">
+          <span class="material-symbols-outlined text-[20px] theme-icon">dark_mode</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAIN CONTENT CONTAINER
+       ============================================================ -->
+  <main class="max-w-md mx-auto w-full pt-20 px-4 flex-1 flex flex-col">
+
+    <!-- Welcome & Heritage Hero Banner -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-900 via-amber-800 to-stone-900 text-white p-4 mb-4 shadow-lg">
+      <div class="absolute -right-6 -bottom-8 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="relative z-10">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-semibold tracking-wider uppercase text-amber-300 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Cita Rasa Tiga Negeri
+          </span>
+          <span class="text-[11px] bg-white/15 px-2 py-0.5 rounded-full backdrop-blur-sm text-stone-200">
+            Halal Certified 100%
+          </span>
+        </div>
+        <h2 class="font-heading font-extrabold text-lg mt-1 text-white">
+          Arabian, Malaysian & Thai Fusion
+        </h2>
+        <p class="text-[12px] text-amber-100/85 mt-1 leading-snug">
+          Pesan langsung dari meja Anda! Makanan dimasak segar dan diantar langsung ke <strong id="heroTableIndicator" class="text-white underline">Meja 05</strong>.
+        </p>
+      </div>
+    </div>
+
+    <!-- Live Search Bar -->
+    <div class="relative mb-3.5">
+      <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#78716C] dark:text-[#94A3B8] text-[20px]">search</span>
+      <input 
+        id="menuSearchInput" 
+        type="text" 
+        oninput="handleSearch(this.value)"
+        placeholder="Cari mandhi, tomyum, shawarma, teh tarik..." 
+        class="w-full h-11 pl-11 pr-9 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-sm text-[#1C1917] dark:text-white placeholder-[#78716C]/70 dark:placeholder-[#94A3B8]/60 focus:outline-none focus:ring-2 focus:ring-amber-500/50 shadow-sm transition-all"
+      />
+      <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+        <span class="material-symbols-outlined text-[18px]">cancel</span>
+      </button>
+    </div>
+
+    <!-- Category Pills (Horizontal Scrollable) -->
+    <div class="relative -mx-4 px-4 mb-4 overflow-x-auto no-scrollbar flex items-center gap-2 py-1">
+      <button onclick="filterCategory('all')" data-cat="all" class="cat-pill active touch-btn px-4 py-2 rounded-full font-heading text-[13px] font-semibold whitespace-nowrap transition-all shadow-sm flex items-center gap-1.5 bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A]">
+        <span>All Menu</span>
+        <span class="text-[11px] opacity-80 px-1.5 py-0.2 rounded-full bg-black/15">13</span>
+      </button>
+
+      <button onclick="filterCategory('arabian')" data-cat="arabian" class="cat-pill touch-btn px-4 py-2 rounded-full font-heading text-[13px] font-semibold whitespace-nowrap transition-all bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+        Arabian Delights 🕌
+      </button>
+
+      <button onclick="filterCategory('malaysian')" data-cat="malaysian" class="cat-pill touch-btn px-4 py-2 rounded-full font-heading text-[13px] font-semibold whitespace-nowrap transition-all bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+        Malaysian Favorites 🇲🇾
+      </button>
+
+      <button onclick="filterCategory('thai')" data-cat="thai" class="cat-pill touch-btn px-4 py-2 rounded-full font-heading text-[13px] font-semibold whitespace-nowrap transition-all bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+        Thai Specialties 🇹🇭
+      </button>
+
+      <button onclick="filterCategory('drinks')" data-cat="drinks" class="cat-pill touch-btn px-4 py-2 rounded-full font-heading text-[13px] font-semibold whitespace-nowrap transition-all bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+        Artisan Drinks 🍹
+      </button>
+    </div>
+
+    <!-- Active Category Title & Item Count -->
+    <div class="flex items-center justify-between mb-3 px-0.5">
+      <div class="flex items-center gap-2">
+        <h3 id="categoryDisplayTitle" class="font-heading font-bold text-base text-[#1C1917] dark:text-white">
+          Daftar Menu Pilihan
+        </h3>
+        <span id="categoryCountBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">
+          13 Hidangan
+        </span>
+      </div>
+      <span class="text-[12px] text-[#78716C] dark:text-[#94A3B8]">Sentuh untuk kustomisasi</span>
+    </div>
+
+    <!-- ============================================================
+         2-COLUMN MENU GRID
+         ============================================================ -->
+    <div id="foodGridContainer" class="grid grid-cols-2 gap-3 pb-6">
+      <!-- Items dynamically populated via JS -->
+    </div>
+
+  </main>
+
+  <!-- ============================================================
+       STICKY BOTTOM FLOATING CART BAR
+       ============================================================ -->
+  <aside id="stickyCartBar" class="fixed bottom-0 left-0 right-0 z-30 transform translate-y-full transition-transform duration-300 ease-out p-3 pointer-events-none">
+    <div class="max-w-md mx-auto pointer-events-auto">
+      <div class="bg-gradient-to-r from-[#1C1917] to-stone-900 dark:from-[#1E293B] dark:to-[#0F172A] border border-amber-500/30 text-white rounded-2xl p-3 shadow-2xl flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="relative w-10 h-10 rounded-xl bg-amber-500 text-[#0F172A] font-bold flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+            <span id="cartBadgeCount" class="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold border-2 border-stone-900">0</span>
+          </div>
+          <div>
+            <div id="cartTableIndicator" class="text-[11px] text-amber-300 font-medium">Keranjang Meja 05</div>
+            <div id="cartTotalPrice" class="font-heading font-extrabold text-[15px] leading-tight text-white tabular-nums">Rp 0</div>
+          </div>
+        </div>
+
+        <button onclick="openCheckoutModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#0F172A] font-heading font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95 transition-all">
+          <span>Checkout</span>
+          <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       MODAL 1: MODIFIER BOTTOM SHEET MODAL
+       ============================================================ -->
+  <div id="modifierModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex-col justify-end transition-opacity duration-300">
+    <!-- Click backdrop to close -->
+    <div onclick="closeModifierModal()" class="flex-1 w-full"></div>
+
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-md mx-auto rounded-t-3xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+      
+      <!-- Sheet Handle & Close -->
+      <div class="pt-3 pb-2 px-4 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between">
+        <div class="w-12 h-1.5 bg-stone-300 dark:bg-stone-600 rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-2"></div>
+        <span class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Kustomisasi Menu</span>
+        <button onclick="closeModifierModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-300 flex items-center justify-center hover:bg-stone-200">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Dish Header Preview -->
+      <div class="p-4 pb-2 flex gap-3 items-center">
+        <img id="modalDishImage" src="" alt="Dish" class="w-20 h-20 rounded-xl object-cover shrink-0 shadow-sm border border-stone-200 dark:border-stone-700" />
+        <div class="min-w-0 flex-1">
+          <span id="modalDishCategory" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Arabian</span>
+          <h4 id="modalDishName" class="font-heading font-bold text-base text-[#1C1917] dark:text-white leading-tight mt-0.5 line-clamp-2">Nama Hidangan</h4>
+          <div id="modalDishPrice" class="font-heading font-extrabold text-amber-600 dark:text-amber-400 text-lg mt-1 tabular-nums">Rp 0</div>
+        </div>
+      </div>
+
+      <!-- Scrollable Customization Options -->
+      <div class="overflow-y-auto px-4 py-2 flex flex-col gap-4 text-sm flex-1">
+        
+        <!-- 1. Tingkat Kepedasan (Spiciness Level 0 - 5) -->
+        <div id="spicinessOptionGroup" class="bg-[#FAF7F2] dark:bg-[#0F172A] p-3 rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white flex items-center gap-1.5">
+              <span>Level Kepedasan</span>
+              <span class="text-red-500 font-bold">🌶️</span>
+            </label>
+            <span class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Pilih salah satu</span>
+          </div>
+          <div class="grid grid-cols-6 gap-1.5" id="spiceLevelPills">
+            <button type="button" onclick="selectSpice(0)" data-spice="0" class="spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 0</button>
+            <button type="button" onclick="selectSpice(1)" data-spice="1" class="spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 1</button>
+            <button type="button" onclick="selectSpice(2)" data-spice="2" class="spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 2</button>
+            <button type="button" onclick="selectSpice(3)" data-spice="3" class="spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 3</button>
+            <button type="button" onclick="selectSpice(4)" data-spice="4" class="spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 4</button>
+            <button type="button" onclick="selectSpice(5)" data-spice="5" class="spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 5 🔥</button>
+          </div>
+        </div>
+
+        <!-- 2. Porsi Nasi (Rice Portion: Regular / Extra) -->
+        <div id="ricePortionGroup" class="bg-[#FAF7F2] dark:bg-[#0F172A] p-3 rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white">Porsi Nasi</label>
+            <span class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Wajib pilih 1</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="ricePortion" value="Regular" checked onchange="updateModifierPrice()" class="accent-amber-600">
+                <span class="text-xs font-semibold">Porsi Biasa</span>
+              </div>
+              <span class="text-[11px] text-stone-500">Standar</span>
+            </label>
+            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="ricePortion" value="Extra" onchange="updateModifierPrice()" class="accent-amber-600">
+                <span class="text-xs font-semibold">Extra Nasi Jumbo</span>
+              </div>
+              <span class="text-[11px] font-bold text-amber-600 dark:text-amber-400">+Rp 10.000</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. Suhu Minuman (Drink Temperature) -->
+        <div id="drinkTempGroup" class="bg-[#FAF7F2] dark:bg-[#0F172A] p-3 rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
+          <div class="flex items-center justify-between mb-2">
+            <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white">Suhu Minuman</label>
+            <span class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Pilih varian</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer text-center">
+              <input type="radio" name="drinkTemp" value="Hot" class="accent-amber-600 mb-1">
+              <span class="text-xs font-semibold">Panas 🔥</span>
+              <span class="text-[10px] text-stone-500">Fresh Brew</span>
+            </label>
+            <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer text-center">
+              <input type="radio" name="drinkTemp" value="Less Ice" class="accent-amber-600 mb-1">
+              <span class="text-xs font-semibold">Sedikit Es 🧊</span>
+              <span class="text-[10px] text-stone-500">Less Ice</span>
+            </label>
+            <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer text-center">
+              <input type="radio" name="drinkTemp" value="Normal Ice" checked class="accent-amber-600 mb-1">
+              <span class="text-xs font-semibold">Es Normal ❄️</span>
+              <span class="text-[10px] text-stone-500">Segar Dingin</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 4. Catatan Khusus Dapur -->
+        <div>
+          <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white block mb-1.5">
+            Catatan Khusus untuk Dapur
+          </label>
+          <textarea 
+            id="cookingNotesInput"
+            rows="2" 
+            placeholder="Contoh: Jangan pakai daun ketumbar, kuah kari dipisah, jangan terlalu manis..." 
+            class="w-full p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs text-[#1C1917] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <!-- Action Footer: Stepper & Add Button -->
+      <div class="p-4 border-t border-[#E7DFD5] dark:border-[#334155] bg-white dark:bg-[#1E293B] flex items-center gap-3">
+        <!-- Quantity Stepper -->
+        <div class="flex items-center justify-between bg-stone-100 dark:bg-stone-800 rounded-xl px-2 py-1.5 w-28 shrink-0">
+          <button onclick="decrementModalQty()" class="w-7 h-7 rounded-lg bg-white dark:bg-stone-700 flex items-center justify-center text-stone-800 dark:text-white font-bold shadow-xs active:scale-95">
+            <span class="material-symbols-outlined text-[16px]">remove</span>
+          </button>
+          <span id="modalQtyDisplay" class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">1</span>
+          <button onclick="incrementModalQty()" class="w-7 h-7 rounded-lg bg-white dark:bg-stone-700 flex items-center justify-center text-stone-800 dark:text-white font-bold shadow-xs active:scale-95">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+          </button>
+        </div>
+
+        <!-- Confirm Add Button -->
+        <button onclick="confirmAddToCart()" class="touch-btn flex-1 h-12 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#0F172A] font-heading font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 active:scale-98">
+          <span id="modalAddButtonText">Tambah • Rp 0</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 2: CHECKOUT & WHATSAPP LOYALTY MODAL
+       ============================================================ -->
+  <div id="checkoutModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex-col justify-end transition-opacity duration-300">
+    <div onclick="closeCheckoutModal()" class="flex-1 w-full"></div>
+
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-md mx-auto rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+      
+      <!-- Modal Header -->
+      <div class="p-4 pb-3 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between bg-[#FAF7F2] dark:bg-[#0F172A]">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-base text-[#1C1917] dark:text-white">Konfirmasi Pesanan</h3>
+            <p id="checkoutTableIndicator" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Meja 05 • Dine-in Langsung ke Dapur</p>
+          </div>
+        </div>
+        <button onclick="closeCheckoutModal()" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Scrollable Checkout Body -->
+      <div class="overflow-y-auto p-4 flex flex-col gap-4 text-sm flex-1">
+        
+        <!-- Customer WhatsApp & Name Form -->
+        <div class="bg-[#FAF7F2] dark:bg-[#0F172A] p-3.5 rounded-2xl border border-[#E7DFD5] dark:border-[#334155] flex flex-col gap-2.5">
+          <div class="flex items-center justify-between">
+            <span class="font-heading font-bold text-xs text-[#1C1917] dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-amber-500 text-[16px]">person</span>
+              Informasi Tamu & WhatsApp
+            </span>
+            <span class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+              Poin Member +150
+            </span>
+          </div>
+
+          <div>
+            <label class="text-[11px] text-[#78716C] dark:text-[#94A3B8] font-medium block mb-1">Nama Pemesan</label>
+            <input 
+              id="customerNameInput" 
+              type="text" 
+              value="Kevin Sanjaya" 
+              placeholder="Masukkan nama lengkap Anda..."
+              class="w-full h-10 px-3 rounded-xl bg-white dark:bg-[#1E293B] border border-stone-200 dark:border-stone-700 text-xs font-medium text-[#1C1917] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+          </div>
+
+          <div>
+            <label class="text-[11px] text-[#78716C] dark:text-[#94A3B8] font-medium block mb-1">Nomor WhatsApp (Untuk Struk Digital)</label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 font-bold text-xs">+62</span>
+              <input 
+                id="customerPhoneInput" 
+                type="tel" 
+                value="812-3456-7890" 
+                placeholder="812-xxxx-xxxx"
+                class="w-full h-10 pl-11 pr-3 rounded-xl bg-white dark:bg-[#1E293B] border border-stone-200 dark:border-stone-700 text-xs font-medium text-[#1C1917] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+            </div>
+          </div>
+
+          <!-- Loyalty Incentive Card -->
+          <div class="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 flex items-start gap-2">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[18px] shrink-0 mt-0.5">verified</span>
+            <p class="text-[11px] text-amber-900 dark:text-amber-200 leading-snug">
+              Nomor WhatsApp akan otomatis menerima <strong>nota struk digital</strong> dan saldo <strong>+150 poin Resto Pro Loyalty</strong>!
+            </p>
+          </div>
+        </div>
+
+        <!-- Ordered Items List -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-heading font-bold text-xs text-[#1C1917] dark:text-white uppercase tracking-wider">
+              Daftar Pesanan Anda (<span id="checkoutItemCount">0</span>)
+            </span>
+            <button onclick="clearCart()" class="text-[11px] text-red-500 hover:underline">Hapus Semua</button>
+          </div>
+
+          <div id="checkoutItemsList" class="flex flex-col gap-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Financial Summary Breakdown -->
+        <div class="bg-[#FAF7F2] dark:bg-[#0F172A] p-3.5 rounded-2xl border border-[#E7DFD5] dark:border-[#334155] flex flex-col gap-1.5 text-xs">
+          <div class="flex justify-between text-[#78716C] dark:text-[#94A3B8]">
+            <span>Subtotal Hidangan</span>
+            <span id="summarySubtotal" class="font-semibold text-[#1C1917] dark:text-white tabular-nums">Rp 0</span>
+          </div>
+          <div class="flex justify-between text-[#78716C] dark:text-[#94A3B8]">
+            <span>Pajak Restoran PB1 (10%)</span>
+            <span id="summaryTax" class="font-semibold text-[#1C1917] dark:text-white tabular-nums">Rp 0</span>
+          </div>
+          <div class="h-px bg-stone-200 dark:bg-stone-700 my-1"></div>
+          <div class="flex justify-between text-sm font-heading font-extrabold text-[#1C1917] dark:text-white">
+            <span>Total Pembayaran</span>
+            <span id="summaryGrandTotal" class="text-amber-600 dark:text-amber-400 tabular-nums text-base">Rp 0</span>
+          </div>
+          <div class="text-[10px] text-stone-500 italic mt-0.5">
+            *Pembayaran dapat dilakukan di kasir setelah hidangan selesai disajikan atau via QRIS.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Button -->
+      <div class="p-4 border-t border-[#E7DFD5] dark:border-[#334155] bg-white dark:bg-[#1E293B]">
+        <button onclick="submitOrderToKitchen()" class="touch-btn w-full h-13 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-extrabold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 active:scale-98">
+          <span class="material-symbols-outlined text-[20px]">send</span>
+          <span id="submitOrderTableBtnText">Kirim Pesanan ke Dapur (Meja 05)</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 3: RESERVASI & BOOKING MEJA TAMU (MOBILE BOTTOM SHEET)
+       ============================================================ -->
+  <div id="customerReservationModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex-col justify-end transition-opacity duration-300">
+    <div onclick="closeCustomerReservationModal()" class="flex-1 w-full"></div>
+
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-md mx-auto rounded-t-3xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
+      
+      <!-- Modal Header -->
+      <div class="p-4 pb-3 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between bg-[#FAF7F2] dark:bg-[#0F172A]">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-full bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[18px]">event_seat</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-base text-[#1C1917] dark:text-white">Reservasi Meja Resto</h3>
+            <p class="text-[11px] text-stone-500">Pesan meja favorit Anda untuk santap bersama</p>
+          </div>
+        </div>
+        <button onclick="closeCustomerReservationModal()" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <form id="customerResForm" onsubmit="submitCustomerReservation(event)" class="p-4 overflow-y-auto flex-1 flex flex-col gap-3 text-xs">
+        
+        <!-- Pilihan Ruangan / Meja -->
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Pilih Ruangan & Tipe Meja <span class="text-red-500">*</span>
+          </label>
+          <select id="custResTable" required class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500">
+            <option value="T07" selected>Meja 07 - Outdoor Garden (8 Kursi - Nuansa Taman)</option>
+            <option value="T08">Meja 08 - Outdoor Garden (4 Kursi)</option>
+            <option value="T09">Meja 09 - Outdoor Garden (4 Kursi)</option>
+            <option value="T11">Meja 11 - VIP Private Room (8 Kursi - Privat & Tenang)</option>
+            <option value="T12">Meja 12 - VIP Private Room (6 Kursi)</option>
+            <option value="T01">Meja 01 - Indoor AC (2 Kursi Pasangan)</option>
+            <option value="T02">Meja 02 - Indoor AC (4 Kursi Keluarga)</option>
+            <option value="T04">Meja 04 - Indoor AC (6 Kursi)</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <!-- Tanggal Kunjungan -->
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Tanggal <span class="text-red-500">*</span>
+            </label>
+            <input type="date" id="custResDate" required class="w-full px-2.5 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <!-- Jam Kedatangan -->
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Jam Kedatangan <span class="text-red-500">*</span>
+            </label>
+            <select id="custResTime" required class="w-full px-2.5 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500">
+              <option value="12:30 WIB">12:30 WIB (Makan Siang)</option>
+              <option value="13:30 WIB">13:30 WIB (Makan Siang)</option>
+              <option value="18:30 WIB">18:30 WIB (Makan Malam)</option>
+              <option value="19:30 WIB" selected>19:30 WIB (Makan Malam)</option>
+              <option value="20:30 WIB">20:30 WIB (Makan Malam)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <!-- Jumlah Pax -->
+          <div class="col-span-1">
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Jumlah Tamu
+            </label>
+            <div class="flex items-center">
+              <input type="number" id="custResGuests" value="4" min="1" max="15" class="w-full px-2 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-bold text-center text-[#1C1917] dark:text-white" />
+            </div>
+          </div>
+
+          <!-- Nama Pemesan -->
+          <div class="col-span-2">
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Nama Lengkap <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="custResName" required placeholder="Bpk/Ibu..." class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <!-- No WhatsApp -->
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Nomor WhatsApp Aktif <span class="text-red-500">*</span>
+          </label>
+          <input type="tel" id="custResPhone" required placeholder="081234567890" class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono font-bold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500" />
+          <span class="text-[10px] text-stone-400 mt-0.5 block">Konfirmasi kedatangan akan dikirim via pesan WhatsApp.</span>
+        </div>
+
+        <!-- Permintaan Khusus -->
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Catatan / Permintaan Khusus
+          </label>
+          <textarea id="custResNotes" rows="2" placeholder="Contoh: Arisan keluarga 4 orang, minta kursi bayi (baby chair)..." class="w-full p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#1C1917] dark:text-white outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button type="submit" class="touch-btn w-full h-12 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-heading font-extrabold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 active:scale-98">
+            <span class="material-symbols-outlined text-[20px]">check_circle</span>
+            <span>Konfirmasi Booking Meja</span>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 4: SIMULASI GANTI NOMOR MEJA QR (MEJA 01 - 12)
+       ============================================================ -->
+  <div id="tableSwitchModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-sm rounded-3xl p-5 border border-[#E7DFD5] dark:border-[#334155] shadow-2xl flex flex-col gap-3.5 animate-in zoom-in-95">
+      <div class="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[18px]">table_restaurant</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Ganti Meja QR</h3>
+            <p class="text-[10px] text-stone-500">Simulasikan scan QR code meja lain</p>
+          </div>
+        </div>
+        <button onclick="closeTableSwitchModal()" class="w-7 h-7 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1" id="tableSwitchGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastNotification" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none transform -translate-y-10 opacity-0 transition-all duration-300 ease-out">
+    <div class="bg-stone-900/95 text-white border border-amber-500/40 px-4 py-2.5 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-semibold backdrop-blur-md">
+      <span id="toastIcon" class="material-symbols-outlined text-emerald-400 text-[18px]">check_circle</span>
+      <span id="toastMessage">Pesanan berhasil ditambahkan!</span>
+    </div>
+  </div>
+
+  <!-- Shared Data & Logic Scripts -->
+  <script src="assets/js/resto-data.js"></script>
+  <script src="assets/js/resto-config.js"></script>
+  <script src="assets/js/resto-sync.js"></script>
+  <script>
+    // State Keranjang & Modal Aktif
+    let cart = [];
+    let currentSelectedDish = null;
+    let modalSelectedSpice = 1;
+    let modalQuantity = 1;
+    let activeFilter = 'all';
+
+    // State Meja Dinamis (Dapat disesuaikan lewat parameter URL ?table=T07 atau pemilih meja)
+    let currentTableId = "T05";
+    let currentTableName = "Meja 05";
+    let currentTableSection = "Indoor AC";
+
+    function getActiveMenuCatalog() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.getMenuCatalog === "function") {
+        return RestoSync.getMenuCatalog();
+      }
+      return typeof MENU_ITEMS !== "undefined" ? MENU_ITEMS : [];
+    }
+
+    function initDynamicTable() {
+      if (typeof RestoSync !== "undefined") {
+        const live = RestoSync.getTables();
+        if (live && live.length > 0 && typeof RESTO_TABLES !== "undefined") {
+          RESTO_TABLES.length = 0;
+          live.forEach(t => RESTO_TABLES.push(t));
+        }
+      }
+      const urlParams = new URLSearchParams(window.location.search);
+      const tbl = urlParams.get("table");
+      if (tbl && typeof RESTO_TABLES !== "undefined") {
+        const found = RESTO_TABLES.find(t => 
+          t.id.toLowerCase() === tbl.toLowerCase() || 
+          t.id.toLowerCase() === ("t" + tbl).toLowerCase() || 
+          t.name.toLowerCase().includes(tbl.toLowerCase())
+        );
+        if (found) {
+          setCustomerTable(found.id);
+          return;
+        }
+      }
+      setCustomerTable("T05");
+    }
+
+    function setCustomerTable(tableId) {
+      if (typeof RESTO_TABLES === "undefined") return;
+      const t = RESTO_TABLES.find(x => x.id === tableId);
+      if (!t) return;
+
+      currentTableId = t.id;
+      currentTableName = t.name;
+      currentTableSection = t.section;
+
+      const headerInd = document.getElementById("headerTableIndicator");
+      if (headerInd) headerInd.textContent = `${t.name} • Dine-in (${t.section})`;
+
+      const heroInd = document.getElementById("heroTableIndicator");
+      if (heroInd) heroInd.textContent = t.name;
+
+      const cartInd = document.getElementById("cartTableIndicator");
+      if (cartInd) cartInd.textContent = `Keranjang ${t.name}`;
+
+      const checkoutInd = document.getElementById("checkoutTableIndicator");
+      if (checkoutInd) checkoutInd.textContent = `${t.name} • Dine-in Langsung ke Dapur`;
+
+      const submitBtnText = document.getElementById("submitOrderTableBtnText");
+      if (submitBtnText) submitBtnText.textContent = `Kirim Pesanan ke Dapur (${t.name})`;
+
+      document.title = `Resto Pro • QR Self-Order (${t.name})`;
+    }
+
+    function openTableSwitchModal() {
+      const modal = document.getElementById("tableSwitchModal");
+      const grid = document.getElementById("tableSwitchGrid");
+      if (!modal || !grid) return;
+
+      if (typeof RESTO_TABLES !== "undefined") {
+        grid.innerHTML = RESTO_TABLES.map(t => {
+          const isSelected = t.id === currentTableId;
+          const bg = isSelected ? "bg-amber-500 text-[#0F172A] font-extrabold border-2 border-amber-600 shadow-sm" : "bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-amber-500";
+          return `
+            <button onclick="selectCustomerTable('${t.id}')" class="p-2 rounded-xl ${bg} text-center touch-btn flex flex-col items-center transition-all">
+              <span class="text-xs font-bold">${t.name}</span>
+              <span class="text-[9px] opacity-75">${t.seats} Kursi</span>
+            </button>
+          `;
+        }).join("");
+      }
+
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeTableSwitchModal() {
+      const modal = document.getElementById("tableSwitchModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function selectCustomerTable(tableId) {
+      setCustomerTable(tableId);
+      closeTableSwitchModal();
+      showToast(`📍 Berpindah ke ${currentTableName} (${currentTableSection})`, "table_restaurant");
+    }
+
+    // Inisialisasi Aplikasi Saat Halaman Selesai Dimuat
+    document.addEventListener("DOMContentLoaded", () => {
+      ThemeManager.init();
+      initDynamicTable();
+      renderMenuCards(getActiveMenuCatalog());
+
+      // PWA Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(e => console.warn('PWA SW:', e));
+      }
+
+      // Dengarkan update status dari Dapur (KDS)
+      RestoSync.on("ORDER_STATUS_CHANGED", (data) => {
+        if (data.table && (data.table === currentTableName || data.table.includes(currentTableName.replace("Meja ", "")))) {
+          if (data.status === "cooking") {
+            showToast(`🍳 Koki dapur sedang memasak pesanan ${currentTableName}!`, "soup_kitchen");
+          } else if (data.status === "ready") {
+            showToast(`🎉 Pesanan ${currentTableName} SIAP SAJI & sedang diantar!`, "check_circle");
+            RestoSync.playWaiterBell();
+          }
+        }
+      });
+
+      // Dengarkan perubahan stok menu dari Dashboard Owner
+      RestoSync.on("MENU_STOCK_CHANGED", (data) => {
+        filterCategory(activeFilter);
+        showToast(`Status menu ${data.name} diperbarui: ${data.isSoldOut ? 'Sold Out' : 'Tersedia'}`);
+      });
+
+      // Dengarkan perubahan katalog menu dinamis (Tambah / Edit / Hapus Produk)
+      RestoSync.on("MENU_CATALOG_UPDATED", () => {
+        filterCategory(activeFilter);
+      });
+
+      // Isi keranjang dummy awal (opsional) agar terlihat hidup dan siap demo
+      cart = [
+        {
+          id: "nasi-lemak-sotong",
+          name: "Nasi Lemak Sambal Sotong Special",
+          basePrice: 45000,
+          unitPrice: 45000,
+          qty: 1,
+          modifiers: {
+            spiciness: 3,
+            ricePortion: "Regular",
+            notes: "Sambal banyakin ya kak"
+          }
+        },
+        {
+          id: "teh-tarik",
+          name: "Authentic Teh Tarik Buih Melimpah",
+          basePrice: 18000,
+          unitPrice: 18000,
+          qty: 1,
+          modifiers: {
+            drinkTemp: "Normal Ice",
+            notes: ""
+          }
+        }
+      ];
+      updateCartUI();
+    });
+
+    // Render Grid Kartu Makanan (2 Kolom)
+    function renderMenuCards(items) {
+      const container = document.getElementById("foodGridContainer");
+      if (!items || items.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-2 py-12 text-center text-stone-400">
+            <span class="material-symbols-outlined text-4xl mb-2">no_meals</span>
+            <p class="text-sm">Tidak ada menu yang sesuai pencarian.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        // Status Sold Out
+        if (item.isSoldOut) {
+          return `
+            <div class="relative bg-white dark:bg-[#1E293B] rounded-2xl overflow-hidden border border-[#E7DFD5] dark:border-[#334155] shadow-sm flex flex-col justify-between opacity-85">
+              <div>
+                <div class="relative h-28 w-full overflow-hidden bg-stone-200 dark:bg-stone-800">
+                  <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover filter grayscale contrast-125" loading="lazy" />
+                  
+                  <!-- Sold Out Overlay Badge -->
+                  <div class="absolute inset-0 sold-out-overlay flex flex-col items-center justify-center p-2 text-center">
+                    <span class="px-2.5 py-1 rounded-full bg-red-600/90 text-white font-heading font-extrabold text-[10px] uppercase tracking-wider shadow-md">
+                      Habis / Sold Out
+                    </span>
+                    <span class="text-[9px] text-stone-300 mt-1">Kembali besok</span>
+                  </div>
+                </div>
+
+                <div class="p-2.5">
+                  <h4 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white line-clamp-2 leading-tight">
+                    ${item.name}
+                  </h4>
+                  <p class="text-[10px] text-[#78716C] dark:text-[#94A3B8] line-clamp-1 mt-1">
+                    ${item.description}
+                  </p>
+                </div>
+              </div>
+
+              <div class="p-2.5 pt-0 flex items-center justify-between">
+                <span class="font-heading font-bold text-xs text-stone-400 tabular-nums">
+                  ${formatRupiah(item.price)}
+                </span>
+                <span class="px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-400 font-heading font-bold text-[10px]">
+                  Sold Out
+                </span>
+              </div>
+            </div>
+          `;
+        }
+
+        // Spicy Indicator
+        let spicyBadges = "";
+        if (item.spicyLevel > 0) {
+          spicyBadges = `<span class="inline-flex items-center text-[10px] font-bold text-red-500">${'🌶️'.repeat(Math.min(item.spicyLevel, 3))}</span>`;
+        }
+
+        return `
+          <div onclick="openModifierModal('${item.id}')" class="touch-btn cursor-pointer bg-white dark:bg-[#1E293B] rounded-2xl overflow-hidden border border-[#E7DFD5] dark:border-[#334155] shadow-sm hover:shadow-md flex flex-col justify-between active:scale-[0.98] transition-all group">
+            <div>
+              <div class="relative h-28 w-full overflow-hidden bg-stone-200 dark:bg-stone-800">
+                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                
+                ${item.isPopular ? `
+                  <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-amber-500 text-[#0F172A] font-heading font-bold text-[9px] uppercase tracking-wider shadow-sm flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[11px]" style="font-variation-settings: 'FILL' 1;">star</span> Favorit
+                  </span>
+                ` : ''}
+
+                <div class="absolute bottom-1.5 right-1.5">
+                  ${spicyBadges}
+                </div>
+              </div>
+
+              <div class="p-2.5 pb-1">
+                <h4 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white line-clamp-2 leading-tight">
+                  ${item.name}
+                </h4>
+                <p class="text-[10px] text-[#78716C] dark:text-[#94A3B8] line-clamp-2 mt-1 leading-snug">
+                  ${item.description}
+                </p>
+              </div>
+            </div>
+
+            <div class="p-2.5 pt-1 flex items-center justify-between">
+              <span class="font-heading font-extrabold text-xs text-amber-600 dark:text-amber-400 tabular-nums">
+                ${formatRupiah(item.price)}
+              </span>
+              <button class="w-7 h-7 rounded-lg bg-amber-500 hover:bg-amber-600 text-[#0F172A] flex items-center justify-center font-bold shadow-sm active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-[16px]">add</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Filter Kategori
+    function filterCategory(categoryKey) {
+      activeFilter = categoryKey;
+      document.querySelectorAll(".cat-pill").forEach(pill => {
+        if (pill.dataset.cat === categoryKey) {
+          pill.className = "cat-pill active touch-btn px-4 py-2 rounded-full font-heading text-[13px] font-semibold whitespace-nowrap transition-all shadow-sm flex items-center gap-1.5 bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A]";
+        } else {
+          pill.className = "cat-pill touch-btn px-4 py-2 rounded-full font-heading text-[13px] font-semibold whitespace-nowrap transition-all bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500";
+        }
+      });
+
+      const titleEl = document.getElementById("categoryDisplayTitle");
+      const badgeEl = document.getElementById("categoryCountBadge");
+
+      let allMenu = getActiveMenuCatalog();
+      let filtered = allMenu;
+      if (categoryKey !== "all") {
+        filtered = allMenu.filter(item => item.category === categoryKey);
+      }
+
+      // Perbarui judul
+      const titleMap = {
+        all: "Daftar Menu Pilihan",
+        arabian: "Arabian Delights 🕌",
+        malaysian: "Malaysian Favorites 🇲🇾",
+        thai: "Thai Specialties 🇹🇭",
+        drinks: "Artisan Drinks 🍹"
+      };
+      titleEl.textContent = titleMap[categoryKey] || "Daftar Menu";
+      badgeEl.textContent = `${filtered.length} Hidangan`;
+
+      renderMenuCards(filtered);
+    }
+
+    // Pencarian Instan
+    function handleSearch(keyword) {
+      const clearBtn = document.getElementById("clearSearchBtn");
+      if (keyword.trim()) {
+        clearBtn.classList.remove("hidden");
+      } else {
+        clearBtn.classList.add("hidden");
+      }
+
+      const term = keyword.toLowerCase().trim();
+      let allMenu = getActiveMenuCatalog();
+      let matched = allMenu;
+      if (term) {
+        matched = allMenu.filter(m => 
+          m.name.toLowerCase().includes(term) || 
+          m.description.toLowerCase().includes(term) ||
+          m.category.toLowerCase().includes(term)
+        );
+      } else if (activeFilter !== 'all') {
+        matched = allMenu.filter(m => m.category === activeFilter);
+      }
+      renderMenuCards(matched);
+    }
+
+    function clearSearch() {
+      const input = document.getElementById("menuSearchInput");
+      input.value = "";
+      document.getElementById("clearSearchBtn").classList.add("hidden");
+      filterCategory(activeFilter);
+    }
+
+    // Modal Modifier Logic
+    function openModifierModal(itemId) {
+      const item = getActiveMenuCatalog().find(m => m.id === itemId);
+      if (!item || item.isSoldOut) return;
+
+      currentSelectedDish = item;
+      modalQuantity = 1;
+      modalSelectedSpice = item.spicyLevel || 1;
+
+      document.getElementById("modalDishImage").src = item.image;
+      document.getElementById("modalDishName").textContent = item.name;
+      document.getElementById("modalDishCategory").textContent = item.categoryLabel;
+      document.getElementById("modalDishPrice").textContent = formatRupiah(item.price);
+      document.getElementById("modalQtyDisplay").textContent = modalQuantity;
+      document.getElementById("cookingNotesInput").value = "";
+
+      // Kondisional Opsi sesuai jenis makanan vs minuman
+      const spiceGroup = document.getElementById("spicinessOptionGroup");
+      const riceGroup = document.getElementById("ricePortionGroup");
+      const drinkGroup = document.getElementById("drinkTempGroup");
+
+      if (item.isDrink) {
+        spiceGroup.classList.add("hidden");
+        riceGroup.classList.add("hidden");
+        drinkGroup.classList.remove("hidden");
+      } else {
+        drinkGroup.classList.add("hidden");
+        spiceGroup.classList.remove("hidden");
+        selectSpice(modalSelectedSpice);
+
+        // Hanya tampilkan porsi nasi untuk menu nasi
+        if (item.name.toLowerCase().includes("nasi") || item.name.toLowerCase().includes("rice")) {
+          riceGroup.classList.remove("hidden");
+        } else {
+          riceGroup.classList.add("hidden");
+        }
+      }
+
+      // Reset radio button nasi
+      const defaultRice = document.querySelector('input[name="ricePortion"][value="Regular"]');
+      if (defaultRice) defaultRice.checked = true;
+
+      updateModifierPrice();
+
+      const modal = document.getElementById("modifierModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeModifierModal() {
+      const modal = document.getElementById("modifierModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      currentSelectedDish = null;
+    }
+
+    function selectSpice(level) {
+      modalSelectedSpice = level;
+      document.querySelectorAll(".spice-btn").forEach(btn => {
+        if (parseInt(btn.dataset.spice) === level) {
+          btn.className = "spice-btn p-2 rounded-xl text-center font-bold text-xs border border-amber-500 bg-amber-500 text-[#0F172A] shadow-sm";
+        } else {
+          btn.className = "spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] text-stone-600 dark:text-stone-300";
+        }
+      });
+    }
+
+    function incrementModalQty() {
+      modalQuantity++;
+      document.getElementById("modalQtyDisplay").textContent = modalQuantity;
+      updateModifierPrice();
+    }
+
+    function decrementModalQty() {
+      if (modalQuantity > 1) {
+        modalQuantity--;
+        document.getElementById("modalQtyDisplay").textContent = modalQuantity;
+        updateModifierPrice();
+      }
+    }
+
+    function calculateCurrentUnitPrice() {
+      if (!currentSelectedDish) return 0;
+      let price = currentSelectedDish.price;
+
+      // Cek extra nasi
+      const riceExtra = document.querySelector('input[name="ricePortion"]:checked');
+      if (riceExtra && riceExtra.value === "Extra") {
+        price += 10000;
+      }
+      return price;
+    }
+
+    function updateModifierPrice() {
+      const unitPrice = calculateCurrentUnitPrice();
+      const total = unitPrice * modalQuantity;
+      document.getElementById("modalAddButtonText").textContent = `Tambah ${modalQuantity} ke Pesanan • ${formatRupiah(total)}`;
+    }
+
+    function confirmAddToCart() {
+      if (!currentSelectedDish) return;
+
+      const unitPrice = calculateCurrentUnitPrice();
+      const notes = document.getElementById("cookingNotesInput").value.trim();
+
+      const modifiers = {
+        notes: notes
+      };
+
+      if (currentSelectedDish.isDrink) {
+        const temp = document.querySelector('input[name="drinkTemp"]:checked');
+        modifiers.drinkTemp = temp ? temp.value : "Normal Ice";
+      } else {
+        modifiers.spiciness = modalSelectedSpice;
+        const rice = document.querySelector('input[name="ricePortion"]:checked');
+        if (rice) modifiers.ricePortion = rice.value;
+      }
+
+      // Cek apakah item dengan modifier yang persis sama sudah ada di keranjang
+      const existing = cart.find(i => 
+        i.id === currentSelectedDish.id && 
+        JSON.stringify(i.modifiers) === JSON.stringify(modifiers)
+      );
+
+      if (existing) {
+        existing.qty += modalQuantity;
+      } else {
+        cart.push({
+          id: currentSelectedDish.id,
+          name: currentSelectedDish.name,
+          basePrice: currentSelectedDish.price,
+          unitPrice: unitPrice,
+          qty: modalQuantity,
+          modifiers: modifiers
+        });
+      }
+
+      closeModifierModal();
+      updateCartUI();
+      showToast(`${modalQuantity}x ${currentSelectedDish.name} ditambahkan!`);
+    }
+
+    // Sinkronisasi UI Keranjang
+    function updateCartUI() {
+      const cartBar = document.getElementById("stickyCartBar");
+      const badge = document.getElementById("cartBadgeCount");
+      const priceEl = document.getElementById("cartTotalPrice");
+
+      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      const subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+
+      badge.textContent = totalItems;
+      priceEl.textContent = formatRupiah(subtotal);
+
+      if (totalItems > 0) {
+        cartBar.classList.remove("translate-y-full");
+      } else {
+        cartBar.classList.add("translate-y-full");
+      }
+    }
+
+    // Modal Checkout
+    function openCheckoutModal() {
+      if (cart.length === 0) return;
+
+      const listContainer = document.getElementById("checkoutItemsList");
+      const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      const subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+      const tax = Math.round(subtotal * RESTO_CONFIG.taxRate);
+      const grandTotal = subtotal + tax;
+
+      document.getElementById("checkoutItemCount").textContent = totalItems;
+
+      listContainer.innerHTML = cart.map((item, index) => {
+        // Rangkum modifier teks
+        let modNotes = [];
+        if (item.modifiers.spiciness !== undefined) modNotes.push(`Pedas Lvl ${item.modifiers.spiciness}`);
+        if (item.modifiers.ricePortion) modNotes.push(`Porsi: ${item.modifiers.ricePortion}`);
+        if (item.modifiers.drinkTemp) modNotes.push(item.modifiers.drinkTemp);
+        if (item.modifiers.notes) modNotes.push(`"${item.modifiers.notes}"`);
+
+        return `
+          <div class="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-stone-200 dark:border-stone-700 flex items-center justify-between gap-2 shadow-xs">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-400 text-[11px] font-bold flex items-center justify-center shrink-0">
+                  ${item.qty}x
+                </span>
+                <h5 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate">
+                  ${item.name}
+                </h5>
+              </div>
+              ${modNotes.length > 0 ? `
+                <p class="text-[10px] text-[#78716C] dark:text-[#94A3B8] ml-6 mt-0.5 truncate">
+                  ${modNotes.join(" • ")}
+                </p>
+              ` : ''}
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="font-heading font-bold text-xs text-stone-800 dark:text-stone-200 tabular-nums">
+                ${formatRupiah(item.unitPrice * item.qty)}
+              </span>
+              <button onclick="removeCartItem(${index})" class="w-6 h-6 rounded-md text-stone-400 hover:text-red-500 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[16px]">delete</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.getElementById("summarySubtotal").textContent = formatRupiah(subtotal);
+      document.getElementById("summaryTax").textContent = formatRupiah(tax);
+      document.getElementById("summaryGrandTotal").textContent = formatRupiah(grandTotal);
+
+      const modal = document.getElementById("checkoutModal");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeCheckoutModal() {
+      const modal = document.getElementById("checkoutModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function removeCartItem(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+      if (cart.length === 0) {
+        closeCheckoutModal();
+      } else {
+        openCheckoutModal();
+      }
+      showToast("Item dihapus dari keranjang");
+    }
+
+    function clearCart() {
+      cart = [];
+      updateCartUI();
+      closeCheckoutModal();
+      showToast("Keranjang telah dikosongkan");
+    }
+
+    function submitOrderToKitchen() {
+      const name = document.getElementById("customerNameInput").value.trim() || `Tamu ${currentTableName}`;
+      const phone = document.getElementById("customerPhoneInput").value.trim() || "-";
+
+      if (cart.length === 0) {
+        showToast("Keranjang Anda masih kosong!");
+        return;
+      }
+
+      // Validasi Stok Menu Terkini (Cegah order menu yang baru saja habis saat jam ramai)
+      const liveCatalog = getActiveMenuCatalog();
+      const soldOutItem = cart.find(cartItem => {
+        const live = liveCatalog.find(m => m.name === cartItem.name || m.id === cartItem.id);
+        return live && live.isSoldOut;
+      });
+
+      if (soldOutItem) {
+        alert(`⚠️ Mohon maaf, menu "${soldOutItem.name}" baru saja HABIS / SOLD OUT di dapur!\n\nSilakan hapus menu ini dari keranjang Anda atau pilih menu lezat lainnya.`);
+        return;
+      }
+
+      // Format rincian menu untuk KDS Layar Dapur & POS Kasir
+      const orderItems = cart.map(item => ({
+        name: item.name,
+        qty: item.qty,
+        price: item.unitPrice,
+        station: (item.id.includes('mandhi') || item.id.includes('shawarma') || item.id.includes('sambosa')) ? 'arabian' :
+                 (item.id.includes('lemak') || item.id.includes('canai') || item.id.includes('laksa')) ? 'malaysian' :
+                 (item.id.includes('tom-yum') || item.id.includes('pad-thai') || item.id.includes('mango')) ? 'thai' : 'drinks',
+        notes: [
+          item.modifiers.spiciness !== undefined ? `Pedas Lvl ${item.modifiers.spiciness}` : '',
+          item.modifiers.ricePortion ? `Porsi ${item.modifiers.ricePortion}` : '',
+          item.modifiers.drinkTemp || '',
+          item.modifiers.notes || ''
+        ].filter(Boolean).join(", ")
+      }));
+
+      const newOrder = {
+        table: currentTableName,
+        tableId: currentTableId,
+        customer: name,
+        phone: phone,
+        section: `${currentTableSection} (QR Self-Order)`,
+        items: orderItems
+      };
+
+      // Siarkan pesanan secara instan ke KDS Dapur & POS Kasir
+      RestoSync.addNewOrderTicket(newOrder);
+
+      closeCheckoutModal();
+      cart = [];
+      updateCartUI();
+
+      // Suara lonceng dapur & notifikasi toast
+      RestoSync.playKitchenBell();
+      showToast(`🚀 Pesanan ${name} terkirim ke dapur ${currentTableName}!`, "local_dining");
+      
+      setTimeout(() => {
+        alert(`Alhamdulillah! Pesanan atas nama ${name} berhasil diteruskan ke Dapur & KDS ${currentTableName}.\n\nNomor WhatsApp: +62 ${phone}\nBonus: +150 Resto Pro Loyalty Points telah dicatat.`);
+      }, 400);
+    }
+
+    function callWaiter() {
+      RestoSync.emit("CALL_WAITER", { table: currentTableName, tableId: currentTableId });
+      RestoSync.playWaiterBell();
+      showToast(`🔔 Pelayan sedang menuju ke ${currentTableName}...`, "notifications_active");
+    }
+
+    // ============================================================
+    // RESERVASI MEJA PELANGGAN DARI MOBILE QR
+    // ============================================================
+    function openCustomerReservationModal() {
+      const modal = document.getElementById("customerReservationModal");
+      const dateInput = document.getElementById("custResDate");
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().slice(0, 10);
+      }
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeCustomerReservationModal() {
+      const modal = document.getElementById("customerReservationModal");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function submitCustomerReservation(e) {
+      e.preventDefault();
+      const tableId = document.getElementById("custResTable").value;
+      const dateStr = document.getElementById("custResDate").value;
+      const timeStr = document.getElementById("custResTime").value;
+      const guests = parseInt(document.getElementById("custResGuests").value, 10) || 4;
+      const customerName = document.getElementById("custResName").value.trim();
+      const phone = document.getElementById("custResPhone").value.trim();
+      const notes = document.getElementById("custResNotes").value.trim();
+
+      const table = (typeof RESTO_TABLES !== "undefined") ? RESTO_TABLES.find(t => t.id === tableId) : null;
+      const tableName = table ? table.name : tableId;
+      const section = table ? table.section : (tableId.startsWith("T07") || tableId.startsWith("T08") || tableId.startsWith("T09") ? "Outdoor Garden" : tableId.startsWith("T11") || tableId.startsWith("T12") ? "VIP Private Room" : "Indoor AC");
+
+      // Validasi Kapasitas Kursi Meja
+      if (table && table.seats && guests > table.seats) {
+        const proceed = confirm(`⚠️ Perhatian: Kapasitas ${tableName} adalah ${table.seats} kursi, sedangkan Anda memesan untuk ${guests} orang.\n\nApakah Anda ingin tetap memesan meja ini (kami akan sediakan kursi tambahan bila memungkinkan)?`);
+        if (!proceed) return;
+      }
+
+      RestoSync.saveReservation({
+        tableId,
+        tableName,
+        section,
+        customerName,
+        phone,
+        guests,
+        dateStr,
+        timeStr,
+        notes,
+        status: "confirmed"
+      });
+
+      closeCustomerReservationModal();
+      showToast(`📅 Reservasi ${tableName} (${customerName}) tersimpan!`, "event_seat");
+
+      setTimeout(() => {
+        alert(`Alhamdulillah! Reservasi Anda telah terkonfirmasi:\n\n• Meja: ${tableName} (${section})\n• Jadwal: ${dateStr} pukul ${timeStr}\n• Atas Nama: ${customerName} (${guests} Orang)\n• No. WhatsApp: ${phone}\n\nTerima kasih, tim Resto Pro siap menyambut kedatangan Anda!`);
+      }, 300);
+    }
+
+    // Toast Helper
+    let toastTimeout;
+    function showToast(message, icon = "check_circle") {
+      const toast = document.getElementById("toastNotification");
+      const msgEl = document.getElementById("toastMessage");
+      const iconEl = document.getElementById("toastIcon");
+
+      msgEl.textContent = message;
+      iconEl.textContent = icon;
+
+      toast.classList.remove("-translate-y-10", "opacity-0");
+      toast.classList.add("translate-y-0", "opacity-100");
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove("translate-y-0", "opacity-100");
+        toast.classList.add("-translate-y-10", "opacity-0");
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

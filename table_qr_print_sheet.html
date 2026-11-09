@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cetak Kartu & Stiker QR Meja • Resto Pro by RASH ✨</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FFFBEB',
+              500: '#F59E0B',
+              600: '#D97706',
+              700: '#B45309',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Menlo', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <!-- Pure JS QR Code Library (Offline & Zero-Dependency) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+      }
+      .qr-card {
+        page-break-inside: avoid !important;
+        box-shadow: none !important;
+        border: 1.5px solid #CBD5E1 !important;
+      }
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 10mm;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 min-h-screen font-sans p-4 sm:p-8">
+
+  <!-- ============================================================
+       TOP ACTION TOOLBAR (Hidden on Print)
+       ============================================================ -->
+  <header class="no-print max-w-6xl mx-auto bg-white dark:bg-[#1E293B] border border-slate-200 dark:border-slate-700 rounded-3xl p-5 shadow-lg mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+        <span class="material-symbols-outlined text-[24px]">qr_code_2</span>
+      </div>
+      <div>
+        <h1 class="font-heading font-extrabold text-lg text-slate-900 dark:text-white">
+          Cetak Kartu & Stiker QR Meja Restoran
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Format siap potong untuk Stand Akrilik Meja (10 x 15 cm) & Stiker Meja Makan.
+        </p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2.5">
+      <!-- Filter Seksi -->
+      <select id="sectionFilter" onchange="renderQrCards()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none">
+        <option value="all">Semua Meja Resto</option>
+        <option value="Indoor AC">Indoor AC</option>
+        <option value="Outdoor Garden">Outdoor Garden</option>
+        <option value="VIP Private Room">VIP Private Room</option>
+      </select>
+
+      <!-- Tombol Print -->
+      <button onclick="window.print()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-[18px]">print</span>
+        <span>Cetak Semua (Ctrl+P)</span>
+      </button>
+
+      <!-- Kembali -->
+      <a href="owner_settings_saas.html" class="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors">
+        ← Kembali
+      </a>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       PRINT CARDS GRID CONTAINER
+       ============================================================ -->
+  <main class="print-container max-w-6xl mx-auto">
+    <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+      <!-- Rendered dynamically by JS -->
+    </div>
+  </main>
+
+  <!-- Shared Scripts -->
+  <script src="assets/js/resto-config.js"></script>
+  <script src="assets/js/resto-data.js"></script>
+  <script src="assets/js/resto-sync.js"></script>
+
+  <script>
+    function getBaseUrl() {
+      const loc = window.location.href;
+      const idx = loc.lastIndexOf("/");
+      return idx !== -1 ? loc.substring(0, idx + 1) : "";
+    }
+
+    function renderQrCards() {
+      const grid = document.getElementById("cardsGrid");
+      const filter = document.getElementById("sectionFilter").value;
+      const tables = RestoSync.getTables();
+      const baseUrl = getBaseUrl();
+
+      grid.innerHTML = "";
+
+      const filteredTables = tables.filter(t => {
+        if (filter === "all") return true;
+        return (t.section || "").toLowerCase().includes(filter.toLowerCase());
+      });
+
+      if (filteredTables.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-2 text-center py-12 text-slate-400">
+            <span class="material-symbols-outlined text-4xl mb-2 text-slate-300">table_restaurant</span>
+            <p class="font-bold text-sm">Tidak ada meja pada seksi ini.</p>
+          </div>
+        `;
+        return;
+      }
+
+      filteredTables.forEach((table, index) => {
+        const qrTargetUrl = `${baseUrl}customer_qr_self_order.html?table=${table.id}`;
+        const cardId = `qr_card_${table.id}`;
+        const qrContainerId = `qrcode_${table.id}`;
+
+        const card = document.createElement("div");
+        card.id = cardId;
+        card.className = "qr-card bg-white text-slate-900 border-2 border-slate-300 rounded-3xl p-6 shadow-md flex flex-col justify-between items-center text-center relative overflow-hidden";
+        card.style.minHeight = "440px";
+
+        card.innerHTML = `
+          <!-- Header Resto Branding -->
+          <div class="w-full flex items-center justify-between pb-3 border-b-2 border-dashed border-slate-200">
+            <div class="flex items-center gap-2 text-left">
+              <span class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-heading font-extrabold text-sm shadow-xs">
+                RP
+              </span>
+              <div>
+                <span class="font-heading font-extrabold text-xs uppercase tracking-wider block text-slate-900">
+                  Resto Pro • Halal Food
+                </span>
+                <span class="text-[9px] text-slate-500 block font-medium">
+                  Arabian, Malaysian & Thai Culinary
+                </span>
+              </div>
+            </div>
+
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+              ${table.section || 'Indoor AC'}
+            </span>
+          </div>
+
+          <!-- Table Identity Badge -->
+          <div class="my-3 space-y-0.5">
+            <span class="text-[10px] font-mono font-extrabold uppercase tracking-widest text-amber-600 block">
+              NOMOR MEJA RESTORAN
+            </span>
+            <h2 class="font-heading font-black text-3xl sm:text-4xl text-slate-900 tracking-tight">
+              ${table.name}
+            </h2>
+            <span class="text-[11px] text-slate-500 font-medium block">
+              Kapasitas: ${table.seats || 4} Kursi Tamu • Meja ID: <strong>${table.id}</strong>
+            </span>
+          </div>
+
+          <!-- QR Code Display Box -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 shadow-inner flex flex-col items-center justify-center my-1">
+            <div id="${qrContainerId}" class="p-1.5 bg-white rounded-xl shadow-xs"></div>
+            <span class="text-[10px] font-mono text-slate-400 mt-1 block">Scan untuk Buka Menu & Pesan</span>
+          </div>
+
+          <!-- 3-Step Guest Instructions -->
+          <div class="w-full grid grid-cols-3 gap-1.5 py-2 my-1 border-t border-b border-slate-100 text-[10px] text-slate-600 font-semibold">
+            <div class="flex flex-col items-center">
+              <span class="material-symbols-outlined text-amber-600 text-[18px]">photo_camera</span>
+              <span>1. Buka Kamera</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <span class="material-symbols-outlined text-amber-600 text-[18px]">qr_code_scanner</span>
+              <span>2. Scan QR Meja</span>
+            </div>
+            <div class="flex flex-col items-center">
+              <span class="material-symbols-outlined text-amber-600 text-[18px]">restaurant</span>
+              <span>3. Pesan Mandiri</span>
+            </div>
+          </div>
+
+          <!-- Footer Card -->
+          <div class="w-full flex items-center justify-between text-[9px] text-slate-400 pt-2 font-mono">
+            <span>📶 Free Wi-Fi Resto Pro</span>
+            <span>✨ Tanpa Download Aplikasi</span>
+          </div>
+        `;
+
+        grid.appendChild(card);
+
+        // Generate QR Code via QRCode.js
+        setTimeout(() => {
+          const container = document.getElementById(qrContainerId);
+          if (container) {
+            container.innerHTML = "";
+            try {
+              new QRCode(container, {
+                text: qrTargetUrl,
+                width: 140,
+                height: 140,
+                colorDark: "#0F172A",
+                colorLight: "#FFFFFF",
+                correctLevel: QRCode.CorrectLevel.M
+              });
+            } catch (err) {
+              // Fallback SVG mockup QR if library error
+              container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrTargetUrl)}" class="w-[140px] h-[140px]" alt="QR ${table.name}" />`;
+            }
+          }
+        }, 50);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderQrCards();
+    });
+  </script>
+</body>
+</html>

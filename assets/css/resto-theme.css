@@ -1,0 +1,166 @@
+/**
+ * Resto Pro by RASH WebApp Builder
+ * Design System CSS & Theme Variables
+ * Mendukung Warm Light Mode & Modern Dark Mode High Contrast
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+:root {
+  /* Warm Light Mode Palette */
+  --bg-primary: #FAF7F2;          /* Creamy warm ivory canvas */
+  --bg-secondary: #F3ECE2;        /* Soft sand container */
+  --bg-surface: #FFFFFF;          /* Pure white card surface */
+  --bg-surface-elevated: #FFFFFF;
+  --bg-surface-dim: #EFE8DC;      /* Muted divider surface */
+  
+  --text-main: #1C1917;           /* Warm charcoal slate */
+  --text-muted: #78716C;          /* Muted warm stone */
+  --text-inverse: #FFFFFF;
+  
+  --brand-accent: #D97706;        /* Warm Saffron Gold */
+  --brand-accent-hover: #B45309;
+  --brand-terracotta: #C2410C;    /* Terracotta accent */
+  
+  --status-available: #059669;    /* Forest green */
+  --status-available-bg: #ECFDF5;
+  --status-occupied: #DC2626;     /* Coral crimson */
+  --status-occupied-bg: #FEF2F2;
+  --status-bill: #D97706;         /* Amber warning */
+  --status-bill-bg: #FFFBEB;
+
+  --border-subtle: #E7DFD5;
+  --border-focus: #D97706;
+  --shadow-card: 0 2px 10px rgba(180, 83, 9, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-elevated: 0 12px 30px -4px rgba(180, 83, 9, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* High-Contrast Modern Dark Mode (#0F172A, #1E293B, #F59E0B) */
+.dark, [data-theme="dark"] {
+  --bg-primary: #0F172A;          /* Deep Obsidian Slate */
+  --bg-secondary: #131E33;        /* Darker container rail */
+  --bg-surface: #1E293B;          /* Muted steel slate card */
+  --bg-surface-elevated: #28354D; /* Elevated interactive layer */
+  --bg-surface-dim: #0B1120;
+  
+  --text-main: #F8FAFC;           /* Crisp bright text */
+  --text-muted: #94A3B8;          /* Slate secondary */
+  --text-inverse: #0F172A;
+  
+  --brand-accent: #F59E0B;        /* Glowing Amber Gold */
+  --brand-accent-hover: #FBBF24;
+  --brand-terracotta: #FB923C;
+  
+  --status-available: #10B981;    /* Vibrant emerald */
+  --status-available-bg: rgba(16, 185, 129, 0.15);
+  --status-occupied: #EF4444;     /* Vivid rose red */
+  --status-occupied-bg: rgba(239, 68, 68, 0.18);
+  --status-bill: #F59E0B;         /* Bright Amber */
+  --status-bill-bg: rgba(245, 158, 11, 0.18);
+
+  --border-subtle: #334155;
+  --border-focus: #F59E0B;
+  --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.35);
+  --shadow-elevated: 0 16px 36px -4px rgba(0, 0, 0, 0.55), 0 0 15px rgba(245, 158, 11, 0.1);
+}
+
+/* Base Utility Classes */
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  transition: background-color 0.25s ease, color 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-heading);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Touch-first ergonomics */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.touch-btn {
+  user-select: none;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.touch-btn:active {
+  transform: scale(0.96);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.4);
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Sleek Sold Out Overlay */
+.sold-out-overlay {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(30, 41, 59, 0.92) 100%);
+  backdrop-filter: blur(3px);
+}
+
+/* Glowing Gold Pulse */
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+}
+.gold-pulse {
+  animation: goldPulse 2s infinite;
+}
+
+/* Thermal Receipt Print Stylesheet */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #thermalReceiptPrintArea, #thermalReceiptPrintArea * {
+    visibility: visible;
+  }
+  #thermalReceiptPrintArea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    margin: 0;
+    padding: 4mm;
+    background: white;
+    color: black;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    line-height: 1.3;
+  }
+}

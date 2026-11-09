@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#C2410C" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="goldGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad512)" />
+  <!-- Dome / Cloche Silhouette -->
+  <path d="M120 310 C120 210 185 145 256 145 C327 145 392 210 392 310 Z" fill="url(#goldGrad512)" />
+  <circle cx="256" cy="130" r="22" fill="#FDE68A" />
+  <!-- Tray Base -->
+  <rect x="96" y="322" width="320" height="26" rx="13" fill="#FAF7F2" />
+  <!-- Star / Sparkle -->
+  <path d="M256 195 L264 222 L291 230 L264 238 L256 265 L248 238 L221 230 L248 222 Z" fill="#FFFFFF" />
+  <text x="256" y="415" font-family="'Plus Jakarta Sans', sans-serif" font-weight="900" font-size="44" fill="#FDE68A" text-anchor="middle" letter-spacing="3">RESTO PRO</text>
+  <text x="256" y="455" font-family="'Inter', sans-serif" font-weight="700" font-size="22" fill="#E2E8F0" text-anchor="middle" letter-spacing="1">by RASH WebApp Builder ✨</text>
+</svg>

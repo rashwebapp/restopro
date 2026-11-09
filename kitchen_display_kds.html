@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resto Pro KDS • Kitchen Display System 🍳</title>
+
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#F59E0B',
+              saffron: '#D97706',
+              terracotta: '#C2410C',
+              dark: '#0F172A',
+              slate: '#1E293B',
+              surface: '#243048',
+              emerald: '#10B981',
+              crimson: '#EF4444'
+            }
+          },
+          fontFamily: {
+            heading: ['Plus Jakarta Sans', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Resto Pro Shared Design Styles -->
+  <link rel="stylesheet" href="assets/css/resto-theme.css">
+
+  <style>
+    /* KDS High Contrast Specifics */
+    .kds-ticket-new {
+      border: 2px solid #10B981;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+    }
+    .kds-ticket-cooking {
+      border: 2px solid #F59E0B;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+    .kds-ticket-overdue {
+      border: 2px solid #EF4444;
+      animation: overduePulse 1.5s infinite;
+    }
+    @keyframes overduePulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#0F172A] text-[#F8FAFC] min-h-screen flex flex-col font-body antialiased select-none transition-colors duration-200">
+
+  <!-- ============================================================
+       TOP KDS NAVIGATION BAR
+       ============================================================ -->
+  <header class="h-16 w-full bg-[#1E293B] border-b border-[#334155] px-4 lg:px-6 flex items-center justify-between gap-4 sticky top-0 z-40 shadow-md">
+    
+    <!-- Left: KDS Title & Active Tickets -->
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-[#0F172A] font-extrabold shadow-md shadow-amber-500/20 shrink-0">
+        <span class="material-symbols-outlined text-[24px]">soup_kitchen</span>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-heading font-extrabold text-base lg:text-lg text-white leading-tight">
+            Resto Pro KDS • Layar Monitor Dapur <span class="text-amber-400">🍳</span>
+          </h1>
+          <span id="activeTicketCountBadge" class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-heading font-bold text-xs tabular-nums">
+            3 Pesanan Aktif
+          </span>
+        </div>
+        <p class="text-[11px] text-[#94A3B8] hidden sm:block">
+          Kitchen Display System • Arab, Malaysia & Thai Fusion Hotline
+        </p>
+      </div>
+    </div>
+
+    <!-- Center: Station Filter Tabs -->
+    <div class="hidden md:flex items-center bg-[#0F172A] p-1 rounded-2xl border border-[#334155] gap-1 overflow-x-auto">
+      <button onclick="filterStation('all')" data-station="all" class="station-tab active touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-bold bg-amber-500 text-[#0F172A] shadow-xs whitespace-nowrap">
+        Semua (Expo) 🛎️
+      </button>
+      <button onclick="filterStation('kitchen')" data-station="kitchen" class="station-tab touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-bold text-[#94A3B8] hover:text-white whitespace-nowrap">
+        Dapur Makanan 🍳
+      </button>
+      <button onclick="filterStation('drinks')" data-station="drinks" class="station-tab touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-bold text-[#94A3B8] hover:text-white whitespace-nowrap">
+        Bar Minuman 🍹
+      </button>
+      <button onclick="filterStation('delivery')" data-station="delivery" class="station-tab touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-bold text-[#94A3B8] hover:text-white whitespace-nowrap">
+        Delivery Online 🛵
+      </button>
+      <button onclick="filterStation('arabian')" data-station="arabian" class="station-tab touch-btn px-2.5 py-1.5 rounded-xl font-heading text-[11px] font-bold text-[#94A3B8] hover:text-white whitespace-nowrap">
+        Arab 🕌
+      </button>
+      <button onclick="filterStation('malaysian')" data-station="malaysian" class="station-tab touch-btn px-2.5 py-1.5 rounded-xl font-heading text-[11px] font-bold text-[#94A3B8] hover:text-white whitespace-nowrap">
+        Malay 🇲🇾
+      </button>
+      <button onclick="filterStation('thai')" data-station="thai" class="station-tab touch-btn px-2.5 py-1.5 rounded-xl font-heading text-[11px] font-bold text-[#94A3B8] hover:text-white whitespace-nowrap">
+        Thai 🇹🇭
+      </button>
+    </div>
+
+    <!-- Right: Audio Chime Toggle, Clock & Controls -->
+    <div class="flex items-center gap-2.5">
+      
+      <!-- Audio Bell Toggle -->
+      <button id="btnSoundToggle" onclick="toggleAudio()" class="touch-btn px-3 py-1.5 rounded-xl bg-[#0F172A] border border-[#334155] flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:border-emerald-400 transition-all shadow-xs" title="Tes / Aktifkan Suara Lonceng Dapur">
+        <span id="soundIcon" class="material-symbols-outlined text-[18px]">volume_up</span>
+        <span id="soundLabel" class="hidden sm:inline">Suara Dapur Aktif</span>
+      </button>
+
+      <!-- Realtime Kitchen Clock -->
+      <div class="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0F172A] border border-[#334155] text-xs font-mono font-bold text-amber-400 tabular-nums">
+        <span class="material-symbols-outlined text-[16px] text-[#94A3B8]">schedule</span>
+        <span id="kdsClock">11:45:00 WIB</span>
+      </div>
+
+      <!-- Quick Back to POS -->
+      <a href="cashier_pos_register.html" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold flex items-center gap-1.5 hover:bg-amber-500/30 transition-all">
+        <span class="material-symbols-outlined text-[16px]">point_of_sale</span>
+        <span class="hidden md:inline">Kasir POS</span>
+      </a>
+
+      <!-- Dark / Light Toggle -->
+      <button onclick="ThemeManager.toggle()" class="theme-toggle-btn touch-btn w-9 h-9 rounded-xl bg-[#0F172A] border border-[#334155] flex items-center justify-center text-amber-400 hover:scale-105 transition-all">
+        <span class="material-symbols-outlined text-[18px] theme-icon">dark_mode</span>
+      </button>
+
+    </div>
+
+  </header>
+
+  <!-- ============================================================
+       SUB-HEADER STATUS BANNER & NOTIFICATION ALERT
+       ============================================================ -->
+  <div class="bg-[#1E293B]/80 border-b border-[#334155] px-4 lg:px-6 py-2 flex items-center justify-between text-xs flex-wrap gap-2">
+    <div class="flex items-center gap-3 flex-wrap">
+      <span id="stationModeBadge" class="font-bold text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2.5 py-1 rounded-xl">
+        🛎️ Mode: Semua Station (Expo Runner)
+      </span>
+      <span class="text-stone-400 hidden sm:inline">💡 Tap/klik pada menu untuk ceklis item saat selesai dibuat.</span>
+      <div class="hidden lg:flex items-center gap-2 text-[11px] text-stone-400 ml-2">
+        <span class="inline-flex items-center gap-1 text-emerald-400 font-semibold"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Baru (&lt;8m)</span>
+        <span class="inline-flex items-center gap-1 text-amber-400 font-semibold"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Masak (8-15m)</span>
+        <span class="inline-flex items-center gap-1 text-red-400 font-semibold"><span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Prioritas (&gt;15m)</span>
+      </div>
+    </div>
+
+    <!-- Live Event Log Pill -->
+    <div id="kdsEventToast" class="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/50 text-emerald-300 text-xs font-semibold transition-all">
+      <span class="material-symbols-outlined text-[16px] text-emerald-400 animate-pulse">sensors</span>
+      <span id="kdsEventMessage">Sistem Terhubung • Menunggu Pesanan Meja</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TICKETS CANVAS GRID
+       ============================================================ -->
+  <main class="flex-1 p-4 lg:p-6 overflow-y-auto">
+    <div id="ticketsGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-start">
+      <!-- Tickets populated dynamically -->
+    </div>
+  </main>
+
+  <!-- Shared Data & Logic Scripts -->
+  <script src="assets/js/resto-data.js"></script>
+  <script src="assets/js/resto-config.js"></script>
+  <script src="assets/js/resto-sync.js"></script>
+  <script>
+    let activeStationFilter = "all";
+    let isSoundEnabled = true;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      ThemeManager.init();
+      initKdsClock();
+
+      // Cek parameter URL ?station=drinks atau ?station=kitchen dari device bar/dapur
+      const urlParams = new URLSearchParams(window.location.search);
+      const stParam = urlParams.get('station');
+      if (stParam) {
+        filterStation(stParam.toLowerCase());
+      } else {
+        renderKdsTickets();
+      }
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(e => {});
+      }
+
+      // Listen for Live Orders from QR Self-Order or POS
+      RestoSync.on("ORDER_PLACED", (order) => {
+        showKdsToast(`🔔 PESANAN BARU MASUK DARI ${order.table.toUpperCase()}!`, true);
+        if (isSoundEnabled) {
+          RestoSync.playKitchenBell();
+        }
+        renderKdsTickets();
+      });
+
+      // Sinkronisasi realtime saat item diceklis dari device lain (Dapur vs Bar Minuman)
+      RestoSync.on("TICKET_ITEMS_UPDATED", () => {
+        renderKdsTickets();
+      });
+
+      RestoSync.on("ORDER_STATUS_CHANGED", () => {
+        renderKdsTickets();
+      });
+
+      RestoSync.on("TICKET_REMOVED", () => {
+        renderKdsTickets();
+      });
+
+      RestoSync.on("CALL_WAITER", (data) => {
+        showKdsToast(`🛎️ Panggilan Pelayan dari ${data.table || 'Meja 05'}!`);
+        if (isSoundEnabled) {
+          RestoSync.playWaiterBell();
+        }
+      });
+
+      RestoSync.on("ORDER_PAID", (data) => {
+        showKdsToast(`💰 Tagihan ${data.tableId || 'Meja'} Telah Dilunasi di Kasir.`);
+      });
+
+      // Update elapsed time every 10 seconds
+      setInterval(() => {
+        updateTicketTimers();
+      }, 10000);
+    });
+
+    // Kitchen Clock Realtime
+    function initKdsClock() {
+      const clockEl = document.getElementById("kdsClock");
+      const update = () => {
+        const now = new Date();
+        const hrs = String(now.getHours()).padStart(2, "0");
+        const mins = String(now.getMinutes()).padStart(2, "0");
+        const secs = String(now.getSeconds()).padStart(2, "0");
+        clockEl.textContent = `${hrs}:${mins}:${secs} WIB`;
+      };
+      update();
+      setInterval(update, 1000);
+    }
+
+    // Render KDS Ticket Cards dengan Sistem Ceklis Item-Per-Item & Filter Stasiun Terpisah
+    function renderKdsTickets() {
+      const container = document.getElementById("ticketsGridContainer");
+      let tickets = RestoSync.getKdsTickets();
+
+      // Filter stasiun device (Dapur Makanan vs Bar Minuman vs Delivery Online vs Expo Semua)
+      if (activeStationFilter === "delivery") {
+        tickets = tickets.filter(ticket => 
+          ['gofood', 'grabfood', 'shopeefood', 'takeaway'].includes((ticket.orderType || '').toLowerCase()) ||
+          (ticket.section && (ticket.section.toLowerCase().includes('delivery') || ticket.section.toLowerCase().includes('bungkus')))
+        );
+      } else if (activeStationFilter === "kitchen" || activeStationFilter === "food") {
+        tickets = tickets.filter(ticket => 
+          ticket.items.some(item => !item.station || item.station !== "drinks")
+        );
+      } else if (activeStationFilter === "drinks" || activeStationFilter === "bar") {
+        tickets = tickets.filter(ticket => 
+          ticket.items.some(item => item.station === "drinks")
+        );
+      } else if (activeStationFilter !== "all") {
+        tickets = tickets.filter(ticket => 
+          ticket.items.some(item => item.station === activeStationFilter || !item.station)
+        );
+      }
+
+      document.getElementById("activeTicketCountBadge").textContent = `${tickets.length} Pesanan Aktif`;
+
+      if (tickets.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-20 flex flex-col items-center justify-center text-center text-stone-500">
+            <span class="material-symbols-outlined text-6xl text-stone-600 mb-2">done_all</span>
+            <h3 class="font-heading font-bold text-lg text-white">Semua Pesanan di Stasiun Ini Selesai!</h3>
+            <p class="text-sm mt-1">Menunggu pesanan berikutnya dari QR Self-Order, POS Kasir, atau Delivery Online.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const now = Date.now();
+
+      container.innerHTML = tickets.map(ticket => {
+        const elapsedMinutes = Math.floor((now - ticket.createdAt) / 60000);
+        const isDelivery = ['gofood', 'grabfood', 'shopeefood', 'takeaway'].includes((ticket.orderType || '').toLowerCase()) || 
+                           (ticket.section && (ticket.section.toLowerCase().includes('delivery') || ticket.section.toLowerCase().includes('bungkus')));
+        const ch = (ticket.orderType || '').toLowerCase();
+        
+        let platformBadge = '';
+        if (ch === 'gofood') {
+          platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#00AA13] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛵 GOFOOD</span>`;
+        } else if (ch === 'grabfood') {
+          platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#00B14F] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛵 GRABFOOD</span>`;
+        } else if (ch === 'shopeefood') {
+          platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#EE4D2D] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛵 SHOPEEFOOD</span>`;
+        } else if (ch === 'takeaway') {
+          platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#8B5CF6] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛍️ TAKEAWAY</span>`;
+        }
+        
+        // Perhitungan Ceklis Item-Per-Item
+        const totalItems = ticket.items.length;
+        const completedItems = ticket.items.filter(i => i.completed).length;
+        const isAllCompleted = totalItems > 0 && completedItems === totalItems;
+        const pct = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+        // Klasifikasi Status Waktu & Ceklis
+        let cardStyleClass = "kds-ticket-new";
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono font-bold text-[11px] border border-emerald-500/40">BARU • ${elapsedMinutes}m</span>`;
+
+        if (isAllCompleted) {
+          cardStyleClass = "border-2 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xl bg-emerald-950/20";
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-mono font-extrabold text-[11px] shadow-sm animate-pulse">✅ LENGKAP SIAP SAJI</span>`;
+        } else if (completedItems > 0) {
+          cardStyleClass = "kds-ticket-cooking";
+          statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold text-[11px] border border-amber-500/40">PARSIAL • ${completedItems}/${totalItems} SIAP</span>`;
+        } else if (elapsedMinutes >= 15) {
+          cardStyleClass = "kds-ticket-overdue";
+          statusBadge = `<span class="px-2 py-0.5 rounded-full bg-red-600 text-white font-mono font-bold text-[11px] animate-pulse">⚠️ OVERDUE ${elapsedMinutes}m</span>`;
+        } else if (elapsedMinutes >= 8 || ticket.status === "cooking") {
+          cardStyleClass = "kds-ticket-cooking";
+          statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-bold text-[11px] border border-amber-500/40">MASAK • ${elapsedMinutes}m</span>`;
+        }
+
+        return `
+          <div class="bg-[#1E293B] rounded-2xl ${cardStyleClass} overflow-hidden shadow-lg flex flex-col justify-between transition-all">
+            
+            <!-- Ticket Header -->
+            <div class="p-3.5 pb-2.5 bg-[#0F172A]/80 border-b border-[#334155] flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  ${platformBadge}
+                  <span class="font-heading font-extrabold text-base lg:text-lg text-white leading-tight">${ticket.table}</span>
+                  <span class="text-[10px] font-mono text-stone-400">#${ticket.orderRef || ticket.id}</span>
+                </div>
+                ${ticket.driverName ? `
+                  <div class="text-[11px] text-emerald-400 font-semibold truncate max-w-[200px] mt-0.5">
+                    🛵 Driver: ${ticket.driverName} (${ticket.driverPlate || '-'})
+                  </div>
+                ` : ''}
+                <div class="text-[11px] text-amber-400 font-medium truncate max-w-[200px]">
+                  Tamu: ${ticket.customer}
+                </div>
+              </div>
+              
+              <div class="text-right">
+                ${statusBadge}
+                <div class="text-[10px] text-stone-400 mt-1">${ticket.section}</div>
+              </div>
+            </div>
+
+            ${isDelivery ? `
+              <!-- Packaging Notice Banner -->
+              <div class="px-3.5 py-1.5 bg-amber-950/70 border-b border-amber-500/40 flex items-center gap-1.5 text-[11px] text-amber-300 font-bold">
+                <span class="material-symbols-outlined text-[15px] text-amber-400 shrink-0">inventory_2</span>
+                <span class="truncate">📦 BUNGKUS: ${ticket.packagingNotes || 'Wajib Paper Box / Seal Cup + Sendok Tisu'}</span>
+              </div>
+            ` : ''}
+
+            <!-- Progress Bar Ceklis Menu -->
+            <div class="px-3.5 pt-2 pb-1 bg-[#131E33] border-b border-[#334155]/60 flex flex-col gap-1">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="font-heading font-bold ${isAllCompleted ? 'text-emerald-400' : 'text-amber-300'}">
+                  ${isAllCompleted ? '🎉 Seluruh Menu Selesai Disiapkan!' : `Menu Siap: ${completedItems} dari ${totalItems} (${pct}%)`}
+                </span>
+                <span class="text-[10px] text-stone-400 font-mono">${completedItems}/${totalItems} Ceklis</span>
+              </div>
+              <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                <div class="h-full ${isAllCompleted ? 'bg-emerald-500' : 'bg-amber-500'} transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+            </div>
+
+            <!-- Items List dengan Checklist Interaktif -->
+            <div class="p-3 flex flex-col gap-2 flex-1">
+              ${ticket.items.map((item, idx) => {
+                const isDrinks = item.station === 'drinks';
+                const isDimmed = (activeStationFilter === 'drinks' && !isDrinks) || ((activeStationFilter === 'kitchen' || activeStationFilter === 'food') && isDrinks);
+                return `
+                  <div onclick="toggleItemCheck('${ticket.id}', ${idx})" class="p-2.5 rounded-xl border cursor-pointer transition-all ${
+                    item.completed 
+                      ? 'bg-emerald-950/40 border-emerald-500/50 shadow-inner' 
+                      : (isDimmed ? 'bg-slate-900/40 border-slate-800 opacity-50' : 'bg-slate-900/90 border-slate-700/80 hover:border-amber-500')
+                  }" title="Klik untuk ceklis/batal selesai menu ini">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="flex items-start gap-2.5">
+                        <div class="w-6 h-6 rounded-lg ${
+                          item.completed 
+                            ? 'bg-emerald-500 text-slate-950 font-black' 
+                            : 'bg-slate-800 border border-slate-700 text-stone-400'
+                        } flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
+                          ${item.completed ? '<span class="material-symbols-outlined text-[16px]">check</span>' : ''}
+                        </div>
+                        <div>
+                          <div class="font-heading font-bold text-sm leading-snug ${
+                            item.completed ? 'line-through text-emerald-300' : 'text-white'
+                          }">
+                            <span class="text-amber-400 font-mono mr-1">${item.qty}x</span> ${item.name}
+                          </div>
+                          ${item.notes ? `
+                            <div class="inline-block mt-1 px-2 py-0.5 rounded bg-amber-950/80 border border-amber-500/40 text-amber-200 text-[11px] font-medium leading-tight">
+                              📝 ${item.notes}
+                            </div>
+                          ` : ''}
+                        </div>
+                      </div>
+
+                      <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded ${
+                        isDrinks 
+                          ? 'bg-cyan-950 text-cyan-300 border border-cyan-800' 
+                          : 'bg-stone-800 text-stone-400'
+                      } shrink-0">
+                        ${isDrinks ? 'BAR 🍹' : (item.station ? item.station.toUpperCase() : 'DAPUR 🍳')}
+                      </span>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+
+            <!-- Ticket Action Footer -->
+            <div class="p-3 bg-[#0F172A]/90 border-t border-[#334155] grid grid-cols-2 gap-2">
+              ${isAllCompleted ? (isDelivery ? `
+                <button onclick="clearTicket('${ticket.id}')" class="col-span-2 touch-btn h-11 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 cursor-pointer animate-pulse">
+                  <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                  <span>📦 Selesai Packing • Siap Diambil Driver 🛵</span>
+                </button>
+              ` : `
+                <button onclick="clearTicket('${ticket.id}')" class="col-span-2 touch-btn h-11 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-600/30 cursor-pointer animate-pulse">
+                  <span class="material-symbols-outlined text-[18px]">room_service</span>
+                  <span>Semua Menu Siap • Antar ke ${ticket.table} 🚀</span>
+                </button>
+              `) : `
+                <button onclick="markAllTicketItemsReady('${ticket.id}')" class="touch-btn h-10 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1 shadow-sm cursor-pointer">
+                  <span class="material-symbols-outlined text-[16px]">done_all</span>
+                  <span>Ceklis Semua</span>
+                </button>
+                <button onclick="clearTicket('${ticket.id}')" class="touch-btn h-10 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 font-heading font-semibold text-xs flex items-center justify-center gap-1 cursor-pointer">
+                  <span class="material-symbols-outlined text-[16px]">done</span>
+                  <span>Sajikan Parsial</span>
+                </button>
+              `}
+            </div>
+
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Toggle checklist per-item
+    function toggleItemCheck(ticketId, itemIdx) {
+      const res = RestoSync.toggleTicketItemCompleted(ticketId, itemIdx);
+      if (res) {
+        renderKdsTickets();
+      }
+    }
+
+    // Ceklis semua item dalam tiket sekaligus
+    function markAllTicketItemsReady(ticketId) {
+      RestoSync.updateTicketStatus(ticketId, "ready");
+      renderKdsTickets();
+      showKdsToast(`Seluruh menu tiket #${ticketId} ditandai siap saji!`);
+    }
+
+    function updateTicketTimers() {
+      renderKdsTickets();
+    }
+
+    function updateStatus(ticketId, newStatus) {
+      RestoSync.updateTicketStatus(ticketId, newStatus);
+      renderKdsTickets();
+      showKdsToast(`Tiket #${ticketId} diperbarui: ${newStatus.toUpperCase()}`);
+    }
+
+    function clearTicket(ticketId) {
+      RestoSync.removeTicket(ticketId);
+      renderKdsTickets();
+      showKdsToast(`Pesanan #${ticketId} selesai dan disajikan ke tamu.`);
+    }
+
+    function filterStation(station) {
+      activeStationFilter = station;
+      document.querySelectorAll(".station-tab").forEach(tab => {
+        if (tab.dataset.station === station) {
+          tab.className = "station-tab active touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-bold bg-amber-500 text-[#0F172A] shadow-xs whitespace-nowrap";
+        } else {
+          tab.className = "station-tab touch-btn px-2.5 py-1.5 rounded-xl font-heading text-xs font-bold text-[#94A3B8] hover:text-white whitespace-nowrap";
+        }
+      });
+
+      // Update badge mode station
+      const badge = document.getElementById("stationModeBadge");
+      if (badge) {
+        if (station === "drinks" || station === "bar") {
+          badge.textContent = "🍹 Mode Device: BAR TEMPAT MINUMAN";
+          badge.className = "font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/50 px-2.5 py-1 rounded-xl";
+        } else if (station === "kitchen" || station === "food") {
+          badge.textContent = "🍳 Mode Device: KHUSUS DAPUR MAKANAN";
+          badge.className = "font-bold text-amber-300 bg-amber-950/80 border border-amber-500/50 px-2.5 py-1 rounded-xl";
+        } else {
+          badge.textContent = "🛎️ Mode Device: SEMUA STATION (EXPO RUNNER)";
+          badge.className = "font-bold text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2.5 py-1 rounded-xl";
+        }
+      }
+
+      renderKdsTickets();
+    }
+
+    function toggleAudio() {
+      isSoundEnabled = !isSoundEnabled;
+      const icon = document.getElementById("soundIcon");
+      const label = document.getElementById("soundLabel");
+
+      if (isSoundEnabled) {
+        icon.textContent = "volume_up";
+        label.textContent = "Suara Dapur Aktif";
+        document.getElementById("btnSoundToggle").className = "touch-btn px-3 py-1.5 rounded-xl bg-[#0F172A] border border-[#334155] flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:border-emerald-400 transition-all shadow-xs";
+        RestoSync.playKitchenBell();
+      } else {
+        icon.textContent = "volume_off";
+        label.textContent = "Bisu / Mute";
+        document.getElementById("btnSoundToggle").className = "touch-btn px-3 py-1.5 rounded-xl bg-[#0F172A] border border-[#334155] flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:border-stone-500 transition-all shadow-xs";
+      }
+    }
+
+    function showKdsToast(msg, isUrgent = false) {
+      const toast = document.getElementById("kdsEventToast");
+      const msgEl = document.getElementById("kdsEventMessage");
+
+      msgEl.textContent = msg;
+      if (isUrgent) {
+        toast.className = "flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500 text-[#0F172A] text-xs font-extrabold shadow-lg animate-bounce";
+      } else {
+        toast.className = "flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/50 text-emerald-300 text-xs font-semibold transition-all";
+      }
+
+      setTimeout(() => {
+        toast.className = "flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/50 text-emerald-300 text-xs font-semibold transition-all";
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

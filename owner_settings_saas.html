@@ -1,0 +1,3157 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resto Pro • Owner Settings, SaaS Licensing & Business Analytics ✨</title>
+
+  <!-- PWA & Mobile Web App Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#D97706">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#F59E0B',
+              saffron: '#D97706',
+              terracotta: '#C2410C',
+              dark: '#0F172A',
+              slate: '#1E293B',
+              surface: '#243048',
+              emerald: '#059669',
+              mint: '#10B981'
+            }
+          },
+          fontFamily: {
+            heading: ['Plus Jakarta Sans', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Resto Pro Shared Design Styles -->
+  <link rel="stylesheet" href="assets/css/resto-theme.css">
+</head>
+<body class="bg-[#FAF7F2] dark:bg-[#0F172A] text-[#1C1917] dark:text-[#F8FAFC] min-h-screen flex flex-col font-body antialiased transition-colors duration-200">
+
+  <!-- ============================================================
+       TOP HEADER NAVIGATION BAR
+       ============================================================ -->
+  <header class="h-16 w-full bg-white dark:bg-[#1E293B] border-b border-[#E7DFD5] dark:border-[#334155] px-4 lg:px-8 flex items-center justify-between gap-4 sticky top-0 z-40 shadow-xs transition-colors">
+    
+    <!-- Brand Identity -->
+    <div class="flex items-center gap-3 shrink-0">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D97706] to-[#C2410C] dark:from-[#F59E0B] dark:to-[#D97706] flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+        <span class="material-symbols-outlined text-[24px]">admin_panel_settings</span>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white leading-tight">
+            Resto Pro Owner Dashboard <span class="text-amber-500">✨</span>
+          </h1>
+          <span class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-heading font-bold text-[10px]">
+            ENTERPRISE SAAS
+          </span>
+        </div>
+        <p class="text-[11px] text-[#78716C] dark:text-[#94A3B8] hidden sm:block">
+          by RASH WebApp Builder • Pengaturan Lisensi, Stok Menu & Analitik
+        </p>
+      </div>
+    </div>
+
+    <!-- Screen Navigation Links -->
+    <nav class="hidden md:flex items-center bg-[#FAF7F2] dark:bg-[#0F172A] p-1 rounded-2xl border border-[#E7DFD5] dark:border-[#334155] gap-1 text-xs font-heading font-semibold">
+      <a href="customer_qr_self_order.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">qr_code_2</span> QR Menu
+      </a>
+      <a href="cashier_pos_register.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">point_of_sale</span> Kasir POS
+      </a>
+      <a href="kitchen_display_kds.html" class="px-3 py-1.5 rounded-xl text-[#78716C] dark:text-[#94A3B8] hover:text-[#1C1917] dark:hover:text-white flex items-center gap-1.5 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">soup_kitchen</span> KDS Dapur
+      </a>
+      <a href="owner_settings_saas.html" class="px-3 py-1.5 rounded-xl bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A] shadow-xs flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">tune</span> Pengaturan Owner
+      </a>
+    </nav>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-3">
+      <!-- Dark/Light Mode Switch -->
+      <button onclick="ThemeManager.toggle()" class="theme-toggle-btn touch-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:scale-105 transition-all shadow-xs" title="Beralih Tema">
+        <span class="material-symbols-outlined text-[18px] theme-icon">dark_mode</span>
+        <span class="theme-label hidden md:inline">Dark Mode</span>
+      </button>
+
+      <!-- Owner Profile -->
+      <div class="flex items-center gap-2 pl-2 py-1 pr-3 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+        <div class="w-7 h-7 rounded-lg bg-amber-500 text-[#0F172A] font-extrabold text-xs flex items-center justify-center font-heading">
+          RP
+        </div>
+        <div class="text-left hidden lg:block leading-tight">
+          <div class="text-xs font-bold font-heading text-[#1C1917] dark:text-white">RASH Partner</div>
+          <div class="text-[10px] text-stone-500">Super Administrator</div>
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ============================================================
+       MAIN CONTENT CONTAINER
+       ============================================================ -->
+  <main class="w-full max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6 flex-1">
+
+    <!-- ============================================================
+         1. SAAS LICENSE STATUS & ACTIVE TIER BANNER
+         ============================================================ -->
+    <section class="relative overflow-hidden rounded-3xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-6 lg:p-8">
+      <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 blur-2xl pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        
+        <div class="space-y-4 max-w-2xl">
+          <div class="flex flex-wrap items-center gap-2">
+            <span id="licenseTierBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-[#0F172A] shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              <span id="licenseTierLabel">RASH Enterprise Tier</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-heading font-bold text-xs border border-emerald-300 dark:border-emerald-700/60">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              Live Sync Multi-Terminal Aktif
+            </span>
+            <button onclick="toggleSimulationLicense()" class="text-[10px] text-stone-400 hover:text-amber-500 underline ml-2 cursor-pointer" title="Uji Coba Gembok Free vs Pro Enterprise">
+              🧪 Uji Mode Free/Pro
+            </button>
+          </div>
+
+          <div>
+            <h2 class="font-heading font-extrabold text-2xl lg:text-3xl text-[#1C1917] dark:text-white tracking-tight">
+              Resto Pro by RASH WebApp Builder ✨
+            </h2>
+            <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-1 leading-relaxed">
+              Masa Aktif Lisensi: <strong id="licenseExpiryLabel" class="text-[#1C1917] dark:text-white">31 Desember 2028</strong> • 
+              <span class="text-amber-600 dark:text-amber-400 font-bold">Lisensi Resmi Terverifikasi</span> (Garansi Update & Cloud Sync Resmi).
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+              <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Client ID Lisensi</span>
+              <div class="font-mono font-bold text-xs text-[#1C1917] dark:text-white mt-0.5">RASH-PRO-88219</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+              <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Restoran Terdaftar</span>
+              <div class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate mt-0.5">Grand Fusion Bistro Jakarta</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+              <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Batas Meja & Terminal</span>
+              <div id="licenseTableLimitLabel" class="font-heading font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+                <span class="material-symbols-outlined text-[16px]">all_inclusive</span> Unlimited Tables
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Token Renewal Box -->
+        <div class="lg:w-80 shrink-0 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-heading font-bold text-[#1C1917] dark:text-white uppercase tracking-wider">Aktivasi Token Lisensi</span>
+            <span class="material-symbols-outlined text-amber-500 text-[18px]">key</span>
+          </div>
+          <div class="space-y-2">
+            <input 
+              id="licenseKeyInput" 
+              type="text" 
+              placeholder="RASH-XXXX-XXXX-XXXX" 
+              class="w-full px-3 py-2 text-xs font-mono uppercase bg-white dark:bg-[#1E293B] border border-stone-300 dark:border-stone-700 text-[#1C1917] dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+            />
+            <button onclick="handleActivateToken()" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px]">sync</span>
+              <span>Verifikasi Token Lisensi</span>
+            </button>
+          </div>
+          <p id="tokenFeedback" class="text-[10px] text-[#78716C] dark:text-[#94A3B8] text-center leading-tight">
+            Verifikasi lisensi instan melalui server otentikasi RASH Keynode.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+
+
+    <!-- ============================================================
+         2. TODAY'S BUSINESS ANALYTICS & REVENUE OVERVIEW (4 Cards)
+         ============================================================ -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[22px]">monitoring</span>
+          <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Ringkasan Omset & Analitik Hari Ini</h2>
+        </div>
+        <span class="text-xs text-stone-500">Live Real-time Transaksi Kasir</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Total Omset -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-500">
+            <span class="text-xs font-semibold">Omset Hari Ini (Gross)</span>
+            <span class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">payments</span>
+            </span>
+          </div>
+          <div class="my-2">
+            <div id="statTotalRevenue" class="font-heading font-extrabold text-2xl text-[#1C1917] dark:text-white tabular-nums">
+              Rp 4.850.000
+            </div>
+            <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-[14px]">trending_up</span> +18.4% vs Kemarin
+            </div>
+          </div>
+          <div class="text-[10px] text-stone-400">Total penjualan bersih sebelum PB1</div>
+        </div>
+
+        <!-- Card 2: Total Transaksi -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-500">
+            <span class="text-xs font-semibold">Total Struk Terbit</span>
+            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+            </span>
+          </div>
+          <div class="my-2">
+            <div id="statTotalOrders" class="font-heading font-extrabold text-2xl text-[#1C1917] dark:text-white tabular-nums">
+              48 Transaksi
+            </div>
+            <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-[14px]">check_circle</span> 100% Selesai & Lunas
+            </div>
+          </div>
+          <div class="text-[10px] text-stone-400">Rata-rata 4.2 transaksi / jam</div>
+        </div>
+
+        <!-- Card 3: Rata-Rata Nilai Tagihan (AOV) -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-500">
+            <span class="text-xs font-semibold">Rata-rata Bill (AOV)</span>
+            <span class="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">shopping_cart</span>
+            </span>
+          </div>
+          <div class="my-2">
+            <div id="statAvgBill" class="font-heading font-extrabold text-2xl text-[#1C1917] dark:text-white tabular-nums">
+              Rp 101.040
+            </div>
+            <div class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-[14px]">group</span> Rata-rata 2.6 tamu / meja
+            </div>
+          </div>
+          <div class="text-[10px] text-stone-400">Paling tinggi di Meja 07 (Rp 310.000)</div>
+        </div>
+
+        <!-- Card 4: Metode Bayar Terpopuler -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] shadow-xs flex flex-col justify-between">
+          <div class="flex items-center justify-between text-stone-500">
+            <span class="text-xs font-semibold">Distribusi Pembayaran</span>
+            <span class="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">pie_chart</span>
+            </span>
+          </div>
+          <div class="my-1.5 space-y-1">
+            <div class="flex justify-between text-xs font-bold font-heading">
+              <span class="text-amber-600 dark:text-amber-400">QRIS Dinamis</span>
+              <span id="statPayQris" class="tabular-nums">54% (Rp 2.61jt)</span>
+            </div>
+            <div class="flex justify-between text-xs font-semibold text-stone-600 dark:text-stone-300">
+              <span>Tunai / Cash</span>
+              <span id="statPayCash" class="tabular-nums">32% (Rp 1.55jt)</span>
+            </div>
+            <div class="flex justify-between text-[11px] text-stone-500">
+              <span>Kartu EDC</span>
+              <span id="statPayCard" class="tabular-nums">14% (Rp 680rb)</span>
+            </div>
+          </div>
+          <div id="statPayBar" class="w-full bg-stone-200 dark:bg-stone-700 h-1.5 rounded-full overflow-hidden flex">
+            <div class="bg-amber-500 h-full w-[54%]"></div>
+            <div class="bg-emerald-500 h-full w-[32%]"></div>
+            <div class="bg-purple-500 h-full w-[14%]"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+
+    <!-- ============================================================
+         2B. VISUALISASI ANALITIK GRAFIK & PERFORMA MENU (BUSINESS INTELLIGENCE)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionAnalyticsBI">
+      
+      <!-- Section Header with Period Filter -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[24px]">insights</span>
+            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">
+              Analitik Penjualan, Jam Sibuk & Performa Menu
+            </h2>
+          </div>
+          <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-0.5">
+            Analisis data tren transaksi, jam paling ramai (peak hours), leaderboard menu terlaris, dan pangsa kuliner.
+          </p>
+        </div>
+
+        <!-- Filter Periode Analitik -->
+        <div class="flex items-center gap-1.5 bg-[#FAF7F2] dark:bg-[#0F172A] p-1 rounded-2xl border border-[#E7DFD5] dark:border-[#334155] text-xs font-heading font-bold" id="analyticsPeriodPills">
+          <button type="button" onclick="setAnalyticsPeriod('today')" class="analytics-pill px-3 py-1.5 rounded-xl transition-all bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A]">Hari Ini</button>
+          <button type="button" onclick="setAnalyticsPeriod('yesterday')" class="analytics-pill px-3 py-1.5 rounded-xl transition-all text-stone-600 dark:text-stone-300 hover:text-amber-500">Kemarin</button>
+          <button type="button" onclick="setAnalyticsPeriod('last7')" class="analytics-pill px-3 py-1.5 rounded-xl transition-all text-stone-600 dark:text-stone-300 hover:text-amber-500">7 Hari</button>
+          <button type="button" onclick="setAnalyticsPeriod('all')" class="analytics-pill px-3 py-1.5 rounded-xl transition-all text-stone-600 dark:text-stone-300 hover:text-amber-500">Semua</button>
+        </div>
+      </div>
+
+      <!-- Main Analytics Grid: Left (Peak Hours Chart) & Right (Cuisine Breakdown) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Left: Hourly Peak Hours Chart (7 Cols) -->
+        <div class="lg:col-span-7 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-[#78716C] dark:text-[#94A3B8] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-amber-500">schedule</span>
+                <span>Distribusi Jam Sibuk (Peak Hours Heatmap)</span>
+              </h3>
+              <p class="text-[11px] text-stone-500 mt-0.5">Volume omset & pesanan per jam operasional (08:00 - 22:00 WIB)</p>
+            </div>
+            <div id="analyticsPeakHourBadge" class="px-2.5 py-1 rounded-xl bg-amber-100 dark:bg-amber-950/60 border border-amber-300 text-amber-800 dark:text-amber-300 font-heading font-extrabold text-[10px] flex items-center gap-1">
+              <span>🔥 Peak: 12:00 WIB</span>
+            </div>
+          </div>
+
+          <!-- SVG Responsive Bar Chart Container -->
+          <div class="w-full h-48 relative flex items-end pt-4 pb-2" id="hourlyChartContainer">
+            <!-- Rendered by JS -->
+          </div>
+
+          <div class="pt-2 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between text-[10px] text-stone-500">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1">
+                <span class="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-amber-600 to-amber-400 inline-block"></span> Makan Siang (11-14)
+              </span>
+              <span class="flex items-center gap-1">
+                <span class="w-2.5 h-2.5 rounded-sm bg-gradient-to-t from-orange-600 to-amber-500 inline-block"></span> Makan Malam (18-21)
+              </span>
+            </div>
+            <span>*Berdasarkan timestamp transaksi kasir</span>
+          </div>
+        </div>
+
+        <!-- Right: Cuisine Revenue Share & Category Breakdown (5 Cols) -->
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between">
+          <div>
+            <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-[#78716C] dark:text-[#94A3B8] flex items-center gap-1.5 mb-1">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">pie_chart</span>
+              <span>Pangsa Omset per Kategori Kuliner</span>
+            </h3>
+            <p class="text-[11px] text-stone-500 mb-3">Persentase kontribusi omset dari masing-masing tradisi kuliner</p>
+
+            <!-- Category Bars List -->
+            <div class="space-y-3" id="cuisineBreakdownContainer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Quick Stats Footer -->
+          <div class="mt-4 pt-3 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between text-[11px] text-stone-500">
+            <span>Tradisi Paling Dominan:</span>
+            <span id="dominantCuisineBadge" class="font-heading font-bold text-amber-600 dark:text-amber-400">Arabian Delights 🕌 (48%)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Kanal Penjualan & Delivery Breakdown (Bar Card) -->
+      <div class="mt-4 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h3 class="font-heading font-bold text-xs uppercase tracking-wider text-[#78716C] dark:text-[#94A3B8] flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-emerald-500">moped</span>
+              <span>Distribusi Kanal Penjualan (Dine-In vs Online Delivery Aggregators)</span>
+            </h3>
+            <p class="text-[11px] text-stone-500">Breakdown perbandingan transaksi dine-in kasir dengan GoFood, GrabFood, dan ShopeeFood beserta estimasi potongan komisi platform (~20%)</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3" id="channelBreakdownContainer">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Bottom Analytics Grid: Top 5 Best Sellers & Smart AI Insights -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
+        
+        <!-- Top 5 Best Sellers (7 Cols) -->
+        <div class="lg:col-span-7 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-amber-500 text-[20px]">military_tech</span>
+              <h3 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">
+                Leaderboard Menu Terlaris (Top 5 Best-Sellers)
+              </h3>
+            </div>
+            <span class="text-[10px] text-stone-400 font-semibold">Berdasarkan Total Porsi Dipesan</span>
+          </div>
+
+          <div class="space-y-2.5" id="topSellingListContainer">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Smart Business Insights & AI Actionable Tips (5 Cols) -->
+        <div class="lg:col-span-5 p-5 rounded-2xl bg-gradient-to-br from-amber-50 via-amber-50/50 to-orange-50/30 dark:from-amber-950/30 dark:via-[#1E293B] dark:to-orange-950/20 border border-amber-200 dark:border-amber-900/40 shadow-xs flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 pb-2 border-b border-amber-200/60 dark:border-amber-900/40">
+              <span class="material-symbols-outlined text-amber-500 text-[22px]">psychology</span>
+              <div>
+                <h4 class="font-heading font-extrabold text-xs uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                  Resto Pro Business Intelligence & Insights
+                </h4>
+                <p class="text-[10px] text-stone-500">Rekomendasi otomatis berbasis analitik transaksi</p>
+              </div>
+            </div>
+
+            <div class="space-y-2.5 text-xs text-stone-700 dark:text-stone-300" id="smartInsightsContainer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-amber-200/60 dark:border-amber-900/40 flex items-center justify-between text-[10px] text-amber-800 dark:text-amber-400">
+            <span class="flex items-center gap-1 font-semibold">
+              <span class="material-symbols-outlined text-[14px]">auto_awesome</span> Rekomendasi di-refresh otomatis
+            </span>
+            <button type="button" onclick="renderAnalyticsDashboard()" class="hover:underline font-bold">Refresh Data</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         3. BUKU KAS & RIWAYAT TRANSAKSI PENJUALAN (MULTI-HARI)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionLedger">
+      
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[24px]">calendar_month</span>
+            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">
+              Buku Kas & Riwayat Transaksi (Multi-Hari & Rekap Periode)
+            </h2>
+          </div>
+          <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-0.5">
+            Pantau penjualan hari ini, kemarin, minggu lalu, maupun pilih tanggal spesifik dari kalender. Data siap diekspor ke Microsoft Excel / CSV.
+          </p>
+        </div>
+
+        <!-- Filter & Export Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Date Preset Filter -->
+          <div class="flex items-center gap-1.5 bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] px-2.5 py-1.5 rounded-xl text-xs">
+            <span class="material-symbols-outlined text-[16px] text-amber-500">date_range</span>
+            <select id="ledgerDateSelect" onchange="handleDatePresetChange(this.value)" class="bg-transparent text-xs font-semibold text-[#1C1917] dark:text-white outline-none cursor-pointer">
+              <option value="today" selected>Hari Ini</option>
+              <option value="yesterday">Kemarin</option>
+              <option value="last7">7 Hari Terakhir</option>
+              <option value="month">Bulan Ini</option>
+              <option value="custom">Pilih Kalender...</option>
+              <option value="all">Semua Riwayat</option>
+            </select>
+          </div>
+
+          <!-- Custom Date Input (Appears when 'custom' selected or click) -->
+          <div id="customDateWrapper" class="hidden flex items-center gap-1.5 bg-[#FAF7F2] dark:bg-[#0F172A] border border-amber-400 dark:border-amber-500 px-2.5 py-1 rounded-xl text-xs">
+            <input type="date" id="ledgerCustomDatePicker" onchange="handleCustomDateChange(this.value)" class="bg-transparent text-xs font-semibold text-[#1C1917] dark:text-white outline-none cursor-pointer" />
+          </div>
+
+          <!-- Payment Method Filter -->
+          <div class="flex items-center gap-1.5 bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] px-2.5 py-1.5 rounded-xl text-xs">
+            <span class="material-symbols-outlined text-[16px] text-amber-500">payments</span>
+            <select id="ledgerPaymentSelect" onchange="renderLedgerTable()" class="bg-transparent text-xs font-semibold text-[#1C1917] dark:text-white outline-none cursor-pointer">
+              <option value="all" selected>Semua Metode</option>
+              <option value="qris">QRIS Dinamis</option>
+              <option value="cash">Tunai / Cash</option>
+              <option value="card">Kartu EDC</option>
+            </select>
+          </div>
+
+          <!-- Export CSV Button -->
+          <button onclick="exportActiveLedgerCSV()" class="touch-btn px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">download</span>
+            <span>Export Excel / CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ledger Summary KPI Strip -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+        <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+          <span class="text-stone-500 text-[11px] flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px] text-amber-500">receipt</span> Total Struk Terfilter
+          </span>
+          <div id="ledgerFilterCount" class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white mt-0.5">0 Struk</div>
+        </div>
+        <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+          <span class="text-stone-500 text-[11px] flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px] text-emerald-500">attach_money</span> Total Omset Terfilter
+          </span>
+          <div id="ledgerFilterRevenue" class="font-heading font-extrabold text-base text-amber-600 dark:text-amber-400 mt-0.5 tabular-nums">Rp 0</div>
+        </div>
+        <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+          <span class="text-stone-500 text-[11px] flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px] text-purple-500">account_balance</span> PB1 (10%) Terhimpun
+          </span>
+          <div id="ledgerFilterTax" class="font-heading font-extrabold text-base text-emerald-600 dark:text-emerald-400 mt-0.5 tabular-nums">Rp 0</div>
+        </div>
+      </div>
+
+      <!-- Scrollable Ledger Table -->
+      <div class="overflow-x-auto rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-500 font-heading border-b border-[#E7DFD5] dark:border-[#334155]">
+            <tr>
+              <th class="p-3">No. Struk</th>
+              <th class="p-3">Tanggal & Jam</th>
+              <th class="p-3">Meja & Tamu</th>
+              <th class="p-3">Kasir / Shift</th>
+              <th class="p-3">Metode</th>
+              <th class="p-3">Menu Dipesan</th>
+              <th class="p-3 text-right">Subtotal</th>
+              <th class="p-3 text-right">Diskon</th>
+              <th class="p-3 text-right">Pajak PB1</th>
+              <th class="p-3 text-right">Total Bersih</th>
+              <th class="p-3 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="ledgerTableBody" class="divide-y divide-[#E7DFD5] dark:divide-[#334155] bg-white dark:bg-[#1E293B]">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         4. KATALOG & PENGATURAN PRODUK MENU (CRUD & LIVE STOCK)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionProductCatalog">
+      
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[24px]">restaurant_menu</span>
+            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">
+              Katalog Produk & Kelola Menu (CRUD Hidangan & Live Stok)
+            </h2>
+          </div>
+          <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-0.5">
+            Tambah hidangan baru, ubah harga, level pedas, foto, atau ubah status ke <strong>"Sold Out"</strong>. Perubahan langsung tersinkron ke POS Kasir & QR Tamu!
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Button Tambah Menu Baru -->
+          <button onclick="openProductModal()" class="touch-btn px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>+ Tambah Menu Baru</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills & Search for Menu Manager -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 text-xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="menuFilterPills">
+          <button onclick="filterCatalogCategory('all')" class="cat-pill px-3 py-1.5 rounded-xl font-heading font-bold bg-amber-500 text-[#0F172A] active">Semua Menu</button>
+          <button onclick="filterCatalogCategory('arabian')" class="cat-pill px-3 py-1.5 rounded-xl font-heading font-bold bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300">Arabian Delights 🕌</button>
+          <button onclick="filterCatalogCategory('malaysian')" class="cat-pill px-3 py-1.5 rounded-xl font-heading font-bold bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300">Malaysian Favorites 🇲🇾</button>
+          <button onclick="filterCatalogCategory('thai')" class="cat-pill px-3 py-1.5 rounded-xl font-heading font-bold bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300">Thai Specialties 🇹🇭</button>
+          <button onclick="filterCatalogCategory('drinks')" class="cat-pill px-3 py-1.5 rounded-xl font-heading font-bold bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300">Artisan Drinks 🍹</button>
+        </div>
+
+        <div class="relative min-w-[200px]">
+          <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-stone-400">search</span>
+          <input type="text" id="catalogSearchInput" oninput="handleCatalogSearch(this.value)" placeholder="Cari nama menu..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs outline-none focus:border-amber-500 text-[#1C1917] dark:text-white" />
+        </div>
+      </div>
+
+      <!-- Grid Cards Menu Catalog -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5" id="catalogManagerGrid">
+        <!-- Rendered by JS -->
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         5. DIREKTORI PELANGGAN & MEMBER LOYALITAS (CRM DATABASE)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionCrmMembers">
+      
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[24px]">stars</span>
+            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">
+              Direktori Pelanggan & Member Loyalitas (CRM Database)
+            </h2>
+          </div>
+          <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-0.5">
+            Kelola data pelanggan setia, level diskon (VIP Gold 10%, VIP Silver 5%), serta akumulasi poin transaksi.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Button Tambah Member -->
+          <button onclick="openMemberModal()" class="touch-btn px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">person_add</span>
+            <span>+ Daftarkan Member Baru</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Member Search Bar -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="relative flex-1 max-w-sm">
+          <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-stone-400">search</span>
+          <input type="text" id="memberSearchInput" oninput="handleMemberSearch(this.value)" placeholder="Cari nama, no. WhatsApp, atau ID member..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs outline-none focus:border-amber-500 text-[#1C1917] dark:text-white" />
+        </div>
+        <div id="memberCountBadge" class="text-xs font-semibold text-stone-500">
+          4 Member Terdaftar
+        </div>
+      </div>
+
+      <!-- Members Table -->
+      <div class="overflow-x-auto rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-500 font-heading border-b border-[#E7DFD5] dark:border-[#334155]">
+            <tr>
+              <th class="p-3">ID Member</th>
+              <th class="p-3">Nama Pelanggan</th>
+              <th class="p-3">WhatsApp</th>
+              <th class="p-3">Tier Loyalitas</th>
+              <th class="p-3 text-right">Poin Tersedia</th>
+              <th class="p-3 text-center">Total Kunjungan</th>
+              <th class="p-3">Kunjungan Terakhir</th>
+              <th class="p-3">Catatan / Preferensi</th>
+              <th class="p-3 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="memberTableBody" class="divide-y divide-[#E7DFD5] dark:divide-[#334155] bg-white dark:bg-[#1E293B]">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         4. RESTAURANT SYSTEM CONFIGURATION (Tax, Printer, CRM)
+         ============================================================ -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- 1. Pajak & Keuangan -->
+      <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs flex flex-col justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-amber-500 text-[20px]">account_balance</span>
+            <h3 class="font-heading font-bold text-base text-[#1C1917] dark:text-white">Pajak & Format Tagihan</h3>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="text-stone-600 dark:text-stone-300 font-semibold block mb-1">Tarif Pajak Restoran (PB1)</label>
+              <div class="flex items-center gap-2">
+                <input id="cfgTaxRate" type="number" value="10" class="w-20 px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-bold text-center" />
+                <span class="font-bold">% (Standar Pemda PB1)</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-stone-600 dark:text-stone-300 font-semibold block mb-1">Service Charge Resto</label>
+              <div class="flex items-center gap-2">
+                <input id="cfgServiceCharge" type="number" value="0" class="w-20 px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-bold text-center" />
+                <span class="font-bold">% (Opsional Layanan)</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-stone-600 dark:text-stone-300 font-semibold block mb-1">Simbol Mata Uang</label>
+              <input id="cfgCurrency" type="text" value="Rp " class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-bold" />
+            </div>
+          </div>
+        </div>
+
+        <button onclick="saveFinancialSettings()" class="touch-btn w-full py-2.5 rounded-xl bg-amber-500 text-[#0F172A] font-heading font-bold text-xs uppercase tracking-wider">
+          Simpan Tarif Finansial
+        </button>
+      </div>
+
+      <!-- 2. Thermal Printer Setting -->
+      <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs flex flex-col justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-amber-500 text-[20px]">print</span>
+            <h3 class="font-heading font-bold text-base text-[#1C1917] dark:text-white">Printer Thermal Kasir</h3>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="text-stone-600 dark:text-stone-300 font-semibold block mb-1">Lebar Kertas Struk</label>
+              <select id="cfgPaperWidth" class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white">
+                <option value="80mm" selected>80 mm (Standar POS Resto Cepat)</option>
+                <option value="58mm">58 mm (Printer Bluetooth Portable Mini)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-stone-600 dark:text-stone-300 font-semibold block mb-1">Pesan Footer Struk</label>
+              <textarea id="cfgReceiptFooter" rows="2" class="w-full p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">Terima kasih atas kunjungan Anda! Makanan Halal, Berkah & Thayyib.</textarea>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <input type="checkbox" id="cfgAutoCut" checked class="accent-amber-500 w-4 h-4" />
+              <label for="cfgAutoCut" class="text-stone-700 dark:text-stone-300 font-medium">Auto-Cut Kertas Setelah Print</label>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="savePrinterSettings()" class="touch-btn w-full py-2.5 rounded-xl bg-amber-500 text-[#0F172A] font-heading font-bold text-xs uppercase tracking-wider">
+          Simpan Profil Printer
+        </button>
+      </div>
+
+      <!-- 3. RASH Concierge Official Support -->
+      <div class="bg-gradient-to-br from-amber-600 via-amber-700 to-stone-900 text-white rounded-3xl p-6 shadow-md flex flex-col justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="material-symbols-outlined text-amber-300 text-[24px]">support_agent</span>
+            <h3 class="font-heading font-extrabold text-base text-white">RASH Concierge & Support 24/7</h3>
+          </div>
+          <p class="text-xs text-amber-100/90 leading-relaxed">
+            Hubungi tim teknis RASH WebApp Builder langsung via WhatsApp untuk penambahan kuota meja, kustomisasi menu, integrasi printer dapur, atau bantuan darurat.
+          </p>
+          <div class="mt-4 p-3 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10 space-y-1 text-xs">
+            <div class="flex justify-between">
+              <span class="text-stone-300">SLA Tanggap:</span>
+              <span class="font-bold text-amber-300">&lt; 15 Menit</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-300">Direct Engineer:</span>
+              <span class="font-bold text-white">RASH Technical Lead</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://wa.me/6281200000000?text=Halo%20RASH%20WebApp%20Builder%2C%20saya%20pemilik%20Resto%20Pro%20ID%3A%20RASH-PRO-88219%20membutuhkan%20bantuan" target="_blank" class="touch-btn w-full py-3 rounded-xl bg-white text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:bg-amber-100 transition-all">
+          <span class="material-symbols-outlined text-[18px]">chat</span>
+          <span>Buka WhatsApp Support (+62 812-XXXX-RASH)</span>
+        </a>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         5. MANAJEMEN RESERVASI MEJA RESTORAN (TABLE BOOKINGS LEDGER)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionReservations">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">event_seat</span>
+          </div>
+          <div>
+            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Manajemen Reservasi Meja Restoran</h2>
+            <p class="text-xs text-stone-500">Pantau jadwal booking tamu, pre-order sajian, dan sinkronisasi denah meja kasir</p>
+          </div>
+        </div>
+
+        <button onclick="openOwnerAddReservationModal()" class="touch-btn px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0">
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          <span>+ Buat Reservasi Meja</span>
+        </button>
+      </div>
+
+      <!-- Filter Tabs & Search -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="resStatusFilterButtons">
+          <button onclick="filterOwnerReservationStatus('all')" class="res-status-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold shadow-xs">Semua</button>
+          <button onclick="filterOwnerReservationStatus('confirmed')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Menunggu Tamu</button>
+          <button onclick="filterOwnerReservationStatus('seated')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Sudah Duduk</button>
+          <button onclick="filterOwnerReservationStatus('cancelled')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Dibatalkan</button>
+        </div>
+
+        <div class="relative w-full sm:w-64">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-stone-400 text-[16px]">search</span>
+          <input 
+            type="text" 
+            placeholder="Cari nama tamu / meja..." 
+            oninput="handleOwnerReservationSearch(this.value)"
+            class="w-full pl-9 pr-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500"
+          />
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div class="overflow-x-auto border border-[#E7DFD5] dark:border-[#334155] rounded-2xl">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-600 dark:text-stone-400 font-heading font-bold border-b border-[#E7DFD5] dark:border-[#334155]">
+            <tr>
+              <th class="py-3 px-4">ID & Meja</th>
+              <th class="py-3 px-4">Tamu & Kontak</th>
+              <th class="py-3 px-4">Jadwal / Waktu</th>
+              <th class="py-3 px-4">Pax</th>
+              <th class="py-3 px-4">Catatan & Pre-Order</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="ownerReservationTableBody" class="divide-y divide-[#E7DFD5] dark:divide-[#334155] bg-white dark:bg-[#1E293B]">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         5B. MANAJEMEN DENAH MEJA RESTORAN (CRUD MEJA & CETAK STIKER QR)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionTableManagement">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">table_restaurant</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Manajemen Denah & Meja Restoran</h2>
+              <span id="ownerTableCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                12 Meja Aktif
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Tambah meja baru, ubah kapasitas kursi, hapus meja, dan cetak stiker QR akrilik</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="table_qr_print_sheet.html" target="_blank" class="touch-btn px-4 py-2.5 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-heading font-bold text-xs flex items-center gap-1.5 border border-stone-300 dark:border-stone-700 transition-all">
+            <span class="material-symbols-outlined text-[18px]">print</span>
+            <span>🖨️ Cetak Stiker QR Akrilik</span>
+          </a>
+
+          <button onclick="openAddTableModal()" class="touch-btn px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>+ Tambah Meja Baru</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tables Grid View -->
+      <div id="ownerTablesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+
+
+
+
+    <!-- ============================================================
+         6. PENCADANGAN & PEMULIHAN DATABASE (BACKUP & RESTORE JSON)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionBackupRestore">
+      <div class="flex items-center gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+          <span class="material-symbols-outlined text-[24px]">cloud_sync</span>
+        </div>
+        <div>
+          <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Pencadangan & Pemulihan Database (Backup & Restore JSON)</h2>
+          <p class="text-xs text-stone-500">Unduh arsip lengkap offline atau pulihkan riwayat transaksi, menu, member, dan tiket dalam 1 klik</p>
+        </div>
+      </div>
+
+      <!-- Action Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- Card 1: Full Backup -->
+        <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between gap-3">
+          <div>
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold mb-2">
+              <span class="material-symbols-outlined text-[20px]">download</span>
+            </div>
+            <h3 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Unduh Backup Penuh (.json)</h3>
+            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+              Ekspor seluruh data transaksi kasir, katalog hidangan dinamis, data pelanggan CRM, dan reservasi meja ke file JSON aman.
+            </p>
+          </div>
+          <button onclick="RestoSync.backupFullDatabaseJSON()" class="touch-btn w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">file_download</span>
+            <span>Unduh Cadangan JSON</span>
+          </button>
+        </div>
+
+        <!-- Card 2: Restore from File -->
+        <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between gap-3">
+          <div>
+            <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold mb-2">
+              <span class="material-symbols-outlined text-[20px]">upload_file</span>
+            </div>
+            <h3 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Pulihkan Data (Restore)</h3>
+            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+              Unggah file JSON cadangan untuk memulihkan seluruh riwayat penjualan dan konfigurasi menu seketika tanpa koneksi internet.
+            </p>
+          </div>
+          <input type="file" id="restoreFileInput" accept=".json,application/json" class="hidden" onchange="handleRestoreFileUpload(event)" />
+          <button onclick="triggerRestoreFileInput()" class="touch-btn w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">cloud_upload</span>
+            <span>Pilih Berkas JSON Restore</span>
+          </button>
+        </div>
+
+        <!-- Card 3: Factory Demo Reset -->
+        <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-red-200 dark:border-red-900/40 flex flex-col justify-between gap-3">
+          <div>
+            <div class="w-9 h-9 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center font-bold mb-2">
+              <span class="material-symbols-outlined text-[20px]">restart_alt</span>
+            </div>
+            <h3 class="font-heading font-bold text-sm text-red-600 dark:text-red-400">Reset Demo Pabrik</h3>
+            <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+              Kembalikan seluruh data ke kondisi awal pabrik. Berguna untuk mendemonstrasikan sistem dari nol atau membersihkan data uji coba.
+            </p>
+          </div>
+          <button onclick="RestoSync.resetDemoData()" class="touch-btn w-full py-2.5 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 text-red-600 dark:text-red-300 border border-red-300 dark:border-red-800 font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">delete_forever</span>
+            <span>Reset Demo Pabrik</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Bulk Migration & Import Data Lama Tools -->
+      <div class="mt-6 pt-5 border-t border-[#E7DFD5] dark:border-[#334155]">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-indigo-500 text-[22px]">swap_horizontal_circle</span>
+              <span>Migrasi Data Lama & Skalabilitas Supabase</span>
+            </h3>
+            <p class="text-xs text-stone-500">Pindahkan data menu dan member dari aplikasi lama secara massal, atau hubungkan ke Supabase (PostgreSQL) jika Google Sheets penuh</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          <!-- Bulk Import Menu CSV -->
+          <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-indigo-200 dark:border-indigo-900/40 flex flex-col justify-between gap-3">
+            <div>
+              <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold mb-2">
+                <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
+              </div>
+              <h4 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Import Massal Menu (CSV)</h4>
+              <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+                Pindahkan puluhan/ratusan daftar menu makanan & minuman dari Excel/CSV aplikasi lama sekali upload.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <input type="file" id="menuCsvFileInput" accept=".csv,text/csv" class="hidden" onchange="handleMenuCsvUpload(event)" />
+              <button onclick="document.getElementById('menuCsvFileInput').click()" class="touch-btn w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">upload</span>
+                <span>Unggah File Menu CSV</span>
+              </button>
+              <button onclick="downloadSampleMenuCSV()" class="touch-btn w-full py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold text-[10px] flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">file_download</span>
+                <span>Unduh Contoh Format CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bulk Import Member CRM CSV -->
+          <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-cyan-200 dark:border-cyan-900/40 flex flex-col justify-between gap-3">
+            <div>
+              <div class="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold mb-2">
+                <span class="material-symbols-outlined text-[20px]">group_add</span>
+              </div>
+              <h4 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Import Massal Member (CSV)</h4>
+              <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+                Pindahkan database kontak pelanggan, nomor WhatsApp, dan saldo poin lama dari sistem loyalitas sebelumnya.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <input type="file" id="memberCsvFileInput" accept=".csv,text/csv" class="hidden" onchange="handleMemberCsvUpload(event)" />
+              <button onclick="document.getElementById('memberCsvFileInput').click()" class="touch-btn w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">upload</span>
+                <span>Unggah File Member CSV</span>
+              </button>
+              <button onclick="downloadSampleMemberCSV()" class="touch-btn w-full py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold text-[10px] flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">file_download</span>
+                <span>Unduh Contoh Format CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Supabase Cloud PostgreSQL Connector -->
+          <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-emerald-200 dark:border-emerald-900/40 flex flex-col justify-between gap-3">
+            <div>
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold mb-2">
+                <span class="material-symbols-outlined text-[20px]">database</span>
+              </div>
+              <h4 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Konektor Supabase (PostgreSQL)</h4>
+              <p class="text-xs text-stone-500 mt-1 leading-relaxed">
+                Jika kuota Google Sheets (10 juta sel) mendekati penuh, hubungkan REST API Supabase untuk kapasitas jutaan transaksi sub-50ms.
+              </p>
+            </div>
+            <div class="space-y-2">
+              <button onclick="openSupabaseModal()" class="touch-btn w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">settings_ethernet</span>
+                <span>Konfigurasi Supabase</span>
+              </button>
+              <button onclick="downloadSupabaseSqlScript()" class="touch-btn w-full py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold text-[10px] flex items-center justify-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">code</span>
+                <span>Unduh SETUP_SUPABASE.sql</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- ============================================================
+         7. INTEGRASI GOOGLE APPS SCRIPT (GAS) & GOOGLE SHEETS BACKEND
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionGasBackend">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">database</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Backend Google Apps Script & Google Sheets</h2>
+              <span id="gasStatusPill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                Mode Offline
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Database cloud murni gratis memanfaatkan Google Sheets melalui pure REST API (doGet & doPost)</p>
+          </div>
+        </div>
+
+        <a href="backend/PANDUAN_SETUP_GOOGLE_APPS_SCRIPT.md" target="_blank" class="touch-btn px-3.5 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:text-amber-600 text-xs font-heading font-bold flex items-center gap-1.5 transition-colors self-start md:self-auto">
+          <span class="material-symbols-outlined text-[16px]">menu_book</span>
+          <span>Buku Panduan Setup GAS</span>
+        </a>
+      </div>
+
+      <!-- GAS Web App URL Input & Controls -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
+        
+        <!-- Field 1: Web App URL -->
+        <div>
+          <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white block mb-1">
+            Google Apps Script Web App Deployment URL <span class="text-stone-400 font-normal">(harus berakhiran <code>/exec</code>)</span>
+          </label>
+          <input 
+            id="gasWebappUrlInput" 
+            type="url" 
+            placeholder="Contoh: https://script.google.com/macros/s/AKfycbx.../exec" 
+            class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none focus:border-emerald-500"
+          />
+          <p class="text-[11px] text-stone-500 mt-1">
+            Salin URL deployment Web App dari Google Apps Script (Who has access: <strong>Anyone</strong>).
+          </p>
+        </div>
+
+        <!-- Field 2: API Secret Key (Admin Security Token) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">vpn_key</span>
+              <span>API Secret Key (Kunci Rahasia Otorisasi Server)</span>
+            </label>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">shield</span> Proteksi Role-Based Aktif
+            </span>
+          </div>
+          <div class="relative w-full">
+            <input 
+              id="gasApiKeyInput" 
+              type="password" 
+              placeholder="Contoh: RP-SEC-XXXXXXXXXX (didapat saat menjalankan setupAppEnvironment)" 
+              class="w-full pl-3.5 pr-10 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none focus:border-emerald-500"
+            />
+            <button 
+              type="button" 
+              onclick="toggleGasApiKeyVisibility()" 
+              class="absolute right-3 top-2.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors"
+              title="Tampilkan / Sembunyikan API Key"
+            >
+              <span id="gasApiKeyToggleIcon" class="material-symbols-outlined text-[18px]">visibility</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-stone-500 mt-1">
+            Kunci rahasia untuk mengesahkan aksi CRUD menu, sinkronisasi omset, dan CRM member. Pelanggan di meja QR hanya diizinkan melihat menu & pesan meja, dan tidak bisa mengubah data apapun tanpa kunci ini.
+          </p>
+        </div>
+
+        <!-- Save Configuration Button -->
+        <div class="flex justify-end pt-1">
+          <button onclick="saveGasUrlSetting()" class="touch-btn w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span>Simpan Konfigurasi Cloud & Kunci</span>
+          </button>
+        </div>
+
+        <!-- Action Buttons: Ping, Push, Pull -->
+        <div class="pt-3 border-t border-stone-200/60 dark:border-stone-800 flex flex-wrap items-center gap-2.5">
+          <button onclick="testGasConnection()" id="btnTestGasPing" class="touch-btn px-3.5 py-2 rounded-xl bg-stone-200/70 dark:bg-stone-800 text-stone-800 dark:text-stone-200 hover:bg-emerald-500 hover:text-white font-heading font-bold text-xs flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">network_ping</span>
+            <span>Uji Koneksi & Otorisasi Key</span>
+          </button>
+
+          <button onclick="pushDataToGoogleSheets()" class="touch-btn px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 font-heading font-bold text-xs flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">cloud_upload</span>
+            <span>Upload Data Lokal ke Sheets (Push)</span>
+          </button>
+
+          <button onclick="pullDataFromGoogleSheets()" class="touch-btn px-3.5 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 font-heading font-bold text-xs flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">cloud_download</span>
+            <span>Tarik Data dari Sheets (Pull)</span>
+          </button>
+
+          <button onclick="copyMagicSetupLink()" class="touch-btn px-3.5 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-100 font-heading font-bold text-xs flex items-center gap-1.5 transition-all">
+            <span class="material-symbols-outlined text-[16px]">link</span>
+            <span>Salin Magic Link Kasir/Dapur</span>
+          </button>
+        </div>
+
+        <!-- Connection Feedback Log -->
+        <div id="gasStatusFeedback" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
+      </div>
+
+      <!-- Quick Setup Instruction Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs text-stone-600 dark:text-stone-300">
+        <div class="p-3.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+          <span class="font-heading font-extrabold text-amber-600 dark:text-amber-400 block mb-1">1. Salin Kode.gs</span>
+          Salin seluruh kode dari file <code>backend/Kode.gs</code> ke proyek baru di <strong>script.google.com</strong>.
+        </div>
+        <div class="p-3.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+          <span class="font-heading font-extrabold text-emerald-600 dark:text-emerald-400 block mb-1">2. Jalankan setupAppEnvironment()</span>
+          Pilih fungsi <code>setupAppEnvironment</code> lalu klik Run. Google Sheets dengan 6 sheet akan dibuat secara otomatis.
+        </div>
+        <div class="p-3.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+          <span class="font-heading font-extrabold text-indigo-600 dark:text-indigo-400 block mb-1">3. Deploy Web App</span>
+          Deploy ➔ New deployment ➔ Web app ➔ Execute as: Me ➔ Who has access: <strong>Anyone</strong>. Salin URL ke form di atas.
+        </div>
+      </div>
+    </section>
+
+
+
+  </main>
+
+  <!-- ============================================================
+       MODAL: FORMULIR TAMBAH / EDIT MEJA RESTORAN (CRUD MEJA)
+       ============================================================ -->
+  <div id="tableFormModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 animate-scaleUp">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500 text-[22px]">table_restaurant</span>
+          <h3 id="tableModalTitle" class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">Tambah Meja Restoran</h3>
+        </div>
+        <button onclick="closeTableModal()" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+
+      <form id="ownerTableForm" onsubmit="handleSaveOwnerTable(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="tableFormEditId" value="" />
+        
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Nama / Label Meja <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="tableFormName" required placeholder="Contoh: Meja 13 / VIP Outdoor" class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Kapasitas Kursi <span class="text-red-500">*</span>
+            </label>
+            <input type="number" id="tableFormSeats" min="1" max="50" value="4" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+          </div>
+
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Seksi Ruangan <span class="text-red-500">*</span>
+            </label>
+            <select id="tableFormSection" class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500">
+              <option value="Indoor AC">Indoor AC</option>
+              <option value="Outdoor Garden">Outdoor Garden</option>
+              <option value="VIP Private Room">VIP Private Room</option>
+              <option value="Rooftop">Rooftop Area</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-2 border-t border-[#E7DFD5] dark:border-[#334155]">
+          <button type="button" onclick="closeTableModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">
+            Batal
+          </button>
+          <button type="submit" class="touch-btn px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-extrabold flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span>Simpan Meja</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: FORMULIR TAMBAH / EDIT PRODUK & MENU RESTO PRO
+       ============================================================ -->
+  <div id="productModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col animate-scaleUp">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between sticky top-0 bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-sm z-10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[22px]">restaurant_menu</span>
+          </div>
+          <div>
+            <h3 id="productModalTitle" class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">
+              Tambah Menu Baru
+            </h3>
+            <p class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Katalog Produk Resto Pro</p>
+          </div>
+        </div>
+        <button onclick="closeProductModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-800 dark:hover:text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form id="productForm" onsubmit="saveProductForm(event)" class="p-6 space-y-4 text-xs">
+        <input type="hidden" id="prodFormId" value="" />
+
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Nama Hidangan / Minuman <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="prodFormName" required placeholder="Contoh: Nasi Mandhi Daging Kambing" class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Kategori Kuliner <span class="text-red-500">*</span>
+            </label>
+            <select id="prodFormCategory" class="w-full px-3 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500">
+              <option value="arabian">Arabian Delights 🕌</option>
+              <option value="malaysian">Malaysian Favorites 🇲🇾</option>
+              <option value="thai">Thai Specialties 🇹🇭</option>
+              <option value="drinks">Artisan Drinks 🍹</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Harga Jual (Rp) <span class="text-red-500">*</span>
+            </label>
+            <input type="number" id="prodFormPrice" required min="1000" step="500" placeholder="65000" class="w-full px-3 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono font-bold text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Tingkat Kepedasan (🌶️)
+            </label>
+            <select id="prodFormSpicy" class="w-full px-3 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500">
+              <option value="0">Level 0 (Tanpa Pedas / Manis Gurih)</option>
+              <option value="1">Level 1 🌶️ (Pedas Lembut)</option>
+              <option value="2">Level 2 🌶️🌶️ (Pedas Sedang)</option>
+              <option value="3">Level 3 🌶️🌶️🌶️ (Pedas Mantap)</option>
+              <option value="4">Level 4 🌶️🌶️🌶️🌶️ (Sangat Pedas)</option>
+              <option value="5">Level 5 🌶️🌶️🌶️🌶️🌶️ (Pedas Ekstrem)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Porsi / Sajian
+            </label>
+            <input type="text" id="prodFormPortion" placeholder="Contoh: 1 Porsi (Nasi Basmati + Kambing 250g)" class="w-full px-3 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            URL Foto Makanan (Unsplash / Link Gambar)
+          </label>
+          <input type="url" id="prodFormImage" placeholder="https://images.unsplash.com/photo-..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#1C1917] dark:text-white outline-none focus:border-amber-500 font-mono text-[11px]" />
+        </div>
+
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Deskripsi Rasa & Komposisi
+          </label>
+          <textarea id="prodFormDesc" rows="3" placeholder="Jelaskan aroma rempah, kelembutan daging, dan saus cocolan..." class="w-full p-3 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#1C1917] dark:text-white outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between gap-4">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="prodFormIsPopular" class="w-4 h-4 accent-amber-500 rounded" />
+            <span class="font-heading font-bold text-[#1C1917] dark:text-white">Menu Rekomendasi Chef / Best Seller ⭐</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" id="prodFormIsSoldOut" class="w-4 h-4 accent-red-500 rounded" />
+            <span class="font-heading font-bold text-red-500">Status Habis (Sold Out)</span>
+          </label>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-[#E7DFD5] dark:border-[#334155]">
+          <button type="button" onclick="closeProductModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-heading font-bold">
+            Batal
+          </button>
+          <button type="submit" class="touch-btn px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold flex items-center gap-1.5 shadow-md">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Simpan Menu</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: FORMULIR TAMBAH / EDIT MEMBER CRM
+       ============================================================ -->
+  <div id="memberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl w-full max-w-lg shadow-2xl flex flex-col animate-scaleUp">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[22px]">badge</span>
+          </div>
+          <div>
+            <h3 id="memberModalTitle" class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">
+              Pendaftaran Member Baru
+            </h3>
+            <p class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Database Pelanggan CRM Resto Pro</p>
+          </div>
+        </div>
+        <button onclick="closeMemberModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-800 dark:hover:text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form id="memberForm" onsubmit="saveMemberForm(event)" class="p-6 space-y-4 text-xs">
+        <input type="hidden" id="memFormId" value="" />
+
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Nama Lengkap Pelanggan <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="memFormName" required placeholder="Contoh: dr. Faisal Ramadhan" class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Nomor WhatsApp / HP <span class="text-red-500">*</span>
+            </label>
+            <input type="tel" id="memFormPhone" required placeholder="081234567890" class="w-full px-3 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono font-bold text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+          </div>
+
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Tier Loyalitas <span class="text-red-500">*</span>
+            </label>
+            <select id="memFormTier" class="w-full px-3 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500">
+              <option value="gold">VIP Gold Member (Diskon 10%)</option>
+              <option value="silver">VIP Silver Member (Diskon 5%)</option>
+              <option value="regular" selected>Reguler Member (Kumpul Poin)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Saldo Poin Awal
+          </label>
+          <input type="number" id="memFormPoints" value="100" min="0" class="w-full px-3 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono font-bold text-[#1C1917] dark:text-white outline-none focus:border-amber-500" />
+          <span class="text-[10px] text-stone-400 mt-1 block">Bonus awal 100 poin selamat datang untuk member baru.</span>
+        </div>
+
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Catatan Khusus (Alergi, Meja Favorit, Preferensi)
+          </label>
+          <textarea id="memFormNotes" rows="2" placeholder="Contoh: Suka meja dekat kolam air mancur, tanpa rempah cengkeh..." class="w-full p-3 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#1C1917] dark:text-white outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-[#E7DFD5] dark:border-[#334155]">
+          <button type="button" onclick="closeMemberModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-heading font-bold">
+            Batal
+          </button>
+          <button type="submit" class="touch-btn px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold flex items-center gap-1.5 shadow-md">
+            <span class="material-symbols-outlined text-[18px]">how_to_reg</span>
+            <span>Simpan Data Member</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: FORMULIR TAMBAH RESERVASI MEJA DARI OWNER
+       ============================================================ -->
+  <div id="ownerReservationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col animate-scaleUp">
+      <div class="p-5 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[20px]">event_seat</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">
+              Formulir Reservasi Meja
+            </h3>
+            <p class="text-xs text-stone-500">Tambah jadwal pemesanan meja dan pre-order tamu</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeOwnerAddReservationModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-900 dark:hover:text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <form id="ownerReservationForm" onsubmit="saveOwnerReservationForm(event)" class="p-5 space-y-3.5 text-xs">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Pilih Meja Resto <span class="text-red-500">*</span>
+            </label>
+            <select id="ownerResTable" required class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500">
+              <option value="T07" selected>Meja 07 - Outdoor Garden (8 Kursi)</option>
+              <option value="T08">Meja 08 - Outdoor Garden (4 Kursi)</option>
+              <option value="T09">Meja 09 - Outdoor Garden (4 Kursi)</option>
+              <option value="T10">Meja 10 - Outdoor Garden (6 Kursi)</option>
+              <option value="T11">Meja 11 - VIP Private Room (8 Kursi)</option>
+              <option value="T12">Meja 12 - VIP Private Room (6 Kursi)</option>
+              <option value="T01">Meja 01 - Indoor AC (2 Kursi)</option>
+              <option value="T02">Meja 02 - Indoor AC (4 Kursi)</option>
+              <option value="T03">Meja 03 - Indoor AC (4 Kursi)</option>
+              <option value="T04">Meja 04 - Indoor AC (6 Kursi)</option>
+              <option value="T05">Meja 05 - Indoor AC (4 Kursi)</option>
+              <option value="T06">Meja 06 - Indoor AC (4 Kursi)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Jam Kedatangan <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="ownerResTime" required placeholder="Contoh: 19:30 WIB" class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono font-bold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Tanggal Kunjungan <span class="text-red-500">*</span>
+            </label>
+            <input type="date" id="ownerResDate" required class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Jumlah Tamu (Pax)
+            </label>
+            <input type="number" id="ownerResGuests" value="4" min="1" max="25" class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-bold text-center text-[#1C1917] dark:text-white" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Nama Tamu / Pemesan <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="ownerResName" required placeholder="Bpk / Ibu..." class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500" />
+          </div>
+
+          <div>
+            <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+              Nomor WhatsApp / HP <span class="text-red-500">*</span>
+            </label>
+            <input type="tel" id="ownerResPhone" required placeholder="081234567890" class="w-full px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono font-bold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="font-heading font-bold text-stone-700 dark:text-stone-300 block mb-1">
+            Catatan Khusus Tamu & Pre-Order Sajian
+          </label>
+          <textarea id="ownerResNotes" rows="2" placeholder="Contoh: Meja arisan keluarga besar, siapkan lilin ulang tahun & teh tarik panas lebih awal..." class="w-full p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#1C1917] dark:text-white outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-[#E7DFD5] dark:border-[#334155]">
+          <button type="button" onclick="closeOwnerAddReservationModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-heading font-bold">
+            Batal
+          </button>
+          <button type="submit" class="touch-btn px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-extrabold flex items-center gap-1.5 shadow-md">
+            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+            <span>Simpan Jadwal Reservasi</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: KONFIGURASI SUPABASE (POSTGRESQL ENTERPRISE SCALING)
+       ============================================================ -->
+  <div id="supabaseConfigModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-lg rounded-3xl border border-[#E7DFD5] dark:border-[#334155] shadow-2xl p-6 flex flex-col gap-4 animate-in zoom-in-95">
+      <div class="flex items-center justify-between pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">database</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">Konektor Database Supabase</h3>
+            <p class="text-xs text-stone-500">Skalabilitas jutaan transaksi saat Google Sheets penuh</p>
+          </div>
+        </div>
+        <button onclick="closeSupabaseModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 text-xs text-emerald-800 dark:text-emerald-300 space-y-1">
+        <p class="font-bold flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">info</span>
+          <span>Kapan Mengaktifkan Supabase?</span>
+        </p>
+        <p class="text-[11px] leading-relaxed">
+          Google Sheets memiliki batas kuota 10 juta sel. Jika restoran Anda telah memproses lebih dari ratusan ribu baris data, Anda bisa menghubungkan database PostgreSQL Supabase dengan latensi kueri ultra-cepat sub-50ms tanpa mengubah tampilan kasir maupun KDS.
+        </p>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-heading font-bold text-stone-700 dark:text-stone-300 mb-1">
+            Supabase Project URL:
+          </label>
+          <input type="url" id="supabaseUrlInput" placeholder="https://xyzcompany.supabase.co" class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono text-xs text-[#1C1917] dark:text-white outline-none focus:border-emerald-500" />
+        </div>
+
+        <div>
+          <label class="block font-heading font-bold text-stone-700 dark:text-stone-300 mb-1">
+            Supabase Anon Public API Key (atau Service Role Key):
+          </label>
+          <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full px-3.5 py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] font-mono text-xs text-[#1C1917] dark:text-white outline-none focus:border-emerald-500" />
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between">
+        <button onclick="downloadSupabaseSqlScript()" class="touch-btn px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold text-xs flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">download</span>
+          <span>Unduh SQL Schema</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="closeSupabaseModal()" class="touch-btn px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold text-xs">
+            Tutup
+          </button>
+          <button onclick="saveSupabaseSettings()" class="touch-btn px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-md">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span>Simpan Pengaturan</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Data & Logic Scripts -->
+  <script src="assets/js/resto-data.js"></script>
+  <script src="assets/js/resto-config.js"></script>
+  <script src="assets/js/resto-sync.js"></script>
+  <script>
+    // State Filter Global
+    let activeDatePreset = "today";
+    let activeCustomDate = "";
+    let activeCatalogCategory = "all";
+    let catalogSearchKeyword = "";
+    let memberSearchQuery = "";
+    let activeAnalyticsPeriod = "today";
+    let activeReservationStatus = "all";
+    let reservationSearchQuery = "";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      ThemeManager.init();
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(e => {});
+      }
+      initGasSettingsUI();
+      renderCatalogManager();
+      renderMembersTable();
+      renderLedgerTable();
+      refreshRevenueStats();
+      renderAnalyticsDashboard();
+      renderOwnerReservationsTable();
+      renderOwnerTables();
+      updateLicenseBannerUI();
+
+      // Listen to real-time events across windows
+      RestoSync.on("ORDER_PAID", () => {
+        refreshRevenueStats();
+        renderLedgerTable();
+        renderAnalyticsDashboard();
+      });
+
+      RestoSync.on("TABLES_UPDATED", () => {
+        renderOwnerTables();
+      });
+
+      RestoSync.on("LICENSE_STATUS_CHANGED", () => {
+        updateLicenseBannerUI();
+      });
+
+      RestoSync.on("TRANSACTION_SAVED", () => {
+        refreshRevenueStats();
+        renderLedgerTable();
+        renderMembersTable();
+        renderAnalyticsDashboard();
+      });
+
+      RestoSync.on("MENU_CATALOG_UPDATED", () => {
+        renderCatalogManager();
+        renderAnalyticsDashboard();
+      });
+
+      RestoSync.on("MEMBER_UPDATED", () => {
+        renderMembersTable();
+      });
+
+      RestoSync.on("RESERVATION_UPDATED", () => {
+        renderOwnerReservationsTable();
+      });
+
+      RestoSync.on("RESERVATION_CHECKED_IN", () => {
+        renderOwnerReservationsTable();
+      });
+
+      RestoSync.on("DATABASE_RESTORED", () => {
+        alert("Database telah dipulihkan! Dashboard SaaS akan memuat ulang...");
+        location.reload();
+      });
+    });
+
+    // ============================================================
+    // 1. RIWAYAT TRANSAKSI & BUKU KAS (MULTI-HARI FILTER)
+    // ============================================================
+    function handleDatePresetChange(val) {
+      activeDatePreset = val;
+      const customWrapper = document.getElementById("customDateWrapper");
+      const customInput = document.getElementById("ledgerCustomDatePicker");
+
+      if (val === "custom") {
+        customWrapper.classList.remove("hidden");
+        if (!customInput.value) {
+          customInput.value = new Date().toISOString().slice(0, 10);
+        }
+        activeCustomDate = customInput.value;
+      } else {
+        customWrapper.classList.add("hidden");
+        activeCustomDate = "";
+      }
+      renderLedgerTable();
+    }
+
+    function handleCustomDateChange(val) {
+      activeCustomDate = val;
+      renderLedgerTable();
+    }
+
+    function renderLedgerTable() {
+      const payFilter = document.getElementById("ledgerPaymentSelect") ? document.getElementById("ledgerPaymentSelect").value : "all";
+
+      const filterOptions = {
+        preset: activeDatePreset,
+        specificDate: activeCustomDate,
+        paymentMethod: payFilter
+      };
+
+      const list = RestoSync.getTransactions(filterOptions);
+
+      const tbody = document.getElementById("ledgerTableBody");
+      const countBadge = document.getElementById("ledgerFilterCount");
+      const revBadge = document.getElementById("ledgerFilterRevenue");
+      const taxBadge = document.getElementById("ledgerFilterTax");
+
+      const totalRevenue = list.reduce((sum, t) => sum + (t.grandTotal || 0), 0);
+      const totalTax = list.reduce((sum, t) => sum + (t.tax || 0), 0);
+
+      if (countBadge) countBadge.textContent = `${list.length} Struk`;
+      if (revBadge) revBadge.textContent = formatRupiah(totalRevenue);
+      if (taxBadge) taxBadge.textContent = formatRupiah(totalTax);
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" class="p-8 text-center text-stone-400">Tidak ada riwayat transaksi pada filter tanggal atau metode pembayaran yang dipilih.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(t => {
+        let payBadge = "";
+        if (t.paymentMethod === 'cash') payBadge = '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold text-[10px]">TUNAI</span>';
+        else if (t.paymentMethod === 'qris') payBadge = '<span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 font-bold text-[10px]">QRIS</span>';
+        else payBadge = '<span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 font-bold text-[10px]">EDC</span>';
+
+        const itemStr = (t.items || []).map(i => `${i.qty}x ${i.name}`).join(", ");
+
+        return `
+          <tr class="hover:bg-stone-50 dark:hover:bg-[#0F172A]/50 transition-colors">
+            <td class="p-3 font-mono font-bold text-amber-600 dark:text-amber-400">${t.billNo}</td>
+            <td class="p-3 text-stone-500 whitespace-nowrap">
+              <div>${t.dateStr}</div>
+              <div class="text-[10px] text-stone-400">${t.timeStr || '-'}</div>
+            </td>
+            <td class="p-3">
+              <div class="font-bold font-heading text-[#1C1917] dark:text-white">${t.table}</div>
+              <div class="text-[10px] text-stone-400 truncate max-w-[130px]">${t.customer}</div>
+            </td>
+            <td class="p-3 text-stone-600 dark:text-stone-300 whitespace-nowrap">
+              <div>${t.cashier || 'Kasir'}</div>
+              <div class="text-[10px] text-stone-400">${t.shift || 'Shift 1'}</div>
+            </td>
+            <td class="p-3 whitespace-nowrap">${payBadge}</td>
+            <td class="p-3 max-w-[200px] truncate text-stone-600 dark:text-stone-300" title="${itemStr}">
+              ${itemStr}
+            </td>
+            <td class="p-3 text-right font-mono text-stone-600 dark:text-stone-300 tabular-nums">${formatRupiah(t.subtotal)}</td>
+            <td class="p-3 text-right font-mono text-emerald-600 dark:text-emerald-400 tabular-nums">-${formatRupiah(t.discount || 0)}</td>
+            <td class="p-3 text-right font-mono text-stone-500 tabular-nums">${formatRupiah(t.tax)}</td>
+            <td class="p-3 text-right font-mono font-extrabold text-[#1C1917] dark:text-white tabular-nums">${formatRupiah(t.grandTotal)}</td>
+            <td class="p-3 text-center">
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 font-bold text-[10px]">
+                ${t.status || 'Lunas'}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function exportActiveLedgerCSV() {
+      const payFilter = document.getElementById("ledgerPaymentSelect") ? document.getElementById("ledgerPaymentSelect").value : "all";
+      const filterOptions = {
+        preset: activeDatePreset,
+        specificDate: activeCustomDate,
+        paymentMethod: payFilter
+      };
+      RestoSync.exportTransactionsToCSV(filterOptions);
+    }
+
+    function refreshRevenueStats() {
+      const allTrx = RestoSync.getTransactions();
+      const today = new Date().toISOString().slice(0, 10);
+      const todayTrx = allTrx.filter(t => t.dateStr === today);
+
+      const totalRev = todayTrx.reduce((sum, t) => sum + (t.grandTotal || 0), 0);
+      const totalCount = todayTrx.length;
+      const avgBill = totalCount > 0 ? Math.round(totalRev / totalCount) : 0;
+
+      const revEl = document.getElementById("statTotalRevenue");
+      const countEl = document.getElementById("statTotalOrders");
+      const avgEl = document.getElementById("statAvgBill");
+
+      if (revEl) revEl.textContent = formatRupiah(totalRev);
+      if (countEl) countEl.textContent = `${totalCount} Transaksi`;
+      if (avgEl) avgEl.textContent = formatRupiah(avgBill);
+
+      // Hitung distribusi pembayaran hari ini
+      const payAnalytics = RestoSync.getSalesAnalytics({ preset: "today" });
+      const qris = payAnalytics.payMap.qris || { percent: 54, revenue: 0 };
+      const cash = payAnalytics.payMap.cash || { percent: 32, revenue: 0 };
+      const card = payAnalytics.payMap.card || { percent: 14, revenue: 0 };
+
+      const elQris = document.getElementById("statPayQris");
+      const elCash = document.getElementById("statPayCash");
+      const elCard = document.getElementById("statPayCard");
+      const elBar = document.getElementById("statPayBar");
+
+      if (elQris) elQris.textContent = `${qris.percent}% (${formatRupiah(qris.revenue)})`;
+      if (elCash) elCash.textContent = `${cash.percent}% (${formatRupiah(cash.revenue)})`;
+      if (elCard) elCard.textContent = `${card.percent}% (${formatRupiah(card.revenue)})`;
+      if (elBar) {
+        elBar.innerHTML = `
+          <div class="bg-amber-500 h-full" style="width: ${qris.percent}%;"></div>
+          <div class="bg-emerald-500 h-full" style="width: ${cash.percent}%;"></div>
+          <div class="bg-purple-500 h-full" style="width: ${card.percent}%;"></div>
+        `;
+      }
+    }
+
+    // ============================================================
+    // 1B. BUSINESS INTELLIGENCE & ANALITIK GRAFIK
+    // ============================================================
+    function setAnalyticsPeriod(period) {
+      activeAnalyticsPeriod = period;
+      const pills = document.querySelectorAll("#analyticsPeriodPills .analytics-pill");
+      pills.forEach(p => {
+        p.className = "analytics-pill px-3 py-1.5 rounded-xl transition-all text-stone-600 dark:text-stone-300 hover:text-amber-500";
+      });
+      event.target.className = "analytics-pill px-3 py-1.5 rounded-xl transition-all bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A]";
+      renderAnalyticsDashboard();
+    }
+
+    function renderAnalyticsDashboard() {
+      const analytics = RestoSync.getSalesAnalytics({ preset: activeAnalyticsPeriod });
+
+      // Peak hour badge
+      const peakEl = document.getElementById("analyticsPeakHourBadge");
+      if (peakEl && analytics.peakHour) {
+        peakEl.innerHTML = `<span>🔥 Peak: ${analytics.peakHour.hour} (${formatRupiah(analytics.peakHour.revenue)})</span>`;
+      }
+
+      // 1. Render Hourly Bar Chart (08:00 - 22:00)
+      const chartContainer = document.getElementById("hourlyChartContainer");
+      if (chartContainer) {
+        const maxRev = Math.max(...analytics.hourlyData.map(h => h.revenue), 100000);
+        chartContainer.innerHTML = analytics.hourlyData.map(h => {
+          const heightPct = Math.max(6, Math.round((h.revenue / maxRev) * 100));
+          const isLunchPeak = ["11", "12", "13", "14"].includes(h.hour.slice(0, 2));
+          const isDinnerPeak = ["18", "19", "20", "21"].includes(h.hour.slice(0, 2));
+
+          const barGrad = isLunchPeak 
+            ? "bg-gradient-to-t from-amber-600 to-amber-400 dark:from-amber-500 dark:to-amber-300" 
+            : (isDinnerPeak 
+                ? "bg-gradient-to-t from-orange-600 to-amber-500" 
+                : "bg-stone-300 dark:bg-stone-700");
+
+          return `
+            <div class="flex-1 flex flex-col items-center h-full justify-end group relative px-0.5">
+              <!-- Tooltip Hover -->
+              <div class="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 text-white text-[10px] py-1 px-2 rounded-lg pointer-events-none whitespace-nowrap z-20 shadow-md">
+                <strong>${h.hour} WIB</strong><br/>
+                ${formatRupiah(h.revenue)} (${h.count} Trx)
+              </div>
+              
+              <!-- Bar -->
+              <div 
+                style="height: ${heightPct}%;" 
+                class="w-full max-w-[22px] ${barGrad} rounded-t-md transition-all duration-300 group-hover:scale-y-105"
+              ></div>
+
+              <!-- Hour Label -->
+              <span class="text-[9px] font-mono mt-1 text-stone-500 dark:text-stone-400 truncate">
+                ${h.hour.slice(0, 2)}
+              </span>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // 2. Render Cuisine Breakdown
+      const cuisineContainer = document.getElementById("cuisineBreakdownContainer");
+      if (cuisineContainer) {
+        const cats = Object.values(analytics.categoryTotals);
+        cuisineContainer.innerHTML = cats.map(c => {
+          return `
+            <div class="space-y-1">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-heading font-bold text-[#1C1917] dark:text-white flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${c.color};"></span>
+                  ${c.label}
+                </span>
+                <div class="font-mono font-bold text-stone-700 dark:text-stone-300 tabular-nums text-[11px]">
+                  ${c.percent}% • <span class="text-amber-600 dark:text-amber-400">${formatRupiah(c.revenue)}</span>
+                </div>
+              </div>
+              <div class="w-full bg-stone-200 dark:bg-stone-800 h-2 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500" style="width: ${c.percent}%; background-color: ${c.color};"></div>
+              </div>
+              <div class="text-[9px] text-stone-400 text-right">${c.qty} porsi terjual</div>
+            </div>
+          `;
+        }).join("");
+
+        // Dominant Cuisine Badge
+        const dominant = cats.reduce((prev, curr) => (curr.revenue > prev.revenue ? curr : prev), cats[0]);
+        const domBadge = document.getElementById("dominantCuisineBadge");
+        if (domBadge && dominant) {
+          domBadge.textContent = `${dominant.label} (${dominant.percent}%)`;
+        }
+      }
+
+      // 3. Render Sales Channel Breakdown (Dine-in vs Online Delivery)
+      const channelContainer = document.getElementById("channelBreakdownContainer");
+      if (channelContainer && analytics.channelBreakdown) {
+        const channels = Object.values(analytics.channelBreakdown);
+        channelContainer.innerHTML = channels.map(c => {
+          return `
+            <div class="p-3.5 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-[#1E293B] flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between text-xs font-bold mb-1">
+                  <span class="truncate flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background-color: ${c.color};"></span>
+                    <span class="text-stone-800 dark:text-white truncate text-[11px]">${c.label}</span>
+                  </span>
+                  <span class="font-mono text-amber-600 dark:text-amber-400 font-extrabold text-[11px] shrink-0">${c.percent}%</span>
+                </div>
+                <div class="w-full bg-stone-100 dark:bg-stone-800 h-1.5 rounded-full overflow-hidden mb-2">
+                  <div class="h-full rounded-full transition-all duration-300" style="width: ${c.percent}%; background-color: ${c.color};"></div>
+                </div>
+              </div>
+              <div class="space-y-1 text-[11px] border-t border-stone-100 dark:border-stone-800/60 pt-2">
+                <div class="flex justify-between text-stone-500">
+                  <span>Volume:</span>
+                  <span class="font-bold text-stone-700 dark:text-stone-300">${c.count} Trx</span>
+                </div>
+                <div class="flex justify-between text-stone-500">
+                  <span>Gross Omset:</span>
+                  <span class="font-bold text-stone-700 dark:text-stone-300">${formatRupiah(c.revenue)}</span>
+                </div>
+                ${c.commissionEstimate > 0 ? `
+                  <div class="flex justify-between text-red-500 text-[10px]">
+                    <span>Komisi (20%):</span>
+                    <span>-${formatRupiah(c.commissionEstimate)}</span>
+                  </div>
+                  <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-extrabold pt-0.5 border-t border-stone-200 dark:border-stone-800">
+                    <span>Net Resto:</span>
+                    <span>${formatRupiah(c.netRevenue)}</span>
+                  </div>
+                ` : `
+                  <div class="flex justify-between text-emerald-600 dark:text-emerald-400 font-extrabold pt-0.5 border-t border-stone-200 dark:border-stone-800">
+                    <span>Net Resto:</span>
+                    <span>${formatRupiah(c.netRevenue)}</span>
+                  </div>
+                `}
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // 4. Render Top 5 Best Sellers
+      const topContainer = document.getElementById("topSellingListContainer");
+      if (topContainer) {
+        const top5 = analytics.topSelling.slice(0, 5);
+        if (top5.length === 0) {
+          topContainer.innerHTML = `<div class="p-4 text-center text-stone-400 text-xs">Belum ada data penjualan pada periode ini.</div>`;
+        } else {
+          const rankBadges = [
+            '<span class="w-6 h-6 rounded-full bg-amber-400 text-amber-950 font-extrabold flex items-center justify-center text-xs shadow-sm">1</span>',
+            '<span class="w-6 h-6 rounded-full bg-slate-300 text-slate-800 font-extrabold flex items-center justify-center text-xs shadow-sm">2</span>',
+            '<span class="w-6 h-6 rounded-full bg-amber-700 text-white font-extrabold flex items-center justify-center text-xs shadow-sm">3</span>',
+            '<span class="w-6 h-6 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold flex items-center justify-center text-xs">4</span>',
+            '<span class="w-6 h-6 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 font-bold flex items-center justify-center text-xs">5</span>'
+          ];
+
+          topContainer.innerHTML = top5.map((item, idx) => {
+            return `
+              <div class="p-2.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between gap-3 shadow-xs hover:border-amber-500/50 transition-all">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  ${rankBadges[idx] || `<span class="w-6 text-center font-bold text-xs">${idx + 1}</span>`}
+                  <img src="${item.image}" alt="${item.name}" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-stone-200 dark:border-stone-700" />
+                  <div class="min-w-0">
+                    <span class="text-[9px] font-mono uppercase text-stone-500">${item.categoryLabel}</span>
+                    <h4 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate" title="${item.name}">
+                      ${item.name}
+                    </h4>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">${item.qty} Porsi Terjual</span>
+                  </div>
+                </div>
+
+                <div class="text-right shrink-0">
+                  <div class="font-heading font-extrabold text-xs text-amber-600 dark:text-amber-400 tabular-nums">
+                    ${formatRupiah(item.revenue)}
+                  </div>
+                  <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                    ${idx === 0 ? '👑 Juara Menu' : (idx === 1 ? '🔥 Best Seller' : '⭐ Populer')}
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+      }
+
+      // 4. Render Smart Business Insights & AI Actionable Tips
+      const insightsContainer = document.getElementById("smartInsightsContainer");
+      if (insightsContainer) {
+        const top1 = analytics.topSelling[0] ? analytics.topSelling[0].name : "Nasi Mandhi Daging Kambing";
+        const peakH = analytics.peakHour ? analytics.peakHour.hour : "12:00";
+        const qrisPct = analytics.payMap.qris ? analytics.payMap.qris.percent : 54;
+
+        insightsContainer.innerHTML = `
+          <div class="p-2.5 rounded-xl bg-white/70 dark:bg-[#1E293B]/70 border border-amber-200/50 dark:border-amber-900/30 flex items-start gap-2">
+            <span class="material-symbols-outlined text-amber-600 text-[18px] shrink-0 mt-0.5">local_fire_department</span>
+            <div>
+              <strong class="font-heading text-amber-950 dark:text-amber-200 block text-[11px]">Lonjakan Jam Makan Siang & Malam:</strong>
+              <p class="text-[10px] text-stone-600 dark:text-stone-300 leading-relaxed mt-0.5">
+                Jam tersibuk terkonsentrasi pada <strong>${peakH} WIB</strong>. Pastikan persediaan nasi basmati, kuah kari, dan sambosa telah di-prep sebelum jam 11:30.
+              </p>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-white/70 dark:bg-[#1E293B]/70 border border-amber-200/50 dark:border-amber-900/30 flex items-start gap-2">
+            <span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0 mt-0.5">trending_up</span>
+            <div>
+              <strong class="font-heading text-emerald-950 dark:text-emerald-200 block text-[11px]">Menu Kontributor Omset Tertinggi:</strong>
+              <p class="text-[10px] text-stone-600 dark:text-stone-300 leading-relaxed mt-0.5">
+                <strong>${top1}</strong> mencatat penjualan tertinggi. Padukan sebagai Paket Bundling dengan <em>Authentic Teh Tarik</em> untuk menaikkan nilai rata-rata struk (AOV).
+              </p>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-white/70 dark:bg-[#1E293B]/70 border border-amber-200/50 dark:border-amber-900/30 flex items-start gap-2">
+            <span class="material-symbols-outlined text-purple-600 text-[18px] shrink-0 mt-0.5">contactless</span>
+            <div>
+              <strong class="font-heading text-purple-950 dark:text-purple-200 block text-[11px]">Tren Pembayaran Cashless (${qrisPct}% QRIS):</strong>
+              <p class="text-[10px] text-stone-600 dark:text-stone-300 leading-relaxed mt-0.5">
+                Mayoritas tamu memilih pembayaran non-tunai. QRIS dinamis di kasir dan QR Self-Order mempercepat waktu antrean hingga 2.4x lipat.
+              </p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ============================================================
+    // 2. KATALOG PRODUK & MENU CRUD (MANAJEMEN HIDANGAN)
+    // ============================================================
+    function renderCatalogManager() {
+      const catalog = RestoSync.getMenuCatalog();
+      let filtered = catalog;
+
+      if (activeCatalogCategory !== "all") {
+        filtered = filtered.filter(m => m.category === activeCatalogCategory);
+      }
+
+      if (catalogSearchKeyword) {
+        const q = catalogSearchKeyword.toLowerCase();
+        filtered = filtered.filter(m => 
+          m.name.toLowerCase().includes(q) || 
+          (m.description && m.description.toLowerCase().includes(q))
+        );
+      }
+
+      const container = document.getElementById("catalogManagerGrid");
+      if (!filtered || filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full p-8 text-center text-stone-400 bg-[#FAF7F2] dark:bg-[#0F172A] rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">Tidak ada menu yang sesuai dengan filter kategori atau pencarian.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const isSoldOut = !!item.isSoldOut;
+        const spicyBadges = item.spicyLevel > 0 ? `<span class="text-[10px] font-bold text-red-500">🌶️ Lvl ${item.spicyLevel}</span>` : '';
+
+        return `
+          <div class="p-3.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between gap-3 shadow-xs hover:border-amber-500/50 transition-all">
+            
+            <div class="flex items-start gap-3">
+              <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-2xl object-cover shrink-0 border border-stone-200 dark:border-stone-700 ${isSoldOut ? 'filter grayscale opacity-60' : ''}" />
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-stone-200/60 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">${item.category}</span>
+                  ${spicyBadges}
+                  ${item.isPopular ? '<span class="text-[9px] font-bold text-amber-500">⭐ Best Seller</span>' : ''}
+                </div>
+                <h4 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white mt-1 leading-snug line-clamp-2" title="${item.name}">
+                  ${item.name}
+                </h4>
+                <div class="text-[12px] font-bold font-mono text-amber-600 dark:text-amber-400 mt-0.5 tabular-nums">
+                  ${formatRupiah(item.price)}
+                </div>
+              </div>
+            </div>
+
+            <p class="text-[10px] text-stone-500 line-clamp-2 leading-relaxed">
+              ${item.description || '-'}
+            </p>
+
+            <div class="pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between gap-2">
+              <!-- Live Stock Toggle -->
+              <label class="relative inline-flex items-center cursor-pointer gap-2" title="Ubah status ketersediaan stok">
+                <input 
+                  type="checkbox" 
+                  ${!isSoldOut ? 'checked' : ''} 
+                  onchange="toggleMenuStock('${item.id}', this.checked)"
+                  class="sr-only peer"
+                />
+                <div class="w-9 h-5 bg-stone-300 dark:bg-stone-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                <span class="text-[10px] font-bold ${isSoldOut ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}">
+                  ${isSoldOut ? 'Habis (Sold Out)' : 'Tersedia'}
+                </span>
+              </label>
+
+              <!-- Action Buttons: Edit & Delete -->
+              <div class="flex items-center gap-1">
+                <button onclick="openProductModal('${item.id}')" class="px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-amber-950/40 text-stone-700 dark:text-stone-300 hover:text-amber-600 font-bold text-[10px] flex items-center gap-1 transition-colors" title="Ubah data menu">
+                  <span class="material-symbols-outlined text-[13px]">edit</span> Edit
+                </button>
+                <button onclick="deleteProduct('${item.id}', '${item.name.replace(/'/g, "\\'")}')" class="p-1 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors" title="Hapus menu dari katalog">
+                  <span class="material-symbols-outlined text-[15px]">delete</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join("");
+    }
+
+    function filterCatalogCategory(categoryKey) {
+      activeCatalogCategory = categoryKey;
+      const pills = document.querySelectorAll("#menuFilterPills .cat-pill");
+      pills.forEach(p => {
+        p.classList.remove("bg-amber-500", "text-[#0F172A]");
+        p.classList.add("bg-[#FAF7F2]", "dark:bg-[#0F172A]", "border", "border-[#E7DFD5]", "dark:border-[#334155]", "text-stone-600", "dark:text-stone-300");
+      });
+      event.target.classList.add("bg-amber-500", "text-[#0F172A]");
+      event.target.classList.remove("text-stone-600", "dark:text-stone-300");
+      renderCatalogManager();
+    }
+
+    function handleCatalogSearch(term) {
+      catalogSearchKeyword = term.trim();
+      renderCatalogManager();
+    }
+
+    function toggleMenuStock(itemId, isAvailable) {
+      const updated = RestoSync.toggleMenuItemStock(itemId, isAvailable);
+      if (updated) {
+        renderCatalogManager();
+      }
+    }
+
+    function openProductModal(itemId = null) {
+      const modal = document.getElementById("productModal");
+      const title = document.getElementById("productModalTitle");
+      const form = document.getElementById("productForm");
+
+      if (itemId) {
+        const catalog = RestoSync.getMenuCatalog();
+        const item = catalog.find(m => m.id === itemId);
+        if (!item) return;
+
+        title.textContent = "✏️ Ubah Data Menu Hidangan";
+        document.getElementById("prodFormId").value = item.id;
+        document.getElementById("prodFormName").value = item.name;
+        document.getElementById("prodFormCategory").value = item.category;
+        document.getElementById("prodFormPrice").value = item.price;
+        document.getElementById("prodFormSpicy").value = item.spicyLevel || 0;
+        document.getElementById("prodFormPortion").value = item.portion || "";
+        document.getElementById("prodFormImage").value = item.image || "";
+        document.getElementById("prodFormDesc").value = item.description || "";
+        document.getElementById("prodFormIsPopular").checked = !!item.isPopular;
+        document.getElementById("prodFormIsSoldOut").checked = !!item.isSoldOut;
+      } else {
+        title.textContent = "+ Tambah Menu Baru ke Resto Pro";
+        form.reset();
+        document.getElementById("prodFormId").value = "";
+        document.getElementById("prodFormIsSoldOut").checked = false;
+        document.getElementById("prodFormIsPopular").checked = false;
+      }
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeProductModal() {
+      document.getElementById("productModal").classList.add("hidden");
+    }
+
+    function saveProductForm(e) {
+      e.preventDefault();
+      const id = document.getElementById("prodFormId").value;
+      const name = document.getElementById("prodFormName").value.trim();
+      const category = document.getElementById("prodFormCategory").value;
+      const price = Number(document.getElementById("prodFormPrice").value);
+      const spicyLevel = Number(document.getElementById("prodFormSpicy").value);
+      const portion = document.getElementById("prodFormPortion").value.trim();
+      const image = document.getElementById("prodFormImage").value.trim();
+      const description = document.getElementById("prodFormDesc").value.trim();
+      const isPopular = document.getElementById("prodFormIsPopular").checked;
+      const isSoldOut = document.getElementById("prodFormIsSoldOut").checked;
+
+      const itemData = {
+        id: id || undefined,
+        name: name,
+        category: category,
+        price: price,
+        spicyLevel: spicyLevel,
+        portion: portion || "1 Porsi",
+        image: image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80",
+        description: description,
+        isPopular: isPopular,
+        isSoldOut: isSoldOut
+      };
+
+      RestoSync.saveMenuItem(itemData);
+      closeProductModal();
+      renderCatalogManager();
+      alert(`Menu "${name}" berhasil disimpan! Perubahan telah tersinkron ke POS Kasir dan QR Self-Order tamu.`);
+    }
+
+    function deleteProduct(itemId, itemName) {
+      if (confirm(`Apakah Anda yakin ingin menghapus menu "${itemName}" dari katalog Resto Pro?`)) {
+        RestoSync.deleteMenuItem(itemId);
+        renderCatalogManager();
+        alert(`Menu "${itemName}" telah dihapus.`);
+      }
+    }
+
+    // ============================================================
+    // 3. DIREKTORI MEMBER CRM & DATA PELANGGAN
+    // ============================================================
+    function renderMembersTable() {
+      let members = RestoSync.getMembers();
+
+      if (memberSearchQuery) {
+        const q = memberSearchQuery.toLowerCase();
+        members = members.filter(m => 
+          m.name.toLowerCase().includes(q) || 
+          m.phone.includes(q) || 
+          m.id.toLowerCase().includes(q)
+        );
+      }
+
+      const tbody = document.getElementById("memberTableBody");
+      const badge = document.getElementById("memberCountBadge");
+      if (badge) badge.textContent = `${members.length} Member Terdaftar`;
+
+      if (!members || members.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-stone-400">Tidak ada data member yang cocok dengan pencarian.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = members.map(m => {
+        let tierBadge = "";
+        if (m.tier === "gold") {
+          tierBadge = '<span class="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-extrabold text-[10px] border border-amber-300">VIP Gold (10%)</span>';
+        } else if (m.tier === "silver") {
+          tierBadge = '<span class="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-extrabold text-[10px] border border-slate-300">VIP Silver (5%)</span>';
+        } else {
+          tierBadge = '<span class="px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold text-[10px]">Reguler Member</span>';
+        }
+
+        const cleanWa = m.phone.replace(/\D/g, "").replace(/^0/, "62");
+
+        return `
+          <tr class="hover:bg-stone-50 dark:hover:bg-[#0F172A]/50 transition-colors">
+            <td class="p-3 font-mono font-bold text-amber-600 dark:text-amber-400">${m.id}</td>
+            <td class="p-3">
+              <div class="font-heading font-bold text-[#1C1917] dark:text-white">${m.name}</div>
+              <div class="text-[10px] text-stone-400">Bergabung: ${m.joinedDate || '-'}</div>
+            </td>
+            <td class="p-3 whitespace-nowrap">
+              <a href="https://wa.me/${cleanWa}" target="_blank" class="text-emerald-600 dark:text-emerald-400 font-mono font-semibold hover:underline flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">chat</span> ${m.phone}
+              </a>
+            </td>
+            <td class="p-3 whitespace-nowrap">${tierBadge}</td>
+            <td class="p-3 text-right font-mono font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
+              ${(m.points || 0).toLocaleString('id-ID')} Pts
+            </td>
+            <td class="p-3 text-center font-bold text-stone-700 dark:text-stone-300">${m.totalVisits || 1}x</td>
+            <td class="p-3 text-stone-500 whitespace-nowrap">${m.lastVisit || '-'}</td>
+            <td class="p-3 max-w-[200px] truncate text-stone-500" title="${m.notes || '-'}">
+              ${m.notes || '-'}
+            </td>
+            <td class="p-3 text-center">
+              <button onclick="openMemberModal('${m.id}')" class="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-amber-100 dark:hover:bg-amber-950/40 text-stone-700 dark:text-stone-300 hover:text-amber-600 font-bold text-[10px] flex items-center gap-1 transition-colors mx-auto">
+                <span class="material-symbols-outlined text-[13px]">edit</span> Edit
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function handleMemberSearch(query) {
+      memberSearchQuery = query.trim();
+      renderMembersTable();
+    }
+
+    function openMemberModal(memberId = null) {
+      const modal = document.getElementById("memberModal");
+      const title = document.getElementById("memberModalTitle");
+      const form = document.getElementById("memberForm");
+
+      if (memberId) {
+        const members = RestoSync.getMembers();
+        const mem = members.find(m => m.id === memberId);
+        if (!mem) return;
+
+        title.textContent = "✏️ Ubah Data Member CRM";
+        document.getElementById("memFormId").value = mem.id;
+        document.getElementById("memFormName").value = mem.name;
+        document.getElementById("memFormPhone").value = mem.phone;
+        document.getElementById("memFormTier").value = mem.tier || "regular";
+        document.getElementById("memFormPoints").value = mem.points || 0;
+        document.getElementById("memFormNotes").value = mem.notes || "";
+      } else {
+        title.textContent = "+ Pendaftaran Member Baru";
+        form.reset();
+        document.getElementById("memFormId").value = "";
+        document.getElementById("memFormPoints").value = 100; // Bonus selamat datang
+      }
+
+      modal.classList.remove("hidden");
+    }
+
+    function closeMemberModal() {
+      document.getElementById("memberModal").classList.add("hidden");
+    }
+
+    function saveMemberForm(e) {
+      e.preventDefault();
+      const id = document.getElementById("memFormId").value;
+      const name = document.getElementById("memFormName").value.trim();
+      const phone = document.getElementById("memFormPhone").value.trim();
+      const tier = document.getElementById("memFormTier").value;
+      const points = Number(document.getElementById("memFormPoints").value);
+      const notes = document.getElementById("memFormNotes").value.trim();
+
+      const memberData = {
+        id: id || undefined,
+        name: name,
+        phone: phone,
+        tier: tier,
+        points: points,
+        notes: notes
+      };
+
+      const saved = RestoSync.saveMember(memberData);
+      closeMemberModal();
+      renderMembersTable();
+      alert(`Member "${saved.name}" (${saved.tierLabel}) berhasil disimpan dengan saldo ${saved.points} Poin!`);
+    }
+
+    // ============================================================
+    // 4. LISENSI SAAS, FINANCIAL & PRINTER SETTINGS
+    // ============================================================
+    function updateLicenseBannerUI() {
+      const lic = RestoSync.getLicenseData();
+      const badgeEl = document.getElementById("licenseTierBadge");
+      const labelEl = document.getElementById("licenseTierLabel");
+      const expiryEl = document.getElementById("licenseExpiryLabel");
+      const limitEl = document.getElementById("licenseTableLimitLabel");
+
+      if (labelEl) labelEl.textContent = lic.tierLabel || "RASH Enterprise Tier";
+      if (expiryEl) expiryEl.textContent = lic.expiry || "31 Desember 2028";
+      
+      if (limitEl) {
+        if (lic.isPro) {
+          limitEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">all_inclusive</span> Unlimited Tables`;
+          limitEl.className = "font-heading font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5";
+        } else {
+          limitEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">lock</span> Maksimal ${lic.maxTables} Meja (Mode Free)`;
+          limitEl.className = "font-heading font-bold text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5";
+        }
+      }
+
+      if (badgeEl) {
+        if (lic.isPro) {
+          badgeEl.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-[#0F172A] shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider";
+        } else {
+          badgeEl.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-xs uppercase tracking-wider";
+        }
+      }
+    }
+
+    function handleActivateToken() {
+      const input = document.getElementById("licenseKeyInput").value.trim();
+      const feedback = document.getElementById("tokenFeedback");
+
+      if (!input) {
+        alert("Silakan masukkan kode token lisensi terlebih dahulu!");
+        return;
+      }
+
+      const res = RestoSync.verifyLicenseToken(input);
+      if (res.success) {
+        if (feedback) feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✅ ${res.message}</span>`;
+        updateLicenseBannerUI();
+        renderOwnerTables();
+        alert(res.message);
+      } else {
+        if (feedback) feedback.innerHTML = `<span class="text-red-500 font-bold">❌ ${res.message}</span>`;
+        alert(res.message);
+      }
+    }
+
+    function toggleSimulationLicense() {
+      const current = RestoSync.getLicenseData();
+      if (current.isPro) {
+        RestoSync.setSimulationFreeTier();
+        alert("Mode Simulasi Diubah: STARTER FREE TIER AKTIF (Maksimal 4 Meja, Fitur Pro Terkunci 🔒).\nCoba klik tombol '+ Tambah Meja' untuk melihat gembok!");
+      } else {
+        RestoSync.verifyLicenseToken("RASH-PRO-ENTERPRISE-2028");
+        alert("Mode Simulasi Diubah: PRO ENTERPRISE AKTIF KEMBALI 🟢 (Unlimited Meja & Seluruh Fitur Terbuka).");
+      }
+      updateLicenseBannerUI();
+      renderOwnerTables();
+    }
+
+    function saveFinancialSettings() {
+      const tax = document.getElementById("cfgTaxRate").value;
+      RESTO_CONFIG.taxRate = Number(tax) / 100;
+      alert(`Tarif Pajak Restoran berhasil disimpan ke ${tax}%. Seluruh kalkulasi transaksi kasir diperbarui.`);
+    }
+
+    function savePrinterSettings() {
+      const width = document.getElementById("cfgPaperWidth").value;
+      alert(`Profil printer thermal ${width} berhasil dikonfigurasi.`);
+    }
+
+    // ============================================================
+    // 5. MANAJEMEN RESERVASI MEJA RESTORAN (OWNER LEDGER)
+    // ============================================================
+    function renderOwnerReservationsTable() {
+      const tbody = document.getElementById("ownerReservationTableBody");
+      if (!tbody) return;
+
+      const list = RestoSync.getReservations();
+      const filtered = list.filter(r => {
+        const matchesStatus = (activeReservationStatus === "all") || (r.status === activeReservationStatus);
+        const q = reservationSearchQuery.toLowerCase().trim();
+        const matchesSearch = !q ||
+          (r.customerName && r.customerName.toLowerCase().includes(q)) ||
+          (r.tableName && r.tableName.toLowerCase().includes(q)) ||
+          (r.tableId && r.tableId.toLowerCase().includes(q)) ||
+          (r.phone && r.phone.includes(q)) ||
+          (r.notes && r.notes.toLowerCase().includes(q));
+
+        return matchesStatus && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-stone-400">
+              <span class="material-symbols-outlined text-3xl mb-1 text-stone-300">event_seat</span>
+              <p>Tidak ada data reservasi yang sesuai dengan filter.</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(r => {
+        let statusBadge = "";
+        let actionCol = "";
+
+        if (r.status === "confirmed") {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">Menunggu Tamu</span>`;
+          actionCol = `
+            <div class="flex items-center justify-center gap-1.5">
+              <button onclick="ownerCheckInReservation('${r.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] shadow-xs flex items-center gap-1" title="Tamu Datang & Duduk">
+                <span class="material-symbols-outlined text-[13px]">how_to_reg</span>
+                <span>Check-in</span>
+              </button>
+              <button onclick="ownerSendWaConfirm('${r.id}')" class="px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white font-bold text-[10px] flex items-center gap-1" title="Kirim Konfirmasi WA ke Tamu">
+                <span class="material-symbols-outlined text-[13px]">chat</span>
+                <span>WA</span>
+              </button>
+              <button onclick="ownerCancelReservation('${r.id}')" class="px-2 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-red-500 hover:text-white text-stone-600 dark:text-stone-300 text-[10px] font-semibold" title="Batalkan Booking">
+                Batalkan
+              </button>
+            </div>
+          `;
+        } else if (r.status === "seated") {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">Sudah Duduk</span>`;
+          actionCol = `<span class="text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">Aktif di Meja</span>`;
+        } else {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-400">Dibatalkan</span>`;
+          actionCol = `<span class="text-stone-400 text-[10px] italic">-</span>`;
+        }
+
+        const preOrderSummary = (r.preOrders && r.preOrders.length > 0)
+          ? `<div class="mt-1 text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+               🍴 Pre-Order: ${r.preOrders.map(p => `${p.qty}x ${p.name}`).join(", ")}
+             </div>`
+          : "";
+
+        return `
+          <tr class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40 transition-colors">
+            <td class="py-3 px-4">
+              <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">${r.id}</span>
+              <div class="font-heading font-extrabold text-stone-900 dark:text-white">${r.tableName}</div>
+              <span class="text-[10px] text-stone-400">${r.section}</span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-heading font-bold text-stone-900 dark:text-white">${r.customerName}</div>
+              <div class="font-mono text-stone-500 text-[11px]">${r.phone}</div>
+            </td>
+            <td class="py-3 px-4">
+              <span class="font-bold text-stone-800 dark:text-stone-200">${r.dateStr}</span>
+              <div class="font-mono font-extrabold text-indigo-600 dark:text-indigo-400">${r.timeStr}</div>
+            </td>
+            <td class="py-3 px-4 font-heading font-bold text-center">
+              ${r.guests} Pax
+            </td>
+            <td class="py-3 px-4 max-w-xs">
+              <div class="text-stone-600 dark:text-stone-300 truncate" title="${r.notes || '-'}">
+                ${r.notes ? `"${r.notes}"` : '<span class="text-stone-400 italic">Tidak ada catatan</span>'}
+              </div>
+              ${preOrderSummary}
+            </td>
+            <td class="py-3 px-4">
+              ${statusBadge}
+            </td>
+            <td class="py-3 px-4 text-center">
+              ${actionCol}
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function filterOwnerReservationStatus(status) {
+      activeReservationStatus = status;
+      const btns = document.querySelectorAll("#resStatusFilterButtons .res-status-btn");
+      btns.forEach(btn => {
+        const text = btn.textContent.toLowerCase();
+        const isActive = (status === "all" && text.includes("semua")) ||
+                         (status === "confirmed" && text.includes("menunggu")) ||
+                         (status === "seated" && text.includes("duduk")) ||
+                         (status === "cancelled" && text.includes("dibatalkan"));
+        if (isActive) {
+          btn.className = "res-status-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold shadow-xs";
+        } else {
+          btn.className = "res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600";
+        }
+      });
+      renderOwnerReservationsTable();
+    }
+
+    function handleOwnerReservationSearch(term) {
+      reservationSearchQuery = term;
+      renderOwnerReservationsTable();
+    }
+
+    function openOwnerAddReservationModal() {
+      const modal = document.getElementById("ownerReservationModal");
+      const dateInput = document.getElementById("ownerResDate");
+      if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().slice(0, 10);
+      }
+      modal.classList.remove("hidden");
+    }
+
+    function closeOwnerAddReservationModal() {
+      const modal = document.getElementById("ownerReservationModal");
+      modal.classList.add("hidden");
+    }
+
+    function saveOwnerReservationForm(e) {
+      e.preventDefault();
+      const tableId = document.getElementById("ownerResTable").value;
+      const timeStr = document.getElementById("ownerResTime").value.trim();
+      const dateStr = document.getElementById("ownerResDate").value;
+      const guests = parseInt(document.getElementById("ownerResGuests").value, 10) || 4;
+      const customerName = document.getElementById("ownerResName").value.trim();
+      const phone = document.getElementById("ownerResPhone").value.trim();
+      const notes = document.getElementById("ownerResNotes").value.trim();
+
+      const table = (typeof RESTO_TABLES !== "undefined") ? RESTO_TABLES.find(t => t.id === tableId) : null;
+      const tableName = table ? table.name : tableId;
+      const section = table ? table.section : "Indoor AC";
+
+      RestoSync.saveReservation({
+        tableId,
+        tableName,
+        section,
+        customerName,
+        phone,
+        guests,
+        dateStr,
+        timeStr,
+        notes,
+        status: "confirmed"
+      });
+
+      closeOwnerAddReservationModal();
+      document.getElementById("ownerReservationForm").reset();
+      renderOwnerReservationsTable();
+      alert(`Jadwal reservasi Meja ${tableName} untuk ${customerName} berhasil disimpan!`);
+    }
+
+    function ownerCheckInReservation(resId) {
+      const res = RestoSync.checkInReservation(resId);
+      if (res) {
+        renderOwnerReservationsTable();
+        alert(`Tamu ${res.customerName} berhasil di-check-in ke ${res.tableName}! Status meja di Kasir kini terisi.`);
+      }
+    }
+
+    function ownerCancelReservation(resId) {
+      if (confirm("Apakah Anda yakin ingin membatalkan jadwal booking ini?")) {
+        RestoSync.cancelReservation(resId);
+        renderOwnerReservationsTable();
+      }
+    }
+
+    function ownerSendWaConfirm(resId) {
+      const list = RestoSync.getReservations();
+      const res = list.find(r => r.id === resId);
+      if (res) {
+        RestoSync.sendWhatsAppReservationConfirm(res);
+      }
+    }
+
+    // ============================================================
+    // 5B. MANAJEMEN DENAH MEJA RESTORAN (CRUD MEJA)
+    // ============================================================
+    function renderOwnerTables() {
+      const grid = document.getElementById("ownerTablesGrid");
+      const badge = document.getElementById("ownerTableCountBadge");
+      if (!grid) return;
+
+      const tables = RestoSync.getTables();
+      if (badge) badge.textContent = `${tables.length} Meja Aktif`;
+
+      grid.innerHTML = tables.map(t => {
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">Kosong</span>`;
+        if (t.status === "occupied") {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300">Terisi</span>`;
+        } else if (t.status === "bill_requested") {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">Minta Bill</span>`;
+        } else if (t.status === "reserved") {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">Booking</span>`;
+        }
+
+        return `
+          <div class="p-4 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between gap-3 shadow-xs">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="text-[10px] font-mono text-stone-400 font-bold">${t.id}</span>
+                <h4 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">${t.name}</h4>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <span class="text-[11px] text-stone-600 dark:text-stone-300 font-semibold">${t.seats} Kursi</span>
+                  <span class="text-stone-300 dark:text-stone-700">•</span>
+                  <span class="text-[11px] text-stone-500">${t.section}</span>
+                </div>
+              </div>
+              <div>${statusBadge}</div>
+            </div>
+
+            <div class="pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between gap-1.5">
+              <a href="customer_qr_self_order.html?table=${t.id}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#1E293B] border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:text-amber-600 text-[11px] font-bold flex items-center gap-1" title="Lihat Tampilan Menu Tamu">
+                <span class="material-symbols-outlined text-[14px]">qr_code_2</span> QR
+              </a>
+
+              <div class="flex items-center gap-1">
+                <button onclick="openEditTableModal('${t.id}')" class="p-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-amber-100 text-stone-700 dark:text-stone-300 hover:text-amber-600 transition-colors" title="Edit Meja">
+                  <span class="material-symbols-outlined text-[16px]">edit</span>
+                </button>
+                <button onclick="handleDeleteOwnerTable('${t.id}')" class="p-1.5 rounded-xl bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 transition-colors" title="Hapus Meja">
+                  <span class="material-symbols-outlined text-[16px]">delete</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function openAddTableModal() {
+      if (!RestoSync.canAddTable()) {
+        const lic = RestoSync.getLicenseData();
+        RestoSync.showProFeatureLockedModal(
+          "Tambah Meja Baru (Khusus Pro)",
+          `Versi Free Anda dibatasi maksimal ${lic.maxTables} meja. Masukkan token lisensi Resto Pro Enterprise untuk mengelola meja tanpa batas!`
+        );
+        return;
+      }
+
+      document.getElementById("tableModalTitle").textContent = "Tambah Meja Restoran";
+      document.getElementById("tableFormEditId").value = "";
+      document.getElementById("tableFormName").value = "";
+      document.getElementById("tableFormSeats").value = "4";
+      document.getElementById("tableFormSection").value = "Indoor AC";
+      document.getElementById("tableFormModal").classList.remove("hidden");
+    }
+
+    function openEditTableModal(tableId) {
+      const tables = RestoSync.getTables();
+      const t = tables.find(x => x.id === tableId);
+      if (!t) return;
+
+      document.getElementById("tableModalTitle").textContent = "Edit " + t.name;
+      document.getElementById("tableFormEditId").value = t.id;
+      document.getElementById("tableFormName").value = t.name;
+      document.getElementById("tableFormSeats").value = t.seats;
+      document.getElementById("tableFormSection").value = t.section;
+      document.getElementById("tableFormModal").classList.remove("hidden");
+    }
+
+    function closeTableModal() {
+      document.getElementById("tableFormModal").classList.add("hidden");
+    }
+
+    function handleSaveOwnerTable(e) {
+      e.preventDefault();
+      const editId = document.getElementById("tableFormEditId").value;
+      const name = document.getElementById("tableFormName").value.trim();
+      const seats = document.getElementById("tableFormSeats").value;
+      const section = document.getElementById("tableFormSection").value;
+
+      if (editId) {
+        RestoSync.updateTable(editId, { name, seats, section });
+        alert(`Meja "${name}" berhasil diperbarui!`);
+      } else {
+        const created = RestoSync.addTable({ name, seats, section });
+        if (!created) return;
+        alert(`Meja "${created.name}" (${created.id}) berhasil ditambahkan ke denah resto!`);
+      }
+
+      closeTableModal();
+      renderOwnerTables();
+    }
+
+    function handleDeleteOwnerTable(tableId) {
+      const tables = RestoSync.getTables();
+      const t = tables.find(x => x.id === tableId);
+      if (!t) return;
+
+      if (!confirm(`Yakin ingin menghapus ${t.name} (${t.id}) dari denah restoran?`)) {
+        return;
+      }
+
+      const ok = RestoSync.deleteTable(tableId);
+      if (ok) {
+        renderOwnerTables();
+        alert(`${t.name} berhasil dihapus dari sistem.`);
+      }
+    }
+
+    // ============================================================
+    // 6. BACKUP & RESTORE DATABASE JSON
+    // ============================================================
+    function triggerRestoreFileInput() {
+      const input = document.getElementById("restoreFileInput");
+      if (input) input.click();
+    }
+
+    function handleRestoreFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const contents = e.target.result;
+        const success = RestoSync.restoreFullDatabaseJSON(contents);
+        if (success) {
+          alert("Selamat! Database Resto Pro berhasil dipulihkan dari file backup. Halaman akan dimuat ulang...");
+          location.reload();
+        }
+      };
+      reader.onerror = function() {
+        alert("Gagal membaca berkas file JSON!");
+      };
+      reader.readAsText(file);
+    }
+
+    // ============================================================
+    // 7. GOOGLE APPS SCRIPT & GOOGLE SHEETS CLOUD INTEGRATION
+    // ============================================================
+    function initGasSettingsUI() {
+      const inputUrl = document.getElementById("gasWebappUrlInput");
+      const inputKey = document.getElementById("gasApiKeyInput");
+      const pill = document.getElementById("gasStatusPill");
+
+      const savedUrl = RestoSync.getGasUrl();
+      const savedKey = RestoSync.getGasApiKey();
+      const isFileConfig = RestoSync.isConfiguredViaConfigFile();
+
+      if (inputUrl && savedUrl) inputUrl.value = savedUrl;
+      if (inputKey && savedKey) inputKey.value = savedKey;
+
+      if (pill) {
+        if (RestoSync.isGasConfigured()) {
+          if (isFileConfig) {
+            pill.className = "text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 flex items-center gap-1";
+            pill.innerHTML = `🟢 Auto-Connected via resto-config.js`;
+          } else if (savedKey) {
+            pill.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300";
+            pill.textContent = "🟢 Cloud Terhubung & Aman";
+          } else {
+            pill.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300";
+            pill.textContent = "🟡 Cloud Aktif (API Key Kosong)";
+          }
+        } else {
+          pill.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300";
+          pill.textContent = "Mode Offline";
+        }
+      }
+    }
+
+    function copyMagicSetupLink() {
+      const link = RestoSync.generateMagicSetupLink("cashier_pos_register.html");
+      if (!link) {
+        alert("Konfigurasikan URL dan API Key terlebih dahulu di form atas atau via assets/js/resto-config.js!");
+        return;
+      }
+
+      navigator.clipboard.writeText(link).then(() => {
+        alert("✅ Magic Link Setup Berhasil Disalin ke Clipboard!\n\nKirimkan tautan ini ke tablet kasir atau dapur. Begitu dibuka, perangkat tersebut akan langsung otomatis terhubung ke Google Sheets tanpa perlu mengetik ulang!");
+      }).catch(() => {
+        prompt("Salin tautan Magic Setup ini secara manual:", link);
+      });
+    }
+
+    function toggleGasApiKeyVisibility() {
+      const input = document.getElementById("gasApiKeyInput");
+      const icon = document.getElementById("gasApiKeyToggleIcon");
+      if (!input || !icon) return;
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.textContent = "visibility_off";
+      } else {
+        input.type = "password";
+        icon.textContent = "visibility";
+      }
+    }
+
+    function saveGasUrlSetting() {
+      const inputUrl = document.getElementById("gasWebappUrlInput");
+      const inputKey = document.getElementById("gasApiKeyInput");
+
+      const url = (inputUrl ? inputUrl.value : "").trim();
+      const apiKey = (inputKey ? inputKey.value : "").trim();
+
+      if (!url) {
+        alert("Silakan masukkan URL deployment Google Apps Script!");
+        return;
+      }
+
+      if (!url.startsWith("https://script.google.com/macros/s/") || !url.endsWith("/exec")) {
+        alert("Peringatan: URL harus berformat Web App Apps Script resmi yang berakhiran '/exec'!");
+      }
+
+      RestoSync.setGasUrl(url);
+      RestoSync.setGasApiKey(apiKey);
+      initGasSettingsUI();
+
+      let msg = "Konfigurasi Cloud berhasil disimpan!";
+      if (apiKey) {
+        msg += "\n🔑 API Secret Key tersimpan untuk otorisasi aksi admin & kasir.";
+      } else {
+        msg += "\n⚠️ Catatan: Anda belum mengisi API Secret Key. Pastikan mengisinya agar aksi admin diizinkan server.";
+      }
+      alert(msg);
+    }
+
+    async function testGasConnection() {
+      const feedback = document.getElementById("gasStatusFeedback");
+      const btn = document.getElementById("btnTestGasPing");
+
+      if (!RestoSync.getGasUrl()) {
+        alert("Silakan simpan URL Google Apps Script terlebih dahulu!");
+        return;
+      }
+
+      if (btn) btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Menguji...</span>`;
+
+      try {
+        const res = await RestoSync.pingGasBackend();
+        const hasKey = RestoSync.getGasApiKey();
+        const sec = res.security || {};
+
+        let authMessage = "";
+        let isSuccess = true;
+
+        if (sec.isKeyConfigured) {
+          if (sec.isAuthorized === true) {
+            authMessage = `🔑 <strong>Otorisasi API Key: VALID & SAH!</strong> (Role-Based Protection Aktif).`;
+          } else if (sec.isAuthorized === false) {
+            isSuccess = false;
+            authMessage = `⚠️ <strong>Peringatan Otorisasi:</strong> Server meminta API Secret Key, namun kunci yang Anda masukkan salah atau belum terdaftar! Silakan periksa kembali.`;
+          }
+        }
+
+        if (feedback) {
+          feedback.classList.remove("hidden", "bg-red-500/10", "text-red-600", "bg-amber-500/10", "text-amber-600");
+          if (isSuccess) {
+            feedback.classList.add("bg-emerald-500/10", "text-emerald-600", "dark:text-emerald-400");
+            feedback.innerHTML = `✅ <strong>Koneksi Berhasil!</strong> ${res.message} (Versi: ${res.version || '2.5.0'}).<br/>${authMessage}`;
+          } else {
+            feedback.classList.add("bg-amber-500/10", "text-amber-600", "dark:text-amber-400");
+            feedback.innerHTML = `⚠️ <strong>Server Terhubung, Namun Kunci Salah:</strong><br/>${authMessage}`;
+          }
+        }
+        initGasSettingsUI();
+        alert(`Hasil Uji Koneksi Google Apps Script:\n\nStatus: ${res.message}\n${authMessage ? authMessage.replace(/<[^>]+>/g, '') : ''}\nWaktu Server: ${res.timestamp || new Date().toISOString()}`);
+      } catch (err) {
+        if (feedback) {
+          feedback.classList.remove("hidden", "bg-emerald-500/10", "text-emerald-600", "bg-amber-500/10", "text-amber-600");
+          feedback.classList.add("bg-red-500/10", "text-red-600", "dark:text-red-400");
+          feedback.innerHTML = `❌ <strong>Gagal Terhubung:</strong> ${err.message}. Pastikan deployment Web App diset ke "Who has access: Anyone".`;
+        }
+        alert(`Gagal terhubung ke Google Apps Script:\n${err.message}\n\nTips: Periksa apakah Web App sudah di-deploy dengan akses 'Anyone'.`);
+      } finally {
+        if (btn) btn.innerHTML = `<span class="material-symbols-outlined text-[16px]">network_ping</span><span>Uji Koneksi & Otorisasi Key</span>`;
+      }
+    }
+
+    async function pushDataToGoogleSheets() {
+      if (!RestoSync.getGasUrl()) {
+        alert("Silakan konfigurasi URL Google Apps Script terlebih dahulu!");
+        return;
+      }
+
+      if (!RestoSync.getGasApiKey()) {
+        if (!confirm("Peringatan: API Secret Key belum diisi. Server mungkin akan menolak permintaan push. Lanjutkan?")) {
+          return;
+        }
+      }
+
+      if (!confirm("Upload seluruh data transaksi lokal, katalog menu, member, dan reservasi ke Google Sheets sekarang?")) {
+        return;
+      }
+
+      try {
+        const res = await RestoSync.pushToGasCloud();
+        alert("Alhamdulillah! " + (res.message || "Seluruh data lokal berhasil diunggah ke Google Sheets!"));
+      } catch (e) {
+        alert("Gagal mengunggah data ke Google Sheets:\n" + e.message);
+      }
+    }
+
+    async function pullDataFromGoogleSheets() {
+      if (!RestoSync.getGasUrl()) {
+        alert("Silakan konfigurasi URL Google Apps Script terlebih dahulu!");
+        return;
+      }
+
+      if (!RestoSync.getGasApiKey()) {
+        if (!confirm("Peringatan: API Secret Key belum diisi. Server mungkin akan menolak permintaan pull data omset/member. Lanjutkan?")) {
+          return;
+        }
+      }
+
+      if (!confirm("Tarik data terbaru dari Google Sheets? Data di aplikasi lokal akan diperbarui sesuai isi spreadsheet cloud.")) {
+        return;
+      }
+
+      try {
+        const res = await RestoSync.pullFromGasCloud();
+        alert("Sinkronisasi Selesai! Data lokal berhasil diperbarui dari Google Sheets. Halaman akan dimuat ulang...");
+        location.reload();
+      } catch (e) {
+        alert("Gagal menarik data dari Google Sheets:\n" + e.message);
+      }
+    }
+
+    // ============================================================
+    // FITUR MIGRASI DATA LAMA (CSV BULK IMPORT & SUPABASE)
+    // ============================================================
+    function handleMenuCsvUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const csvText = e.target.result;
+          const res = RestoSync.importMenuFromCSV(csvText);
+          alert(`Berhasil Mengimpor Menu!\n• Menu Baru Ditambahkan: ${res.added}\n• Menu Diperbarui: ${res.updated}\n• Total Menu di Katalog: ${res.total}`);
+          renderCatalogTable();
+          renderAnalyticsDashboard();
+        } catch (err) {
+          alert("Gagal mengimpor menu dari CSV:\n" + err.message);
+        }
+        event.target.value = "";
+      };
+      reader.readAsText(file);
+    }
+
+    function handleMemberCsvUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const csvText = e.target.result;
+          const res = RestoSync.importMembersFromCSV(csvText);
+          alert(`Berhasil Mengimpor Member!\n• Member Baru Ditambahkan: ${res.added}\n• Member Diperbarui: ${res.updated}\n• Total Member Terdaftar: ${res.total}`);
+          renderMembersTable();
+        } catch (err) {
+          alert("Gagal mengimpor member dari CSV:\n" + err.message);
+        }
+        event.target.value = "";
+      };
+      reader.readAsText(file);
+    }
+
+    function downloadSampleMenuCSV() {
+      const sample = `name,price,category,station,notes
+Nasi Mandhi Daging Kambing,65000,arabian,kitchen,Beras Basmati Gurih Daging Kambing Empuk
+Authentic Teh Tarik,18000,drinks,drinks,Teh Susu Tarik Asli Buih Tebal
+Tom Yum Goong Seafood Kuah Merah,55000,thai,kitchen,Kuah Asam Pedas Segar Udang Jumbo
+Nasi Lemak Sambal Sotong Special,45000,malaysian,kitchen,Nasi Gurih Santan Sambal Cumi Pedas Manis
+Thai Green Tea Susu Asli,22000,drinks,drinks,Matcha Thailand Creamy Dingin Segar`;
+      downloadTextFile(sample, "Contoh_Format_Import_Menu_RestoPro.csv", "text/csv");
+    }
+
+    function downloadSampleMemberCSV() {
+      const sample = `name,phone,points,tier
+Kevin Sanjaya,081234567890,1250,gold
+dr. Ahmad Fauzi,081398765432,800,gold
+Ibu Nurul Hidayah,085611223344,450,silver
+Bpk. Subagyo,087855667788,150,regular`;
+      downloadTextFile(sample, "Contoh_Format_Import_Member_RestoPro.csv", "text/csv");
+    }
+
+    function downloadTextFile(content, filename, type = "text/plain") {
+      const blob = new Blob([content], { type: `${type};charset=utf-8;` });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function openSupabaseModal() {
+      const cfg = RestoSync.getSupabaseConfig();
+      document.getElementById("supabaseUrlInput").value = cfg.url || "";
+      document.getElementById("supabaseKeyInput").value = cfg.key || "";
+      document.getElementById("supabaseConfigModal").classList.remove("hidden");
+    }
+
+    function closeSupabaseModal() {
+      document.getElementById("supabaseConfigModal").classList.add("hidden");
+    }
+
+    function saveSupabaseSettings() {
+      const url = document.getElementById("supabaseUrlInput").value;
+      const key = document.getElementById("supabaseKeyInput").value;
+      RestoSync.saveSupabaseConfig(url, key);
+      alert("Pengaturan Supabase berhasil disimpan secara lokal!");
+      closeSupabaseModal();
+    }
+
+    function downloadSupabaseSqlScript() {
+      const sql = `-- ============================================================
+-- RESTO PRO ENTERPRISE - SUPABASE POSTGRESQL SCHEMA (SETUP_SUPABASE.sql)
+-- Eksekusi skrip ini di SQL Editor Supabase untuk migrasi saat Google Sheets penuh
+-- ============================================================
+
+-- 1. Tabel Master Menu Hidangan
+CREATE TABLE IF NOT EXISTS public."Menu_Catalog" (
+  "id" TEXT PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "price" NUMERIC NOT NULL DEFAULT 0,
+  "category" TEXT NOT NULL DEFAULT 'arabian',
+  "categoryLabel" TEXT,
+  "station" TEXT DEFAULT 'kitchen',
+  "image" TEXT,
+  "isSoldOut" BOOLEAN DEFAULT false,
+  "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 2. Tabel Riwayat Transaksi Finansial
+CREATE TABLE IF NOT EXISTS public."Transactions" (
+  "billNo" TEXT PRIMARY KEY,
+  "timestamp" BIGINT NOT NULL,
+  "dateStr" TEXT NOT NULL,
+  "timeStr" TEXT NOT NULL,
+  "table" TEXT,
+  "tableId" TEXT,
+  "customer" TEXT,
+  "cashier" TEXT,
+  "shift" TEXT,
+  "paymentMethod" TEXT NOT NULL,
+  "channel" TEXT DEFAULT 'dine_in',
+  "items" JSONB,
+  "subtotal" NUMERIC NOT NULL,
+  "discount" NUMERIC DEFAULT 0,
+  "tax" NUMERIC DEFAULT 0,
+  "grandTotal" NUMERIC NOT NULL,
+  "amountPaid" NUMERIC NOT NULL,
+  "change" NUMERIC DEFAULT 0,
+  "status" TEXT DEFAULT 'Lunas',
+  "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 3. Tabel Database Member CRM
+CREATE TABLE IF NOT EXISTS public."CRM_Members" (
+  "id" TEXT PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "phone" TEXT UNIQUE NOT NULL,
+  "points" NUMERIC DEFAULT 0,
+  "tier" TEXT DEFAULT 'regular',
+  "tierLabel" TEXT DEFAULT 'Regular Member',
+  "registeredAt" BIGINT,
+  "created_at" TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 4. Aktifkan Row Level Security (RLS)
+ALTER TABLE public."Menu_Catalog" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."Transactions" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public."CRM_Members" ENABLE ROW LEVEL SECURITY;
+
+-- 5. Kebijakan Keamanan RLS (Anon hanya SELECT, Service Role ALL)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public Read Only Menu') THEN
+    CREATE POLICY "Public Read Only Menu" ON public."Menu_Catalog" FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public Read Only Trx') THEN
+    CREATE POLICY "Public Read Only Trx" ON public."Transactions" FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public Read Only CRM') THEN
+    CREATE POLICY "Public Read Only CRM" ON public."CRM_Members" FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+END $$;
+`;
+      downloadTextFile(sql, "SETUP_SUPABASE_RESTO_PRO.sql", "application/sql");
+    }
+  </script>
+</body>
+</html>

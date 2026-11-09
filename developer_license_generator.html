@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RASH Keynode • Universal Multi-App License Generator ✨</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FFFBEB',
+              500: '#F59E0B',
+              600: '#D97706',
+              700: '#B45309',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Menlo', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body class="bg-[#0B1120] text-slate-100 min-h-screen font-sans antialiased p-4 sm:p-8 flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+  <div class="max-w-5xl mx-auto w-full space-y-6">
+
+    <!-- Header Developer Portal -->
+    <header class="bg-[#131C31] border border-slate-700/80 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-bold shadow-lg shadow-amber-500/20">
+          <span class="material-symbols-outlined text-[28px]">vpn_key</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="font-heading font-extrabold text-xl text-white tracking-tight">RASH Universal License Generator</h1>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              DEVELOPER SUITE 🔐
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Portal lisensi sentral untuk menerbitkan token resmi multi-aplikasi: Resto, Retail, Laundry, Klinik, Bengkel & Custom SaaS.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <button onclick="openIntegrationSnippetModal()" class="px-3.5 py-2 rounded-xl bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition-colors border border-indigo-700/60 shadow-sm cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">code</span>
+          <span>Snippet Verifikasi Kode</span>
+        </button>
+        <a href="owner_settings_saas.html" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors border border-slate-700">
+          <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+          <span>Buka Resto SaaS</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Generator Form Card -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left Panel: Form Input Generator (7 Cols) -->
+      <section class="lg:col-span-7 bg-[#131C31] border border-slate-700/80 rounded-3xl p-6 shadow-xl space-y-5">
+        
+        <div class="border-b border-slate-700/70 pb-3 flex items-center justify-between">
+          <div>
+            <h2 class="font-heading font-bold text-base text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-amber-400 text-[20px]">add_moderator</span>
+              <span>Konfigurasi Lisensi Klien</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Pilih aplikasi target dan isi data klien yang melunasi pembayaran.
+            </p>
+          </div>
+          <span id="activeAppBadge" class="px-2.5 py-1 rounded-xl text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+            🍽️ Resto Pro
+          </span>
+        </div>
+
+        <form id="genForm" onsubmit="handleGenerateToken(event)" class="space-y-4">
+          
+          <!-- Field 1: Pilihan Jenis Aplikasi Target -->
+          <div>
+            <label class="block text-xs font-heading font-bold text-slate-300 mb-1">
+              Pilih Jenis Aplikasi Target <span class="text-amber-400">*</span>
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="appTypeSelectorGrid">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Field 2: Nama Klien / Bisnis -->
+          <div>
+            <label id="clientNameLabel" class="block text-xs font-heading font-bold text-slate-300 mb-1">
+              Nama Restoran / Klien <span class="text-red-400">*</span>
+            </label>
+            <div class="relative">
+              <span id="clientNameIcon" class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">storefront</span>
+              <input 
+                type="text" 
+                id="clientNameInput" 
+                required 
+                placeholder="Contoh: Resto Padang Berkah Nusantara" 
+                class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50"
+              />
+            </div>
+          </div>
+
+          <!-- Field 3: Nomor WhatsApp Klien -->
+          <div>
+            <label class="block text-xs font-heading font-bold text-slate-300 mb-1">
+              Nomor WhatsApp Klien <span class="text-slate-400 font-normal">(untuk kirim token 1-klik)</span>
+            </label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-[18px]">chat</span>
+              <input 
+                type="tel" 
+                id="clientPhoneInput" 
+                placeholder="Contoh: 081234567890" 
+                class="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white outline-none focus:border-amber-500"
+              />
+            </div>
+          </div>
+
+          <!-- Grid: Paket & Kuota Batas Sumber Daya -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-heading font-bold text-slate-300 mb-1">
+                Paket Lisensi
+              </label>
+              <select id="packageTypeSelect" onchange="handlePackageChange()" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white outline-none focus:border-amber-500">
+                <option value="enterprise_lifetime">♾️ Pro Enterprise (Lifetime / Selamanya)</option>
+                <option value="enterprise_1year" selected>📅 Pro Enterprise (1 Tahun)</option>
+                <option value="enterprise_2year">📅 Pro Enterprise (2 Tahun)</option>
+                <option value="starter_custom">🌟 Starter Pro (Custom Quota)</option>
+              </select>
+            </div>
+
+            <div>
+              <label id="quotaLimitLabel" class="block text-xs font-heading font-bold text-slate-300 mb-1">
+                Batas Kuota Meja Resto
+              </label>
+              <select id="quotaLimitSelect" class="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white outline-none focus:border-amber-500">
+                <!-- Dynamic based on selected app -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Fitur yang Diaktifkan -->
+          <div>
+            <label class="block text-xs font-heading font-bold text-slate-300 mb-1.5">
+              Fitur Pro yang Dibuka Penuh
+            </label>
+            <div class="grid grid-cols-2 gap-2 text-xs" id="featuresChecklistGrid">
+              <!-- Dynamic based on selected app -->
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-2">
+            <button 
+              type="submit" 
+              class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-heading font-extrabold text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 transition-all cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-[20px]">bolt</span>
+              <span>Bangkitkan Token Lisensi Resmi</span>
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- Right Panel: Output Token & WhatsApp Message (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-5">
+        
+        <!-- Token Result Box -->
+        <div class="bg-[#131C31] border border-slate-700/80 rounded-3xl p-6 shadow-xl flex-1 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-700/70 pb-3">
+              <span class="text-xs font-heading font-bold text-slate-300 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-emerald-400 text-[18px]">verified</span>
+                <span>Token Aktivasi Resmi</span>
+              </span>
+              <span id="tokenExpiryBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">
+                Menunggu input
+              </span>
+            </div>
+
+            <div class="mt-4 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-center space-y-2">
+              <span id="tokenTypeHeader" class="text-[10px] uppercase font-mono tracking-widest text-slate-500 block">
+                TOKEN RESTO PRO ENTERPRISE
+              </span>
+              <div id="generatedTokenText" class="font-mono font-extrabold text-base sm:text-lg text-amber-400 tracking-wider break-all select-all">
+                RASH-RESTO-PRO-DEMO-2028-A4F9
+              </div>
+              <p class="text-[11px] text-slate-400" id="tokenClientLabel">
+                Berlaku untuk seluruh perangkat klien.
+              </p>
+            </div>
+
+            <!-- Copy Token Button -->
+            <button 
+              onclick="copyGeneratedToken()" 
+              class="mt-3 w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-heading font-bold flex items-center justify-center gap-1.5 border border-slate-700 transition-all cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-[16px]">content_copy</span>
+              <span id="copyBtnText">Salin Kode Token</span>
+            </button>
+          </div>
+
+          <!-- Quick WhatsApp Messenger Generator -->
+          <div class="pt-3 border-t border-slate-700/70 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-heading font-bold text-white flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-emerald-400 text-[16px]">send</span>
+                <span>Kirimkan ke WhatsApp Klien</span>
+              </span>
+              <span class="text-[10px] text-slate-400">Format Resmi RASH</span>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] font-mono text-slate-300 max-h-32 overflow-y-auto whitespace-pre-wrap select-all leading-relaxed" id="waMessagePreview">
+              <!-- Preview WA Message -->
+            </div>
+
+            <button 
+              onclick="copyOrSendWhatsAppMessage()" 
+              class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-heading font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-900/30 transition-all cursor-pointer"
+            >
+              <span class="material-symbols-outlined text-[18px]">chat</span>
+              <span id="waBtnText">Buka Chat WhatsApp Klien</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Master Demo Bypass Tokens Card -->
+        <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs text-slate-400 space-y-2">
+          <span class="font-heading font-bold text-amber-400 block flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">lightbulb</span>
+            <span>Token Uji Coba Cepat (Universal Master):</span>
+          </span>
+          <div class="grid grid-cols-2 gap-1.5 font-mono text-[10px]">
+            <button onclick="useQuickToken('RASH-RESTO-PRO-ENTERPRISE-2028', 'RESTO')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-amber-300 truncate">
+              🍽️ RESTO-2028
+            </button>
+            <button onclick="useQuickToken('RASH-RETAIL-PRO-LIFETIME-VIP', 'RETAIL')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-emerald-300 truncate">
+              🛒 RETAIL-LIFETIME
+            </button>
+            <button onclick="useQuickToken('RASH-LAUNDRY-PRO-LIFETIME-VIP', 'LAUNDRY')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-cyan-300 truncate">
+              🧺 LAUNDRY-VIP
+            </button>
+            <button onclick="useQuickToken('RASH-KLINIK-PRO-ENTERPRISE-2028', 'KLINIK')" class="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left text-purple-300 truncate">
+              🏥 KLINIK-2028
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Section 2: Riwayat Lisensi Klien yang Diterbitkan (Local Registry Table) -->
+    <section class="bg-[#131C31] border border-slate-700/80 rounded-3xl p-6 shadow-xl space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700/70 pb-3">
+        <div>
+          <h3 class="font-heading font-bold text-base text-white flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-400 text-[20px]">history_edu</span>
+            <span>Riwayat Lisensi Klien yang Pernah Diterbitkan</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Daftar seluruh token lisensi yang Anda bangkitkan dari browser ini.
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="clearHistoryLicenses()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-red-950/60 text-slate-400 hover:text-red-400 text-xs font-semibold transition-colors border border-slate-700 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">delete</span>
+            <span>Hapus Riwayat</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-slate-700/70 text-slate-400 font-heading">
+              <th class="pb-2.5">Aplikasi</th>
+              <th class="pb-2.5">Nama Klien / Bisnis</th>
+              <th class="pb-2.5">WhatsApp</th>
+              <th class="pb-2.5">Kode Token Lisensi</th>
+              <th class="pb-2.5">Masa Berlaku</th>
+              <th class="pb-2.5 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="historyLicensesTableBody" class="divide-y divide-slate-800">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 py-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>RASH Universal Keynode v3.0 • Hak Cipta &copy; 2026 RASH WebApp Builder.</div>
+      <div class="text-[11px] text-slate-400">Arsitektur Lisensi Offline-First Multi-SaaS. Rahasiakan generator ini.</div>
+    </footer>
+
+  </div>
+
+  <!-- ============================================================
+       MODAL: SNIPPET KODE INTEGRASI VERIFIKASI UNTUK APLIKASI BARU
+       ============================================================ -->
+  <div id="integrationSnippetModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-[#131C31] w-full max-w-3xl rounded-3xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="p-4 border-b border-slate-700 bg-slate-900/60 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-indigo-400 text-[22px]">integration_instructions</span>
+          <div>
+            <h4 class="font-heading font-bold text-sm text-white">Snippet Verifikasi Token untuk Aplikasi Baru Anda</h4>
+            <p class="text-[11px] text-slate-400">Copy kode JavaScript murni ini ke aplikasi software apa pun yang Anda bangun.</p>
+          </div>
+        </div>
+        <button onclick="closeIntegrationSnippetModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-slate-700">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Untuk memvalidasi token yang dihasilkan oleh generator ini di aplikasi baru Anda (misal: Toko Retail, Laundry, Apotek, atau WebApp SaaS), cukup tempelkan fungsi JavaScript berikut ke dalam file script aplikasi Anda:
+        </p>
+
+        <div class="relative">
+          <pre id="snippetCodeBlock" class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-mono text-emerald-400 overflow-x-auto whitespace-pre leading-relaxed select-all">
+// ============================================================
+// RASH UNIVERSAL LICENSE VERIFIER (Drop-in JS Snippet)
+// ============================================================
+function verifyUniversalLicense(rawToken, expectedAppCode = "RESTO") {
+  const token = (rawToken || "").trim().toUpperCase();
+  if (!token) return { valid: false, message: "Token lisensi tidak boleh kosong!" };
+
+  // Format standar: RASH-[APP]-PRO-... atau RASH-PRO-...
+  const isValidFormat = token.startsWith(`RASH-${expectedAppCode}-PRO-`) || 
+                        token.startsWith("RASH-PRO-") || 
+                        token.startsWith("RASH-APP-PRO-") ||
+                        token.includes("LIFETIME") || 
+                        token.includes("VIP");
+
+  if (!isValidFormat) {
+    return { valid: false, message: `Token tidak sesuai untuk aplikasi ${expectedAppCode}!` };
+  }
+
+  let expiry = "31 Desember 2028";
+  if (token.includes("LIFETIME") || token.includes("VIP")) {
+    expiry = "Permanen / Tanpa Batas (Lifetime)";
+  } else if (token.includes("2027")) {
+    expiry = "31 Desember 2027";
+  }
+
+  const licenseData = {
+    isPro: true,
+    token: token,
+    appCode: expectedAppCode,
+    expiryDateStr: expiry,
+    activatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem("app_saas_license", JSON.stringify(licenseData));
+  return { valid: true, message: `Lisensi Pro Berhasil Aktif (${expiry})!`, data: licenseData };
+}
+          </pre>
+          <button onclick="copySnippetCode()" class="absolute top-3 right-3 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold flex items-center gap-1 shadow cursor-pointer">
+            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+            <span id="copySnippetBtnText">Salin Snippet</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-700 bg-slate-900/60 flex justify-end">
+        <button onclick="closeIntegrationSnippetModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold">
+          Tutup Panduan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT LOGIC UNIVERSAL GENERATOR -->
+  <script>
+    // 1. Data Definisi Aplikasi Universal
+    const APPS_CATALOG = {
+      RESTO: {
+        code: "RESTO",
+        badge: "🍽️ Resto Pro",
+        name: "Resto Pro POS & KDS",
+        labelName: "Nama Restoran / Cafe",
+        icon: "restaurant",
+        placeholderName: "Contoh: Resto Padang Berkah Nusantara",
+        quotaLabel: "Batas Kuota Meja Resto",
+        quotaOptions: [
+          { value: "unlimited", text: "♾️ Meja Tanpa Batas (Unlimited)" },
+          { value: "24", text: "24 Meja" },
+          { value: "16", text: "16 Meja" },
+          { value: "12", text: "12 Meja (Standar)" }
+        ],
+        features: ["Manajemen Meja Dinamis", "Cetak Stiker QR Akrilik", "BI Heatmap Jam Sibuk", "WhatsApp CRM Struk"],
+        stepsToActivate: "1. Buka Layar 4: Owner SaaS Settings pada aplikasi Resto Pro Anda.\n2. Scroll ke bagian 'Status Lisensi SaaS & Tier Aktif'.\n3. Tempelkan kode token lisensi di kolom aktivasi.\n4. Klik 'Verifikasi & Aktifkan Lisensi'."
+      },
+      RETAIL: {
+        code: "RETAIL",
+        badge: "🛒 Retail Pro",
+        name: "Retail & Toko POS Pro",
+        labelName: "Nama Toko / Minimarket",
+        icon: "shopping_cart",
+        placeholderName: "Contoh: Minimarket Berkah Sejahtera",
+        quotaLabel: "Batas Kuota SKU Produk & Cabang",
+        quotaOptions: [
+          { value: "unlimited", text: "♾️ Produk & Cabang Tanpa Batas" },
+          { value: "5000", text: "Maksimal 5.000 SKU Produk" },
+          { value: "2000", text: "Maksimal 2.000 SKU Produk" },
+          { value: "500", text: "Maksimal 500 SKU Produk (Starter)" }
+        ],
+        features: ["Scan Barcode Scanner Cepat", "Manajemen Stok Multi-Cabang", "Laporan Laba Rugi Realtime", "Cetak Label Barcode Thermal"],
+        stepsToActivate: "1. Buka Menu 'Pengaturan Toko & Lisensi'.\n2. Klik tombol 'Aktivasi Lisensi Pro'.\n3. Masukkan kode token aktivasi lisensi Anda.\n4. Klik 'Aktifkan Lisensi'."
+      },
+      LAUNDRY: {
+        code: "LAUNDRY",
+        badge: "🧺 Laundry Pro",
+        name: "Laundry & Dry Clean Pro",
+        labelName: "Nama Usaha Laundry",
+        icon: "local_laundry_service",
+        placeholderName: "Contoh: Clean & Fresh Laundry Kiloan",
+        quotaLabel: "Batas Nota Cucian / Bulan",
+        quotaOptions: [
+          { value: "unlimited", text: "♾️ Nota Cucian Tanpa Batas" },
+          { value: "3000", text: "Maksimal 3.000 Nota / Bulan" },
+          { value: "1000", text: "Maksimal 1.000 Nota / Bulan" }
+        ],
+        features: ["Notifikasi WhatsApp Cucian Selesai", "Status Cucian Realtime (Cuci/Kering/Setrika)", "Cetak Nota Thermal Mini 58mm", "CRM Pelanggan Langganan"],
+        stepsToActivate: "1. Buka Dashboard Admin Laundry.\n2. Masuk ke tab 'Pengaturan Akun & Lisensi'.\n3. Masukkan token lisensi resmi Anda.\n4. Klik 'Verifikasi Lisensi'."
+      },
+      KLINIK: {
+        code: "KLINIK",
+        badge: "🏥 Klinik Pro",
+        name: "Klinik & Apotek Pro",
+        labelName: "Nama Klinik / Apotek",
+        icon: "local_hospital",
+        placeholderName: "Contoh: Klinik Pratama Sehat Bersama",
+        quotaLabel: "Batas Dokter & Rekam Medis",
+        quotaOptions: [
+          { value: "unlimited", text: "♾️ Pasien & Dokter Tanpa Batas" },
+          { value: "5_doctors", text: "Maksimal 5 Dokter / Poli" },
+          { value: "2_doctors", text: "Maksimal 2 Dokter / Poli" }
+        ],
+        features: ["Rekam Medis Elektronik (RME)", "Kasir Apotek & Stok Obat", "Cetak Resep & Kwitansi Resmi", "Antrean Pasien Digital"],
+        stepsToActivate: "1. Buka Pengaturan Sistem Manajemen Klinik.\n2. Masuk ke menu 'Lisensi Software'.\n3. Masukkan token aktivasi resmi Anda.\n4. Klik 'Validasi Token'."
+      },
+      BENGKEL: {
+        code: "BENGKEL",
+        badge: "🔧 Bengkel Pro",
+        name: "Bengkel & Servis Otomotif Pro",
+        labelName: "Nama Bengkel / Service Center",
+        icon: "build",
+        placeholderName: "Contoh: Auto Jaya Motor Service",
+        quotaLabel: "Batas Kuota Stall & Mekanik",
+        quotaOptions: [
+          { value: "unlimited", text: "♾️ Stall & Mekanik Tanpa Batas" },
+          { value: "10_stall", text: "Maksimal 10 Stall Servis" },
+          { value: "4_stall", text: "Maksimal 4 Stall Servis" }
+        ],
+        features: ["Surat Perintah Kerja (SPK) Servis", "Katalog Suku Cadang & Sparepart", "Reminder WhatsApp Jadwal Servis", "Laporan Komisi Mekanik"],
+        stepsToActivate: "1. Masuk ke Menu Pengaturan Bengkel.\n2. Buka tab 'Lisensi Aplikasi'.\n3. Input kode token aktivasi Anda.\n4. Klik 'Simpan Lisensi'."
+      },
+      CUSTOM: {
+        code: "APP",
+        badge: "🏢 Custom SaaS",
+        name: "Aplikasi Web / SaaS Custom",
+        labelName: "Nama Perusahaan / Klien",
+        icon: "business_center",
+        placeholderName: "Contoh: PT Teknologi Inovasi Mandiri",
+        quotaLabel: "Batas Kuota Akun / Pengguna",
+        quotaOptions: [
+          { value: "unlimited", text: "♾️ Pengguna Tanpa Batas (Enterprise)" },
+          { value: "50_users", text: "Maksimal 50 Akun Pengguna" },
+          { value: "10_users", text: "Maksimal 10 Akun Pengguna" }
+        ],
+        features: ["Multi-Device & Cloud Sync", "Export Excel & Pelaporan Lengkap", "Role-Based Access Guard", "White-Label Branding"],
+        stepsToActivate: "1. Buka Halaman Pengaturan / License.\n2. Masukkan kode token aktivasi pada form.\n3. Klik Verifikasi / Simpan."
+      }
+    };
+
+    let selectedAppKey = "RESTO";
+    let currentToken = "RASH-RESTO-PRO-DEMO-2028-A4F9";
+    let currentClient = "Demo Client";
+    let currentPhone = "";
+    let currentExpiry = "31 Desember 2028";
+    const STORAGE_KEY = "rash_universal_licenses_history";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderAppTypeSelector();
+      selectApp("RESTO");
+      renderLicensesHistoryTable();
+      updateWaMessagePreview();
+    });
+
+    function renderAppTypeSelector() {
+      const container = document.getElementById("appTypeSelectorGrid");
+      container.innerHTML = Object.keys(APPS_CATALOG).map(key => {
+        const app = APPS_CATALOG[key];
+        const isSelected = key === selectedAppKey;
+        return `
+          <button 
+            type="button" 
+            onclick="selectApp('${key}')" 
+            id="btnApp_${key}" 
+            class="p-2.5 rounded-2xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
+              isSelected 
+                ? 'bg-amber-500/20 border-amber-500 text-white shadow-md shadow-amber-500/10' 
+                : 'bg-slate-900 border-slate-700/80 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+            }"
+          >
+            <span class="material-symbols-outlined text-[18px] ${isSelected ? 'text-amber-400' : 'text-slate-400'}">${app.icon}</span>
+            <div class="truncate">
+              <div class="font-heading font-bold text-xs truncate leading-tight">${app.name.split(' ')[0]} ${app.name.split(' ')[1] || ''}</div>
+              <div class="text-[10px] text-slate-400 truncate">${app.code}</div>
+            </div>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function selectApp(appKey) {
+      selectedAppKey = appKey;
+      const app = APPS_CATALOG[appKey];
+      if (!app) return;
+
+      renderAppTypeSelector();
+
+      // Update Label & Placeholders
+      document.getElementById("activeAppBadge").textContent = app.badge;
+      document.getElementById("clientNameLabel").innerHTML = `${app.labelName} <span class="text-red-400">*</span>`;
+      document.getElementById("clientNameInput").placeholder = app.placeholderName;
+      document.getElementById("clientNameIcon").textContent = app.icon;
+      document.getElementById("quotaLimitLabel").textContent = app.quotaLabel;
+
+      // Update Quota Options
+      const quotaSelect = document.getElementById("quotaLimitSelect");
+      quotaSelect.innerHTML = app.quotaOptions.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join("");
+
+      // Update Features Checklist
+      const featGrid = document.getElementById("featuresChecklistGrid");
+      featGrid.innerHTML = app.features.map(f => `
+        <label class="flex items-center gap-2 p-2 rounded-xl bg-slate-900/70 border border-slate-800 text-slate-300">
+          <input type="checkbox" checked disabled class="accent-amber-500 rounded" />
+          <span class="truncate">${f}</span>
+        </label>
+      `).join("");
+
+      document.getElementById("tokenTypeHeader").textContent = `TOKEN ${app.name.toUpperCase()}`;
+      updateWaMessagePreview();
+    }
+
+    function generateChecksum(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash).toString(16).toUpperCase().padStart(4, "0").slice(0, 4);
+    }
+
+    function handleGenerateToken(e) {
+      if (e) e.preventDefault();
+
+      const name = document.getElementById("clientNameInput").value.trim();
+      const phone = document.getElementById("clientPhoneInput").value.trim();
+      const pkg = document.getElementById("packageTypeSelect").value;
+      const quota = document.getElementById("quotaLimitSelect").value;
+      const app = APPS_CATALOG[selectedAppKey];
+
+      if (!name) {
+        alert("Nama Klien / Bisnis wajib diisi!");
+        return;
+      }
+
+      currentClient = name;
+      currentPhone = phone;
+
+      // Buat akronim nama client (3-4 huruf kapital)
+      const cleanName = name.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+      const clientTag = (cleanName.length >= 3 ? cleanName.slice(0, 3) : "CLT") + Math.floor(100 + Math.random() * 900);
+
+      let expiryCode = "2027";
+      if (pkg === "enterprise_lifetime") {
+        expiryCode = "LIFETIME";
+        currentExpiry = "Permanen / Tanpa Batas (Lifetime)";
+      } else if (pkg === "enterprise_2year") {
+        expiryCode = "2028";
+        currentExpiry = "31 Desember 2028";
+      } else {
+        expiryCode = "2027";
+        currentExpiry = "31 Desember 2027";
+      }
+
+      const salt = "RASH_UNIVERSAL_SEC_2026";
+      const checksum = generateChecksum(app.code + name + expiryCode + quota + salt);
+
+      // Susun Token Universal Resmi
+      currentToken = `RASH-${app.code}-PRO-${clientTag}-${expiryCode}-${checksum}`;
+
+      // Update UI
+      document.getElementById("generatedTokenText").textContent = currentToken;
+      document.getElementById("tokenExpiryBadge").textContent = "Aktif s/d " + currentExpiry;
+      document.getElementById("tokenExpiryBadge").className = "text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800";
+      document.getElementById("tokenClientLabel").innerHTML = `Lisensi Resmi untuk: <strong class="text-white">${name}</strong> (${app.name})`;
+
+      updateWaMessagePreview();
+
+      // Simpan ke Riwayat Registri Lokal
+      saveToHistory({
+        id: "LIC-" + Date.now(),
+        timestamp: Date.now(),
+        dateStr: new Date().toLocaleDateString('id-ID'),
+        appKey: selectedAppKey,
+        appName: app.name,
+        clientName: name,
+        phone: phone || "-",
+        token: currentToken,
+        expiry: currentExpiry,
+        pkg: pkg
+      });
+
+      renderLicensesHistoryTable();
+      alert(`🎉 Token Lisensi Resmi Berhasil Dibuat!\n\nAplikasi: ${app.name}\nToken: ${currentToken}\nKlien: ${name}\nMasa Aktif: ${currentExpiry}`);
+    }
+
+    function buildWhatsAppMessage() {
+      const app = APPS_CATALOG[selectedAppKey];
+      return `Halo ${currentClient}! ✨\n\nTerima kasih telah melakukan pembayaran lisensi resmi *${app.name} by RASH WebApp Builder*.\n\nBerikut adalah Kode Token Aktivasi Lisensi Anda:\n🔑 *${currentToken}*\n📅 Masa Aktif: *${currentExpiry}*\n\n*Cara Aktivasi di Aplikasi Anda:*\n${app.stepsToActivate}\n\nSeketika seluruh batas fitur, multi-device, dan sinkronisasi akan aktif tanpa batasan. Semoga bisnis Anda semakin sukses, lancar, dan berkah! 🚀`;
+    }
+
+    function updateWaMessagePreview() {
+      const previewEl = document.getElementById("waMessagePreview");
+      if (previewEl) {
+        previewEl.textContent = buildWhatsAppMessage();
+      }
+    }
+
+    function copyGeneratedToken() {
+      navigator.clipboard.writeText(currentToken).then(() => {
+        const btn = document.getElementById("copyBtnText");
+        btn.textContent = "✅ Token Berhasil Disalin!";
+        setTimeout(() => btn.textContent = "Salin Kode Token", 2500);
+      });
+    }
+
+    function copyOrSendWhatsAppMessage() {
+      const msg = buildWhatsAppMessage();
+
+      if (currentPhone) {
+        let clean = currentPhone.replace(/[^0-9]/g, "");
+        if (clean.startsWith("0")) clean = "62" + clean.slice(1);
+        else if (clean.startsWith("8")) clean = "62" + clean;
+        const waUrl = `https://wa.me/${clean}?text=${encodeURIComponent(msg)}`;
+        window.open(waUrl, "_blank");
+      } else {
+        navigator.clipboard.writeText(msg).then(() => {
+          alert("📋 Pesan WhatsApp berhasil disalin ke clipboard! Anda bisa langsung menempelkannya (paste) di chat WhatsApp klien.");
+        });
+      }
+    }
+
+    function useQuickToken(token, appKey = "RESTO") {
+      selectApp(appKey);
+      currentToken = token;
+      document.getElementById("generatedTokenText").textContent = token;
+      document.getElementById("tokenClientLabel").textContent = `Token Master Cepat (${APPS_CATALOG[appKey].name}): Siap digunakan langsung.`;
+      copyGeneratedToken();
+      updateWaMessagePreview();
+    }
+
+    // ============================================================
+    // REGISTRI RIWAYAT PENERBITAN LISENSI (LOCAL STORAGE)
+    // ============================================================
+    function getStoredLicenses() {
+      try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveToHistory(record) {
+      const list = getStoredLicenses();
+      list.unshift(record);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    function renderLicensesHistoryTable() {
+      const list = getStoredLicenses();
+      const tbody = document.getElementById("historyLicensesTableBody");
+      if (!tbody) return;
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-6 text-center text-slate-500">
+              Belum ada riwayat token yang diterbitkan. Silakan generate token baru di atas.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => {
+        const app = APPS_CATALOG[item.appKey] || { badge: item.appName || "App", name: item.appName };
+        return `
+          <tr class="hover:bg-slate-900/60 transition-colors">
+            <td class="py-3 font-semibold text-white whitespace-nowrap">
+              <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-800 border border-slate-700 text-amber-300">
+                ${app.badge}
+              </span>
+            </td>
+            <td class="py-3 font-bold text-slate-200">
+              <div>${item.clientName}</div>
+              <div class="text-[10px] text-slate-500 font-normal">${item.dateStr || '-'}</div>
+            </td>
+            <td class="py-3 text-slate-400 font-mono text-[11px]">
+              ${item.phone}
+            </td>
+            <td class="py-3 font-mono font-bold text-amber-400 select-all text-[11px]">
+              ${item.token}
+            </td>
+            <td class="py-3 text-slate-400 whitespace-nowrap text-[11px]">
+              ${item.expiry}
+            </td>
+            <td class="py-3 text-center whitespace-nowrap">
+              <div class="inline-flex items-center gap-1">
+                <button onclick="copySpecificToken('${item.token}')" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold" title="Salin Token">
+                  Copy
+                </button>
+                ${item.phone && item.phone !== '-' ? `
+                  <button onclick="sendSpecificWhatsApp('${item.id}')" class="px-2 py-1 rounded-lg bg-emerald-950 text-emerald-400 hover:bg-emerald-800 hover:text-white text-[10px] font-bold flex items-center gap-0.5" title="Kirim WA">
+                    <span class="material-symbols-outlined text-[12px]">chat</span>
+                    <span>WA</span>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function copySpecificToken(tok) {
+      navigator.clipboard.writeText(tok).then(() => {
+        alert("✅ Token " + tok + " berhasil disalin!");
+      });
+    }
+
+    function sendSpecificWhatsApp(itemId) {
+      const list = getStoredLicenses();
+      const item = list.find(x => x.id === itemId);
+      if (!item) return;
+
+      currentClient = item.clientName;
+      currentPhone = item.phone;
+      currentToken = item.token;
+      currentExpiry = item.expiry;
+      selectedAppKey = item.appKey || "RESTO";
+
+      copyOrSendWhatsAppMessage();
+    }
+
+    function clearHistoryLicenses() {
+      if (confirm("Apakah Anda yakin ingin menghapus seluruh riwayat token lisensi dari browser ini?")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderLicensesHistoryTable();
+      }
+    }
+
+    // Modal Panduan Integrasi
+    function openIntegrationSnippetModal() {
+      document.getElementById("integrationSnippetModal").classList.remove("hidden");
+      document.getElementById("integrationSnippetModal").classList.add("flex");
+    }
+
+    function closeIntegrationSnippetModal() {
+      document.getElementById("integrationSnippetModal").classList.add("hidden");
+      document.getElementById("integrationSnippetModal").classList.remove("flex");
+    }
+
+    function copySnippetCode() {
+      const text = document.getElementById("snippetCodeBlock").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById("copySnippetBtnText");
+        btn.textContent = "✅ Snippet Disalin!";
+        setTimeout(() => btn.textContent = "Salin Snippet", 2000);
+      });
+    }
+  </script>
+</body>
+</html>
