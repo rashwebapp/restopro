@@ -119,9 +119,9 @@
   </main>
 
   <!-- Shared Scripts -->
-  <script src="assets/js/resto-config.js?v=2.5.5"></script>
-  <script src="assets/js/resto-data.js?v=2.5.5"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.5"></script>
+  <script src="assets/js/resto-config.js?v=2.5.6"></script>
+  <script src="assets/js/resto-data.js?v=2.5.6"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.6"></script>
 
   <script>
     function getBaseUrl() {
@@ -137,11 +137,12 @@
       const baseUrl = getBaseUrl();
       const tenantId = RestoSync.getTenantId();
       const tenantInfo = RestoSync.getTenantInfo();
-      const restoName = tenantInfo ? tenantInfo.name : "Resto Pro • Halal Food";
-      const restoSub = tenantInfo ? (tenantInfo.city || "Restoran & Kafe Modern") : "Arabian, Malaysian & Thai Culinary";
+      const isMaster = !tenantId || tenantId === "default";
+      const restoName = (tenantInfo && !isMaster) ? tenantInfo.name : "Resto Pro • Halal Food";
+      const restoSub = (tenantInfo && !isMaster) ? (tenantInfo.city || "Restoran & Kafe Modern") : "Arabian, Malaysian & Thai Culinary";
 
       // Perbarui judul halaman jika ada tenant aktif
-      if (tenantInfo && tenantInfo.name) {
+      if (tenantInfo && tenantInfo.name && !isMaster) {
         const titleEl = document.querySelector("h1");
         if (titleEl) titleEl.innerText = `Cetak QR Code Meja • ${tenantInfo.name}`;
       }

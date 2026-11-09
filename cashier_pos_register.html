@@ -1005,11 +1005,11 @@
           <span class="material-symbols-outlined text-3xl font-black">point_of_sale</span>
         </div>
         <h2 id="pinModalRestoTitle" class="font-heading font-extrabold text-xl text-white">
-          Harapan Corner Resto
+          Resto Pro POS (Master)
         </h2>
         <p class="text-xs text-slate-400 mt-1 flex items-center justify-center gap-1.5">
           <span class="material-symbols-outlined text-sm text-emerald-400">badge</span>
-          <span>Petugas: <strong id="pinModalCashierName" class="text-slate-200">Adib Ali</strong></span>
+          <span>Petugas: <strong id="pinModalCashierName" class="text-slate-200">Kasir Utama</strong></span>
         </p>
       </div>
 
@@ -1107,11 +1107,11 @@
         <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-700/60 text-xs space-y-1">
           <div class="flex items-center justify-between">
             <span class="text-slate-400">Tenant Restoran:</span>
-            <strong id="emergencyTenantName" class="text-amber-400">Harapan Corner</strong>
+            <strong id="emergencyTenantName" class="text-amber-400">Resto Pro Master System</strong>
           </div>
           <div class="flex items-center justify-between">
             <span class="text-slate-400">Tenant ID (Slug):</span>
-            <span id="emergencyTenantId" class="font-mono text-slate-300">harapan-corner</span>
+            <span id="emergencyTenantId" class="font-mono text-slate-300">master (default)</span>
           </div>
         </div>
 
@@ -1404,7 +1404,7 @@
       </div>
       <div style="display: flex; justify-content: space-between;">
         <span>Meja: <strong id="rcptTable">03</strong></span>
-        <span>Kasir: <strong id="rcptCashierName">Adib Ali</strong></span>
+        <span>Kasir: <strong id="rcptCashierName">Kasir Utama</strong></span>
       </div>
       <div style="display: flex; justify-content: space-between;">
         <span>Tamu: <span id="rcptCustomer">Ibu Rahmawati</span></span>
@@ -1458,9 +1458,9 @@
   <div id="posToastContainer" class="fixed top-5 right-5 z-[70] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.5.5"></script>
-  <script src="assets/js/resto-config.js?v=2.5.5"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.5"></script>
+  <script src="assets/js/resto-data.js?v=2.5.6"></script>
+  <script src="assets/js/resto-config.js?v=2.5.6"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.6"></script>
   <script>
     // State Kasir
     let activeTableId = "T03";
@@ -1485,10 +1485,12 @@
       const saved = localStorage.getItem(storageKey);
       if (saved && saved.trim()) return saved.trim();
 
-      // Fallback otomatis ke PIC dari pendaftaran tenant (misal: "Adib Ali")
-      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
-      if (tenantInfo && tenantInfo.pic && tenantInfo.pic.trim()) {
-        return tenantInfo.pic.trim();
+      // Jika tenant spesifik (bukan master default), gunakan PIC dari pendaftaran tenant
+      if (tenantId && tenantId !== "default") {
+        const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo(tenantId) : null;
+        if (tenantInfo && tenantInfo.pic && tenantInfo.pic.trim()) {
+          return tenantInfo.pic.trim();
+        }
       }
       return "Kasir Utama";
     }
@@ -1726,8 +1728,9 @@
       const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
       const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
 
-      document.getElementById("emergencyTenantName").textContent = tenantInfo ? tenantInfo.name : "Default Resto";
-      document.getElementById("emergencyTenantId").textContent = tenantId;
+      const isMaster = !tenantId || tenantId === "default";
+      document.getElementById("emergencyTenantName").textContent = isMaster ? "Resto Pro Master System" : (tenantInfo ? tenantInfo.name : tenantId);
+      document.getElementById("emergencyTenantId").textContent = isMaster ? "master (default)" : tenantId;
 
       // Populate list tenant untuk opsi switch instant
       const selectTenant = document.getElementById("emergencySelectTenant");

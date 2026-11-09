@@ -621,9 +621,9 @@
   </div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.5.5"></script>
-  <script src="assets/js/resto-config.js?v=2.5.5"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.5"></script>
+  <script src="assets/js/resto-data.js?v=2.5.6"></script>
+  <script src="assets/js/resto-config.js?v=2.5.6"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.6"></script>
   <script>
     // State Keranjang & Modal Aktif
     let cart = [];
@@ -692,8 +692,10 @@
       const submitBtnText = document.getElementById("submitOrderTableBtnText");
       if (submitBtnText) submitBtnText.textContent = `Kirim Pesanan ke Dapur (${t.name})`;
 
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const isMaster = !tenantId || tenantId === "default";
       const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
-      const restoName = tenantInfo ? tenantInfo.name : "Resto Pro";
+      const restoName = (tenantInfo && !isMaster) ? tenantInfo.name : "Resto Pro";
       const restoHeader = document.getElementById("headerRestoName");
       if (restoHeader) restoHeader.textContent = restoName;
 

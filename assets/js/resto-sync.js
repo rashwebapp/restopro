@@ -12,8 +12,8 @@ const RestoSync = {
   // --------------------------------------------------------------------------
   getTenantId() {
     try {
-      if (typeof window !== "undefined") {
-        if (window.location && window.location.search) {
+      if (typeof window !== "undefined" && window.location) {
+        if (window.location.search) {
           const params = new URLSearchParams(window.location.search);
           const t = params.get("tenant") || params.get("resto");
           if (t && t.trim()) {
@@ -22,8 +22,9 @@ const RestoSync = {
             return clean;
           }
         }
-        const cached = sessionStorage.getItem("resto_pro_active_tenant");
-        if (cached && cached.trim()) return cached.trim();
+        // Jika membuka halaman master tanpa parameter query tenant di URL,
+        // selalu kembali ke master "default" agar tidak tertukar dengan tenant lain!
+        sessionStorage.removeItem("resto_pro_active_tenant");
       }
     } catch (e) {}
     return "default";
@@ -164,11 +165,29 @@ const RestoSync = {
   getTenantInfo(targetTenantId) {
     try {
       const tenantId = targetTenantId || this.getTenantId();
-      if (!tenantId || tenantId === "default") return null;
+      if (!tenantId || tenantId === "default") {
+        return {
+          id: "default",
+          name: "Resto Pro POS (Master)",
+          pic: "Kasir Utama",
+          phone: "081234567890",
+          cashierPhone: "081299887766",
+          cashierPin: "1234",
+          ownerPin: "1234",
+          city: "Master Headquarters",
+          plan: "enterprise",
+          planName: "Master Core Resto Pro",
+          tablesCount: 12,
+          status: "active"
+        };
+      }
       const all = this.getAllTenants();
       return all.find(t => t.id === tenantId) || {
         id: tenantId,
         name: tenantId.replace(/-/g, " ").toUpperCase(),
+        pic: "Kasir Resto",
+        cashierPin: "1234",
+        ownerPin: "1234",
         plan: "pro",
         status: "active",
         tablesCount: 12

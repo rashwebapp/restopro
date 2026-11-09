@@ -1612,9 +1612,9 @@
   </div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.5.5"></script>
-  <script src="assets/js/resto-config.js?v=2.5.5"></script>
-  <script src="assets/js/resto-sync.js?v=2.5.5"></script>
+  <script src="assets/js/resto-data.js?v=2.5.6"></script>
+  <script src="assets/js/resto-config.js?v=2.5.6"></script>
+  <script src="assets/js/resto-sync.js?v=2.5.6"></script>
   <script>
     // State Filter Global
     let activeDatePreset = "today";
@@ -1633,10 +1633,11 @@
       }
 
       // Branding Dinamis Multi-Tenant
-      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
       const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const isMaster = !tenantId || tenantId === "default";
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
 
-      if (tenantInfo && tenantInfo.name) {
+      if (tenantInfo && tenantInfo.name && !isMaster) {
         const titleEl = document.getElementById("ownerDashboardTitle");
         if (titleEl) titleEl.innerHTML = `${tenantInfo.name} • Pengaturan Resto <span class="text-amber-500">✨</span>`;
         const subEl = document.getElementById("ownerDashboardSub");
