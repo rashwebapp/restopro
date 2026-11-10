@@ -621,6 +621,114 @@ test("testUpdateTenantExpiryAndSelfServeCollision", async function () {
   assertEqual(RestoSync.getTenantInfo("kopi-senja").plan, "monthly", "Offline collision preserves existing kopi-senja");
 });
 
+test("testTenantCloudSyncEmitsAfterTableSync", async function () {
+  resetTestEnv();
+
+  const t = RestoSync.registerNewTenant({
+    id: "warung-sync-table",
+    name: "Warung Sync Table",
+    plan: "trial",
+    tablesCount: 4,
+    _skipCloud: true
+  });
+  setActiveTenantUrl(t.id);
+  RestoSync.initDefaultTables();
+  assertEqual(RestoSync.getUsableTables().length, 4, "Starts with 4 usable tables on trial");
+
+  let listenerFired = false;
+  let observedUsableInListener = -1;
+  let observedTablesInListener = -1;
+  let observedPaidActiveInListener = false;
+
+  RestoSync.on("TENANTS_UPDATED", function () {
+    listenerFired = true;
+    observedUsableInListener = RestoSync.getUsableTables().length;
+    observedTablesInListener = RestoSync.getTables().length;
+    observedPaidActiveInListener = RestoSync.getLicenseData().isPaidActive;
+  });
+
+  fetch = function () {
+    return Promise.resolve({
+      ok: true,
+      json: function () {
+        return Promise.resolve({
+          success: true,
+          cloudInitialized: true,
+          tenant: {
+            id: "warung-sync-table",
+            name: "Warung Sync Table",
+            plan: "monthly",
+            status: "active",
+            tablesCount: 8,
+            isLifetime: false,
+            expiresAt: new Date(Date.now() + 30 * 86400000).toISOString()
+          }
+        });
+      }
+    });
+  };
+
+  const syncRes = await RestoSync.syncTenantsFromCloud({ mode: "tenant" });
+  assertEqual(syncRes.success, true, "Tenant Cloud sync must succeed");
+  assertEqual(listenerFired, true, "TENANTS_UPDATED listener must fire");
+  assertEqual(observedPaidActiveInListener, true, "Inside TENANTS_UPDATED, license must already be paid active");
+  assertEqual(observedTablesInListener, 8, "Inside TENANTS_UPDATED, getTables() must already reflect 8 tables");
+  assertEqual(observedUsableInListener, 8, "Inside TENANTS_UPDATED, getUsableTables() must already reflect 8 tables");
+});
+
+test("testAccessGuardEscapesHtmlAndUpdatesExistingOverlay", function () {
+  resetTestEnv();
+
+  const xssName = 'Warung <img src=x onerror="alert(1)"> & "Quote"';
+  const t = RestoSync.registerNewTenant({
+    id: "warung-xss",
+    name: xssName,
+    plan: "monthly",
+    status: "suspended",
+    _skipCloud: true
+  });
+  setActiveTenantUrl(t.id);
+
+  const mockDoc = createMockDocument();
+  const res1 = RestoSync.enforceTenantAccessGuard(mockDoc);
+  assertEqual(res1.blocked, true, "Suspended tenant must be blocked");
+
+  const overlay = mockDoc.getElementById("tenantSuspendedOverlay");
+  assert(Boolean(overlay), "Overlay must exist");
+  assertEqual(overlay.innerHTML.indexOf("<img"), -1, "Raw <img tag must NEVER appear unescaped in overlay HTML");
+  assert(overlay.innerHTML.indexOf("&lt;img src=x") !== -1, "HTML tags must be escaped in overlay HTML");
+  assert(overlay.innerHTML.indexOf("&amp;") !== -1, "Ampersand must be escaped in overlay HTML");
+
+  // Re-running guard when #tenantSuspendedOverlay already exists must update displayed name
+  RestoSync.updateTenant(t.id, { name: "Nama Baru Aman", status: "suspended", _skipCloud: true });
+  RestoSync.enforceTenantAccessGuard(mockDoc);
+  assert(overlay.innerHTML.indexOf("Nama Baru Aman") !== -1, "Existing overlay must update displayed tenant name");
+  assertEqual(overlay.innerHTML.indexOf("&lt;img"), -1, "Old tenant name must be replaced on existing overlay");
+
+  // Also verify child node textContent update path (browser DOM simulation)
+  const browserMockDoc = createMockDocument();
+  const existingOverlay = browserMockDoc.createElement("div");
+  existingOverlay.id = "tenantSuspendedOverlay";
+  const nameNode = browserMockDoc.createElement("strong");
+  nameNode.id = "tenantSuspendedName";
+  nameNode.textContent = "Old Name";
+  const idNode = browserMockDoc.createElement("code");
+  idNode.id = "tenantSuspendedId";
+  idNode.textContent = "old-id";
+  const waNode = browserMockDoc.createElement("a");
+  waNode.id = "tenantSuspendedWaLink";
+  existingOverlay.appendChild(nameNode);
+  existingOverlay.appendChild(idNode);
+  existingOverlay.appendChild(waNode);
+  browserMockDoc.body.appendChild(existingOverlay);
+
+  RestoSync.updateTenant(t.id, { name: "<img src=x>", status: "suspended", _skipCloud: true });
+  RestoSync.enforceTenantAccessGuard(browserMockDoc);
+  assertEqual(nameNode.textContent, "<img src=x>", "Browser child #tenantSuspendedName must receive literal textContent safely");
+  assertEqual(idNode.textContent, "warung-xss", "Browser child #tenantSuspendedId must be updated");
+  assert(String(waNode.getAttribute("href") || waNode.href || "").indexOf("https://wa.me/") === 0, "WhatsApp link href must be updated");
+});
+
 // -----------------------------------------------------------------------------
 // Execute Tests
 // -----------------------------------------------------------------------------

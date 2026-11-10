@@ -52,6 +52,15 @@ const RestoSync = {
     } catch (e) {}
   },
 
+  _escapeHtml(str) {
+    return String(str === undefined || str === null ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  },
+
   _getQueryParam(searchStr, key) {
     if (!searchStr || !key) return null;
     try {
@@ -436,13 +445,15 @@ const RestoSync = {
     return this.seedDemoTenants();
   },
 
-  saveAllTenants(tenants) {
+  saveAllTenants(tenants, options = {}) {
     try {
       if (typeof localStorage !== "undefined") {
         localStorage.setItem(this.TENANTS_INIT_FLAG_KEY, "true");
         localStorage.setItem(this.TENANTS_DIRECTORY_KEY, JSON.stringify(Array.isArray(tenants) ? tenants : []));
       }
-      this.emit("TENANTS_UPDATED", { count: Array.isArray(tenants) ? tenants.length : 0 });
+      if (!options || !options.silent) {
+        this.emit("TENANTS_UPDATED", { count: Array.isArray(tenants) ? tenants.length : 0 });
+      }
       return true;
     } catch (e) {
       this._safeWarn("Gagal simpan tenant directory:", e);
@@ -3585,7 +3596,11 @@ const RestoSync = {
         if (cloudInitialized) {
           const currentLocal = this._readRawTenantsArray();
           const filtered = currentLocal.filter(t => t.id !== targetTenantId);
-          this.saveAllTenants(filtered);
+          this.saveAllTenants(filtered, { silent: true });
+          if (targetTenantId === this.getTenantId() && typeof localStorage !== "undefined" && localStorage.getItem(this.TABLES_STORAGE_KEY)) {
+            this.syncTablesForTenant();
+          }
+          this.emit("TENANTS_UPDATED", { count: filtered.length, evictedTenantId: targetTenantId });
           return {
             success: true,
             mode: "tenant",
@@ -3625,10 +3640,11 @@ const RestoSync = {
         localArr.unshift(cloudTenant);
       }
 
-      this.saveAllTenants(localArr);
-      if (cloudTenant.id === this.getTenantId() && typeof localStorage !== "undefined" && localStorage.getItem(this.TABLES_STORAGE_KEY)) {
+      this.saveAllTenants(localArr, { silent: true });
+      if (cloudTenant.id === this.getTenantId()) {
         this.syncTablesForTenant();
       }
+      this.emit("TENANTS_UPDATED", { count: localArr.length, tenantId: cloudTenant.id });
       return {
         success: true,
         mode: "tenant",
@@ -3789,16 +3805,14 @@ const RestoSync = {
       let overlayRendered = false;
       if (doc && typeof doc.getElementById === "function" && typeof doc.createElement === "function" && doc.body) {
         let overlay = doc.getElementById("tenantSuspendedOverlay");
-        const restoName = (tenant && tenant.name) ? tenant.name : tenantId;
+        const restoName = (tenant && tenant.name) ? String(tenant.name) : String(tenantId);
+        const safeName = this._escapeHtml(restoName);
+        const safeTenantId = this._escapeHtml(tenantId);
         const waMsg = encodeURIComponent(`Halo Admin RASH, akun restoran "${restoName}" (ID: ${tenantId}) berstatus Suspended. Mohon informasi aktivasi kembali.`);
-        if (!overlay) {
-          overlay = doc.createElement("div");
-          overlay.id = "tenantSuspendedOverlay";
-          overlay.className = "fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-md text-white";
-          if (typeof overlay.setAttribute === "function") {
-            overlay.setAttribute("data-suspended", "true");
-          }
-          overlay.innerHTML = `
+        const waHref = `https://wa.me/6282286452105?text=${waMsg}`;
+        const safeWaHref = this._escapeHtml(waHref);
+
+        const buildOverlayHtml = () => `
             <div class="max-w-md w-full bg-slate-900 border border-red-500/40 rounded-3xl p-8 text-center shadow-2xl space-y-5">
               <div class="w-16 h-16 mx-auto rounded-2xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center">
                 <span class="material-symbols-outlined text-4xl">block</span>
@@ -3807,18 +3821,42 @@ const RestoSync = {
                 <span class="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-[11px] font-bold uppercase tracking-wider">Akses Terkunci</span>
                 <h2 class="text-xl font-extrabold text-white">Akun Restoran Ditangguhkan (Suspended)</h2>
                 <p class="text-xs text-slate-300 leading-relaxed">
-                  Layanan operasional untuk <strong>${restoName}</strong> (<code>${tenantId}</code>) sedang ditangguhkan sementara oleh Admin RASH.
+                  Layanan operasional untuk <strong id="tenantSuspendedName">${safeName}</strong> (<code id="tenantSuspendedId">${safeTenantId}</code>) sedang ditangguhkan sementara oleh Admin RASH.
                 </p>
               </div>
-              <a href="https://wa.me/6282286452105?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-lg">
+              <a id="tenantSuspendedWaLink" href="${safeWaHref}" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-lg">
                 <span>Hubungi Admin RASH via WhatsApp</span>
               </a>
             </div>
           `;
+
+        if (!overlay) {
+          overlay = doc.createElement("div");
+          overlay.id = "tenantSuspendedOverlay";
+          overlay.className = "fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-md text-white";
+          if (typeof overlay.setAttribute === "function") {
+            overlay.setAttribute("data-suspended", "true");
+          }
+          overlay.innerHTML = buildOverlayHtml();
           if (typeof doc.body.appendChild === "function") {
             doc.body.appendChild(overlay);
           }
+        } else {
+          const nameEl = doc.getElementById("tenantSuspendedName");
+          const idEl = doc.getElementById("tenantSuspendedId");
+          const waEl = doc.getElementById("tenantSuspendedWaLink");
+          if (nameEl || idEl || waEl) {
+            if (nameEl) nameEl.textContent = restoName;
+            if (idEl) idEl.textContent = String(tenantId);
+            if (waEl) {
+              waEl.href = waHref;
+              if (typeof waEl.setAttribute === "function") waEl.setAttribute("href", waHref);
+            }
+          } else {
+            overlay.innerHTML = buildOverlayHtml();
+          }
         }
+
         if (overlay.classList && typeof overlay.classList.remove === "function") {
           overlay.classList.remove("hidden");
         }
