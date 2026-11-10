@@ -34,9 +34,78 @@ const CONFIG = {
     TRANSACTIONS: 'Transactions',
     MEMBERS: 'Members',
     RESERVATIONS: 'Reservations',
-    KDS: 'KdsTickets'
+    KDS: 'KdsTickets',
+    TENANTS: 'Tenants'
   }
 };
+
+/**
+ * Header Kolom Resmi Sheet 'Tenants' (Database SaaS Multi-Tenant)
+ */
+const TENANT_HEADERS = [
+  'id', 'name', 'pic', 'phone', 'cashierPhone', 'cashierPinHash', 'ownerPinHash',
+  'city', 'plan', 'planName', 'price', 'originalPrice', 'billingCycle', 'tablesCount',
+  'status', 'isLifetime', 'createdAt', 'expiresAt', 'updatedAt', 'gasUrl', 'apiKey', 'licenseKey'
+];
+
+/**
+ * Helper Kriptografi SHA-256: Mengembalikan 64-karakter lowercase hex string
+ */
+function sha256Hex_(input) {
+  const rawHash = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(input), Utilities.Charset.UTF_8);
+  let txtHash = '';
+  for (let i = 0; i < rawHash.length; i++) {
+    let hashVal = rawHash[i];
+    if (hashVal < 0) hashVal += 256;
+    let byteHex = hashVal.toString(16);
+    if (byteHex.length === 1) byteHex = '0' + byteHex;
+    txtHash += byteHex;
+  }
+  return txtHash.toLowerCase();
+}
+
+/**
+ * Helper Hash PIN Tenant: Kompatibel 100% dengan RestoSync.hashTenantPin
+ */
+function hashTenantPin_(id, pin) {
+  const tid = (id && String(id).trim()) ? String(id).trim() : 'default';
+  const cleanPin = (pin !== undefined && pin !== null) ? String(pin).trim() : '';
+  return sha256Hex_('RESTO_PRO_PIN_V1:' + tid + ':' + cleanPin);
+}
+
+/**
+ * Cek status inisialisasi direktori cloud tenants
+ */
+function isCloudInitialized_() {
+  try {
+    return PropertiesService.getScriptProperties().getProperty('TENANTS_CLOUD_INITIALIZED') === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Tandai bahwa cloud tenants sudah terinisialisasi
+ */
+function setCloudInitialized_() {
+  try {
+    PropertiesService.getScriptProperties().setProperty('TENANTS_CLOUD_INITIALIZED', 'true');
+  } catch (e) {}
+}
+
+/**
+ * Sensor Keamanan Publik: Menghapus PIN plaintext, nomor kontak staf/owner, dan API key custom
+ */
+function sanitizeTenantPublicInfo_(tenant) {
+  if (!tenant || typeof tenant !== 'object') return tenant;
+  const copy = Object.assign({}, tenant);
+  delete copy.cashierPin;
+  delete copy.ownerPin;
+  delete copy.phone;
+  delete copy.cashierPhone;
+  delete copy.apiKey;
+  return copy;
+}
 
 /**
  * Helper Keamanan: Memverifikasi otorisasi API Secret Key dari request
@@ -83,7 +152,7 @@ function doGet(e) {
     const providedApiKey = params.apiKey || params.key || '';
 
     // Pembagian Hak Akses: Aksi publik vs Aksi terproteksi
-    const isPublicAction = (action === 'ping' || action === 'getMenuCatalog');
+    const isPublicAction = (action === 'ping' || action === 'getMenuCatalog' || action === 'getTenantPublicInfo');
 
     if (!isPublicAction && !verifyAuthKey_(providedApiKey)) {
       return buildResponse({
@@ -119,6 +188,14 @@ function doGet(e) {
 
       case 'getMenuCatalog':
         result = { success: true, data: getRowsAsObjects(CONFIG.SHEET_NAMES.MENU) };
+        break;
+
+      case 'getTenantPublicInfo':
+        result = handleGetTenantPublicInfo(params.tenantId || params.id || '');
+        break;
+
+      case 'getTenants':
+        result = handleGetAllTenants();
         break;
 
       case 'getTransactions':
@@ -164,9 +241,9 @@ function doPost(e) {
     const providedApiKey = payload.apiKey || payload.key || '';
 
     // Pembagian Hak Akses POST:
-    // 'placeOrder' adalah aksi publik untuk tamu meja di QR Self-Order
-    // Seluruh aksi mutasi lainnya (CRUD menu, hapus data, omset, CRM) WAJIB API Secret Key!
-    const isPublicPost = (action === 'placeOrder');
+    // 'placeOrder' dan 'registerTrialTenant' adalah aksi publik
+    // Seluruh aksi mutasi lainnya (CRUD menu, hapus data, omset, CRM, simpan tenant) WAJIB API Secret Key!
+    const isPublicPost = (action === 'placeOrder' || action === 'registerTrialTenant');
 
     if (!isPublicPost && !verifyAuthKey_(providedApiKey)) {
       return buildResponse({
@@ -181,6 +258,18 @@ function doPost(e) {
     switch (action) {
       case 'placeOrder':
         result = handlePlaceOrder(payload.data);
+        break;
+
+      case 'saveTenant':
+        result = handleSaveTenant(payload.data || payload);
+        break;
+
+      case 'deleteTenant':
+        result = handleDeleteTenant((payload.data && payload.data.id) ? payload.data.id : payload.id);
+        break;
+
+      case 'registerTrialTenant':
+        result = handleRegisterTrialTenant(payload.data || payload);
         break;
 
       case 'saveTransaction':
@@ -603,18 +692,297 @@ function handleSyncFullState(fullData) {
   return { success: true, message: 'Seluruh data offline berhasil disinkronkan ke Google Sheets!' };
 }
 
+// ------------------------------------------------------------------------------
+// MULTI-TENANT SAAS HANDLERS
+// ------------------------------------------------------------------------------
+
+/**
+ * Mengambil informasi publik tenant (tanpa membocorkan PIN/phone/key)
+ */
+function handleGetTenantPublicInfo(tenantId) {
+  if (!tenantId) {
+    return { success: true, notFound: true, cloudInitialized: isCloudInitialized_() };
+  }
+  const cleanId = String(tenantId).trim().toLowerCase();
+  const tenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
+  const found = tenants.find(t => String(t.id).trim().toLowerCase() === cleanId);
+  if (!found) {
+    return { success: true, notFound: true, cloudInitialized: isCloudInitialized_() };
+  }
+  const publicTenant = sanitizeTenantPublicInfo_(found);
+  return {
+    success: true,
+    cloudInitialized: isCloudInitialized_(),
+    tenant: publicTenant,
+    data: publicTenant
+  };
+}
+
+/**
+ * Mengambil seluruh data tenant (khusus Super Admin)
+ */
+function handleGetAllTenants() {
+  const tenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
+  return {
+    success: true,
+    cloudInitialized: isCloudInitialized_(),
+    tenants: tenants,
+    data: tenants
+  };
+}
+
+/**
+ * Menyimpan / Update data tenant ke sheet Tenants
+ */
+function handleSaveTenant(data) {
+  if (!data || !data.id) {
+    throw new Error('Data tenant dan id tenant wajib diisi');
+  }
+  setCloudInitialized_();
+  const sheet = getOrCreateTenantsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+  const idIdx = headers.indexOf('id');
+  const targetId = String(data.id).trim().toLowerCase();
+
+  let existingRow = -1;
+  let existingObj = null;
+
+  for (let r = 1; r < values.length; r++) {
+    if (String(values[r][idIdx]).trim().toLowerCase() === targetId) {
+      existingRow = r + 1; // 1-based index
+      existingObj = {};
+      headers.forEach((h, i) => {
+        existingObj[h] = values[r][i];
+      });
+      break;
+    }
+  }
+
+  const record = Object.assign({}, data);
+  record.id = targetId;
+  const nowIso = new Date().toISOString();
+
+  // Handle PIN hashes
+  if (record.cashierPin !== undefined && String(record.cashierPin).trim() !== '') {
+    record.cashierPinHash = hashTenantPin_(record.id, record.cashierPin);
+  } else if (!record.cashierPinHash && existingObj && existingObj.cashierPinHash) {
+    record.cashierPinHash = existingObj.cashierPinHash;
+  } else if (!record.cashierPinHash) {
+    record.cashierPinHash = hashTenantPin_(record.id, '1234');
+  }
+
+  if (record.ownerPin !== undefined && String(record.ownerPin).trim() !== '') {
+    record.ownerPinHash = hashTenantPin_(record.id, record.ownerPin);
+  } else if (!record.ownerPinHash && existingObj && existingObj.ownerPinHash) {
+    record.ownerPinHash = existingObj.ownerPinHash;
+  } else if (!record.ownerPinHash) {
+    record.ownerPinHash = record.cashierPinHash || hashTenantPin_(record.id, '1234');
+  }
+
+  // Handle plan & lifetime
+  if (record.plan !== undefined) {
+    record.plan = String(record.plan).toLowerCase().trim();
+  }
+  if (record.isLifetime !== undefined) {
+    record.isLifetime = Boolean(record.isLifetime === true || record.isLifetime === 'true' || record.plan === 'lifetime');
+  }
+  if (record.isLifetime) {
+    record.expiresAt = '';
+  }
+
+  if (record.tablesCount !== undefined) {
+    record.tablesCount = Number(record.tablesCount) || 12;
+  }
+  if (record.price !== undefined) {
+    record.price = Number(record.price) || 0;
+  }
+  if (record.originalPrice !== undefined) {
+    record.originalPrice = Number(record.originalPrice) || 0;
+  }
+
+  record.createdAt = (existingObj && existingObj.createdAt) || record.createdAt || nowIso;
+  record.updatedAt = nowIso;
+
+  const rowValues = headers.map(h => {
+    let val = record[h];
+    if (val === undefined || val === null) return '';
+    if (typeof val === 'object') return JSON.stringify(val);
+    return val;
+  });
+
+  if (existingRow > 0) {
+    sheet.getRange(existingRow, 1, 1, rowValues.length).setValues([rowValues]);
+  } else {
+    sheet.appendRow(rowValues);
+  }
+
+  invalidateCache();
+  return {
+    success: true,
+    message: 'Data tenant ' + record.id + ' berhasil disimpan!',
+    tenant: record,
+    cloudInitialized: true
+  };
+}
+
+/**
+ * Menghapus tenant dari cloud
+ */
+function handleDeleteTenant(tenantId) {
+  if (!tenantId) {
+    throw new Error('Tenant ID wajib diisi untuk menghapus tenant');
+  }
+  setCloudInitialized_();
+  const cleanId = String(tenantId).trim().toLowerCase();
+  const sheet = getOrCreateTenantsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const idIdx = values[0].indexOf('id');
+
+  for (let r = 1; r < values.length; r++) {
+    if (String(values[r][idIdx]).trim().toLowerCase() === cleanId) {
+      sheet.deleteRow(r + 1);
+      invalidateCache();
+      return {
+        success: true,
+        message: 'Tenant ' + tenantId + ' berhasil dihapus dari cloud!',
+        deletedId: tenantId,
+        cloudInitialized: true
+      };
+    }
+  }
+
+  return {
+    success: true,
+    notFound: true,
+    message: 'Tenant ' + tenantId + ' tidak ditemukan atau sudah dihapus',
+    cloudInitialized: true
+  };
+}
+
+/**
+ * Registrasi Trial Tenant Mandiri (Public Self-Serve)
+ */
+function handleRegisterTrialTenant(data) {
+  if (!data || !data.name || !String(data.name).trim()) {
+    throw new Error('Nama resto wajib diisi');
+  }
+  setCloudInitialized_();
+
+  const rawName = String(data.name).trim();
+  let baseSlug = (data.id ? String(data.id).trim().toLowerCase() : '') ||
+    rawName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') ||
+    ('resto-' + Math.floor(1000 + Math.random() * 9000));
+  baseSlug = baseSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+
+  const sheet = getOrCreateTenantsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+  const idIdx = headers.indexOf('id');
+
+  const existingIds = new Set();
+  for (let r = 1; r < values.length; r++) {
+    existingIds.add(String(values[r][idIdx]).trim().toLowerCase());
+  }
+
+  let finalSlug = baseSlug;
+  if (existingIds.has(finalSlug)) {
+    let attempt = 0;
+    do {
+      const suffix = Math.floor(1000 + Math.random() * 9000);
+      finalSlug = baseSlug + '-' + suffix;
+      attempt++;
+    } while (existingIds.has(finalSlug) && attempt < 20);
+  }
+
+  const cashierPin = data.cashierPin ? String(data.cashierPin).trim() : '1234';
+  const ownerPin = data.ownerPin ? String(data.ownerPin).trim() : cashierPin;
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 14 * 86400000).toISOString();
+
+  const trialTenant = {
+    id: finalSlug,
+    name: rawName,
+    pic: data.pic ? String(data.pic).trim() : 'Pemilik Resto',
+    phone: data.phone ? String(data.phone).trim() : '',
+    cashierPhone: data.cashierPhone ? String(data.cashierPhone).trim() : '',
+    cashierPinHash: hashTenantPin_(finalSlug, cashierPin),
+    ownerPinHash: hashTenantPin_(finalSlug, ownerPin),
+    city: data.city ? String(data.city).trim() : 'Indonesia',
+    plan: 'trial',
+    planName: 'Free Trial (14 Hari)',
+    price: 0,
+    originalPrice: 0,
+    billingCycle: 'trial',
+    tablesCount: 4,
+    status: 'trial',
+    isLifetime: false,
+    createdAt: now.toISOString(),
+    expiresAt: expiresAt,
+    updatedAt: now.toISOString(),
+    gasUrl: (data.gasUrl || '').trim(),
+    apiKey: (data.apiKey || '').trim(),
+    licenseKey: data.licenseKey || ('RP-TRL-' + finalSlug.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) + '-' + Math.random().toString(36).substring(2, 8).toUpperCase())
+  };
+
+  const rowValues = headers.map(h => {
+    let val = trialTenant[h];
+    if (val === undefined || val === null) return '';
+    if (typeof val === 'object') return JSON.stringify(val);
+    return val;
+  });
+
+  sheet.appendRow(rowValues);
+  invalidateCache();
+
+  return {
+    success: true,
+    message: 'Registrasi trial tenant ' + finalSlug + ' berhasil!',
+    tenant: trialTenant,
+    slug: finalSlug,
+    cloudInitialized: true
+  };
+}
+
 // ==============================================================================
 // 4. UTILITIES & HELPER DATABASE
 // ==============================================================================
 
-function getSheet(sheetName) {
+function getSpreadsheet_() {
   const ssId = CONFIG.SPREADSHEET_ID;
-  if (!ssId) {
-    throw new Error('SPREADSHEET_ID belum dikonfigurasi! Jalankan setupAppEnvironment() terlebih dahulu.');
+  if (ssId) {
+    try {
+      const ss = SpreadsheetApp.openById(ssId);
+      if (ss) return ss;
+    } catch (e) {}
   }
-  const ss = SpreadsheetApp.openById(ssId);
-  const sheet = ss.getSheetByName(sheetName);
+  try {
+    if (typeof SpreadsheetApp.getActiveSpreadsheet === 'function') {
+      const active = SpreadsheetApp.getActiveSpreadsheet();
+      if (active) return active;
+    }
+  } catch (e) {}
+  throw new Error('SPREADSHEET_ID belum dikonfigurasi! Jalankan setupAppEnvironment() terlebih dahulu.');
+}
+
+function getOrCreateTenantsSheet_() {
+  const ss = getSpreadsheet_();
+  let sheet = ss.getSheetByName(CONFIG.SHEET_NAMES.TENANTS);
   if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.SHEET_NAMES.TENANTS);
+    sheet.appendRow(TENANT_HEADERS);
+    styleHeader(sheet, '#0284C7');
+  }
+  return sheet;
+}
+
+function getSheet(sheetName) {
+  const ss = getSpreadsheet_();
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    if (sheetName === CONFIG.SHEET_NAMES.TENANTS) {
+      return getOrCreateTenantsSheet_();
+    }
     throw new Error('Sheet ' + sheetName + ' tidak ditemukan di Spreadsheet');
   }
   return sheet;
@@ -839,6 +1207,13 @@ function setupAppEnvironment() {
     Date.now() - 300000, 'cooking'
   ]);
   styleHeader(kdsSheet, '#DC2626');
+
+  // -------------------------------------------------------------
+  // Sheet 7: Tenants (Direktori Tenant SaaS Multi-Resto)
+  // -------------------------------------------------------------
+  const tenantSheet = ss.insertSheet(CONFIG.SHEET_NAMES.TENANTS);
+  tenantSheet.appendRow(TENANT_HEADERS);
+  styleHeader(tenantSheet, '#0284C7');
 
   // 3. Simpan ID & Kunci Rahasia ke PropertiesService secara otomatis!
   const props = PropertiesService.getScriptProperties();
