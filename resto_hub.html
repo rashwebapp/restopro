@@ -81,8 +81,8 @@
           <span class="theme-label hidden sm:inline">Tema</span>
         </button>
 
-        <!-- Super Admin Link -->
-        <a href="super_admin_saas.html" class="touch-btn px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-800 dark:hover:bg-stone-700 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs" title="Masuk ke Portal Super Admin RASH SaaS">
+        <!-- Super Admin Link (HANYA DITAMPILKAN JIKA MASTER DEFAULT, SEMBUNYIKAN UNTUK TENANT KLIEN) -->
+        <a id="btnSuperAdminNav" href="super_admin_saas.html" class="hidden touch-btn px-3 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white dark:bg-stone-800 dark:hover:bg-stone-700 text-xs font-semibold items-center gap-1.5 transition-colors shadow-2xs" title="Masuk ke Portal Super Admin RASH SaaS">
           <span class="material-symbols-outlined text-[16px] text-amber-400">shield_person</span>
           <span class="hidden md:inline">Admin RASH</span>
         </a>
@@ -401,8 +401,8 @@
       <p>© 2026 Resto Pro Multi-Tenant SaaS. Powered by <strong class="text-amber-600 dark:text-amber-400">RASH WebApp Builder</strong>.</p>
       <div class="flex items-center gap-4">
         <a href="index.html" class="hover:text-amber-600 transition-colors">Landing Page</a>
-        <span>•</span>
-        <a href="super_admin_saas.html" class="hover:text-amber-600 transition-colors">Super Admin Portal</a>
+        <span id="footerAdminSeparator" class="hidden">•</span>
+        <a id="footerAdminLink" href="super_admin_saas.html" class="hidden hover:text-amber-600 transition-colors">Super Admin Portal</a>
       </div>
     </div>
   </footer>
@@ -430,6 +430,23 @@
       // Baca tenant ID dari URL atau session
       const tenantId = RestoSync.getTenantId();
       currentTenant = RestoSync.getTenantInfo(tenantId);
+
+      // Sembunyikan tombol Admin RASH jika dibuka oleh tenant restoran!
+      // Hanya tampilkan jika membuka master headquarters pusat
+      const isMaster = !tenantId || tenantId === "default";
+      const btnAdmin = document.getElementById("btnSuperAdminNav");
+      const footerSep = document.getElementById("footerAdminSeparator");
+      const footerAdmin = document.getElementById("footerAdminLink");
+
+      if (isMaster) {
+        if (btnAdmin) { btnAdmin.classList.remove("hidden"); btnAdmin.classList.add("flex"); }
+        if (footerSep) footerSep.classList.remove("hidden");
+        if (footerAdmin) footerAdmin.classList.remove("hidden");
+      } else {
+        if (btnAdmin) { btnAdmin.classList.add("hidden"); btnAdmin.classList.remove("flex"); }
+        if (footerSep) footerSep.classList.add("hidden");
+        if (footerAdmin) footerAdmin.classList.add("hidden");
+      }
 
       // Render informasi restoran
       renderRestaurantInfo(currentTenant);
