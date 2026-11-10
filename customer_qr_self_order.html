@@ -646,6 +646,7 @@
     let currentTableId = "T05";
     let currentTableName = "Meja 05";
     let currentTableSection = "Indoor AC";
+    let hasResolvedInitialTable = false;
 
     function escapeHtmlSafe(str) {
       if (typeof RestoSync !== "undefined" && typeof RestoSync._escapeHtml === "function") {
@@ -789,6 +790,7 @@
         setCustomerTable(matched.id);
         updateFallbackBypassNotice(null, null);
         renderTableSwitchGrid();
+        hasResolvedInitialTable = true;
         return;
       }
 
@@ -800,6 +802,7 @@
         setCustomerTable(currentUsable.id);
         updateFallbackBypassNotice(null, null);
         renderTableSwitchGrid();
+        hasResolvedInitialTable = true;
         return;
       }
 
@@ -812,7 +815,7 @@
       }
 
       if (fallback) {
-        const bypassed = tbl || (currentTableId && !currentUsable ? currentTableId : null);
+        const bypassed = tbl || (!options.fromInit && hasResolvedInitialTable && currentTableId && !currentUsable ? currentTableId : null);
         setCustomerTable(fallback.id);
         if (bypassed && bypassed.toUpperCase() !== fallback.id.toUpperCase()) {
           updateFallbackBypassNotice(bypassed, fallback);
@@ -825,6 +828,7 @@
       } else {
         applyCustomerTenantBranding(null);
       }
+      hasResolvedInitialTable = true;
       renderTableSwitchGrid();
     }
 

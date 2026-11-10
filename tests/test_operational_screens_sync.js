@@ -999,6 +999,69 @@ test("8. XSS escaping on POS & Print Sheet, Master keeps all 12 tables, and offl
   assertEqual(masterSheet.doc.getElementById("cardsGridSubtitle").classList.contains("hidden"), true, "Master print sheet must hide unpaid limit notice");
 });
 
+test("9. Fix Round 1: customer_qr_self_order without ?table= avoids false T05 lock banner/toast, and POS selectTable(T06) resolves reservations on T01", function () {
+  resetAll();
+  RestoSync.saveAllTenants([], { silent: true });
+  RestoSync.registerNewTenant({
+    id: "warung-trial",
+    name: "Warung Trial Fix1",
+    plan: "trial",
+    status: "trial",
+    tablesCount: 4,
+    expiresAt: new Date(Date.now() + 10 * 86400000).toISOString(),
+    _skipCloud: true
+  });
+
+  // 9a. customer_qr_self_order.html?tenant=warung-trial (NO ?table= param)
+  const qrNoTable = mountCustomerQr({ search: "?tenant=warung-trial" });
+  qrNoTable.doc.dispatchDOMContentLoaded();
+
+  assertEqual(qrNoTable.api.getCurrentTableId(), "T01", "Unpaid tenant without ?table= must land cleanly on T01");
+  assertEqual(qrNoTable.doc.getElementById("qrTableFallbackNotice").classList.contains("hidden"), true, "#qrTableFallbackNotice must stay hidden when ?table= was not requested");
+  const toastMsg = qrNoTable.doc.getElementById("toastMessage").textContent;
+  assertEqual(toastMsg.indexOf("tidak tersedia"), -1, "No unavailable/lock toast should fire when ?table= was omitted, got: " + toastMsg);
+  assertEqual(qrNoTable.doc.getElementById("toastNotification").classList.contains("opacity-0"), true, "Toast notification must remain unshown on clean default T01 load");
+
+  // 9b. cashier_pos_register.html selectTable('T06') falls back to T01 and resolves reservations against T01 (ignoring T06 reservation)
+  window.location.search = "?tenant=warung-trial";
+  RestoSync.initDefaultTables();
+  RestoSync.saveReservation({
+    tableId: "T06",
+    tableName: "Meja 06",
+    section: "Indoor AC",
+    customerName: "Tamu Locked T06",
+    phone: "0811111111",
+    guests: 4,
+    timeStr: "20:00 WIB",
+    notes: "Booking meja terkunci",
+    status: "confirmed"
+  });
+
+  const posNoResT01 = mountCashierPos({ search: "?tenant=warung-trial" });
+  posNoResT01.doc.dispatchDOMContentLoaded();
+  posNoResT01.api.selectTable("T06");
+  assertEqual(posNoResT01.api.getActiveTableId(), "T01", "selectTable('T06') on unpaid 4-table tenant must fall back to T01");
+  assertEqual(posNoResT01.doc.getElementById("activeTicketReservationBanner").classList.contains("hidden"), true, "Must ignore confirmed reservation on unavailable T06 when falling back to T01");
+  assertEqual(posNoResT01.doc.getElementById("activeTicketStatusBadge").textContent, "Tersedia", "T01 with no reservation must show Tersedia, not T06 Dibooking");
+
+  // Add a confirmed reservation on T01 and verify selectTable('T06') renders T01's reservation
+  RestoSync.saveReservation({
+    tableId: "T01",
+    tableName: "Meja 01",
+    section: "Indoor AC",
+    customerName: "Tamu Valid T01",
+    phone: "0822222222",
+    guests: 2,
+    timeStr: "19:00 WIB",
+    notes: "Dekat jendela",
+    status: "confirmed"
+  });
+  posNoResT01.api.selectTable("T06");
+  assertEqual(posNoResT01.api.getActiveTableId(), "T01", "Fallback active table must be T01");
+  assertEqual(posNoResT01.doc.getElementById("activeTicketReservationBanner").classList.contains("hidden"), false, "Must show T01 confirmed reservation banner after falling back from T06");
+  assert(posNoResT01.doc.getElementById("resBannerCustomer").textContent.indexOf("Tamu Valid T01") !== -1, "Reservation banner must display T01 reservation customer");
+});
+
 // -----------------------------------------------------------------------------
 // 5. Execute All Tests
 // -----------------------------------------------------------------------------

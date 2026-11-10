@@ -2701,7 +2701,7 @@
       let table = RESTO_TABLES.find(t => t.id === tableId);
       if (!table) {
         if (RESTO_TABLES.length === 0) return;
-        const fallback = RESTO_TABLES.find(t => t.id === activeTableId) || RESTO_TABLES[0];
+        const fallback = RESTO_TABLES[0];
         activeTableId = fallback.id;
         table = fallback;
         showPosNotification(`⚠️ Meja ${tableId} tidak tersedia pada paket aktif. Dialihkan ke ${fallback.name}.`);
@@ -2722,7 +2722,7 @@
 
       // Periksa apakah meja ini memiliki reservasi aktif hari ini
       const reservations = RestoSync.getReservations();
-      const activeRes = reservations.find(r => r.tableId === tableId && r.status === "confirmed");
+      const activeRes = reservations.find(r => r.tableId === table.id && r.status === "confirmed");
       const banner = document.getElementById("activeTicketReservationBanner");
 
       if (banner) {
