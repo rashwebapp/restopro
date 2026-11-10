@@ -127,6 +127,11 @@
       </div>
     </div>
 
+    <!-- Notice Pengalihan Meja (Limit Belum Bayar: Maks. 4 Meja) -->
+    <div id="qrTableFallbackNotice" class="hidden mb-3.5 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-[11px] font-semibold text-amber-900 dark:text-amber-200 leading-snug">
+      Meja yang diminta terkunci (Limit Belum Bayar: Maks. 4 Meja). Dialihkan otomatis ke Meja 01.
+    </div>
+
     <!-- Live Search Bar -->
     <div class="relative mb-3.5">
       <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#78716C] dark:text-[#94A3B8] text-[20px]">search</span>
@@ -606,6 +611,10 @@
         </button>
       </div>
 
+      <div id="tableSwitchLimitNotice" class="hidden px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+        Limit Belum Bayar: Maks. 4 Meja Aktif
+      </div>
+
       <div class="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1" id="tableSwitchGrid">
         <!-- Rendered by JS -->
       </div>
@@ -621,9 +630,9 @@
   </div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.6.0"></script>
-  <script src="assets/js/resto-config.js?v=2.6.0"></script>
-  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
+  <script src="assets/js/resto-data.js?v=2.7.0"></script>
+  <script src="assets/js/resto-config.js?v=2.7.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.7.0"></script>
   <script>
     // State Keranjang & Modal Aktif
     let cart = [];
@@ -631,11 +640,34 @@
     let modalSelectedSpice = 1;
     let modalQuantity = 1;
     let activeFilter = 'all';
+    let userManuallySelectedTable = false;
 
     // State Meja Dinamis (Dapat disesuaikan lewat parameter URL ?table=T07 atau pemilih meja)
     let currentTableId = "T05";
     let currentTableName = "Meja 05";
     let currentTableSection = "Indoor AC";
+
+    function escapeHtmlSafe(str) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._escapeHtml === "function") {
+        return RestoSync._escapeHtml(str);
+      }
+      return String(str === undefined || str === null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getQueryParamSafe(key) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._getQueryParam === "function") {
+        return RestoSync._getQueryParam(window.location.search, key);
+      }
+      if (typeof URLSearchParams !== "undefined") {
+        return new URLSearchParams(window.location.search).get(key);
+      }
+      return null;
+    }
 
     function getActiveMenuCatalog() {
       if (typeof RestoSync !== "undefined" && typeof RestoSync.getMenuCatalog === "function") {
@@ -644,34 +676,168 @@
       return typeof MENU_ITEMS !== "undefined" ? MENU_ITEMS : [];
     }
 
-    function initDynamicTable() {
+    function applyCustomerTenantBranding(activeTableObj) {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const isMaster = !tenantId || tenantId === "default";
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo(tenantId) : null;
+      const restoName = (tenantInfo && !isMaster && tenantInfo.name) ? tenantInfo.name : "Resto Pro";
+      const restoHeader = document.getElementById("headerRestoName");
+      if (restoHeader) restoHeader.textContent = restoName;
+      const tblLabel = activeTableObj && activeTableObj.name ? activeTableObj.name : currentTableName;
+      document.title = `${restoName} • QR Self-Order (${tblLabel})`;
+    }
+
+    function populateCustomerReservationTables() {
+      const select = document.getElementById("custResTable");
+      if (!select || typeof RESTO_TABLES === "undefined") return;
+      if (RESTO_TABLES.length === 0) {
+        select.innerHTML = "";
+        return;
+      }
+      const prevVal = select.value;
+      select.innerHTML = RESTO_TABLES.map(t => {
+        const safeId = escapeHtmlSafe(t.id);
+        const safeName = escapeHtmlSafe(t.name);
+        const safeSection = escapeHtmlSafe(t.section || "Indoor AC");
+        const seats = Number(t.seats) || 4;
+        return `<option value="${safeId}">${safeName} - ${safeSection} (${seats} Kursi)</option>`;
+      }).join("");
+      if (prevVal && RESTO_TABLES.some(t => t.id === prevVal)) {
+        select.value = prevVal;
+      } else if (RESTO_TABLES[0]) {
+        select.value = RESTO_TABLES[0].id;
+      }
+    }
+
+    function renderTableSwitchGrid() {
+      const grid = document.getElementById("tableSwitchGrid");
+      const notice = document.getElementById("tableSwitchLimitNotice");
+      if (notice && typeof RestoSync !== "undefined" && typeof RestoSync.getLicenseData === "function") {
+        const lic = RestoSync.getLicenseData();
+        if (!lic.isPaidActive && !lic.isMaster) {
+          notice.textContent = "Limit Belum Bayar: Maks. 4 Meja Aktif";
+          notice.classList.remove("hidden");
+        } else {
+          notice.classList.add("hidden");
+        }
+      }
+      if (!grid || typeof RESTO_TABLES === "undefined") return;
+      grid.innerHTML = RESTO_TABLES.map(t => {
+        const isSelected = t.id === currentTableId;
+        const bg = isSelected ? "bg-amber-500 text-[#0F172A] font-extrabold border-2 border-amber-600 shadow-sm" : "bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-amber-500";
+        const safeIdAttr = escapeHtmlSafe(String(t.id || "").replace(/'/g, "\\'"));
+        const safeName = escapeHtmlSafe(t.name);
+        const seats = Number(t.seats) || 4;
+        return `
+            <button onclick="selectCustomerTable('${safeIdAttr}')" class="p-2 rounded-xl ${bg} text-center touch-btn flex flex-col items-center transition-all">
+              <span class="text-xs font-bold">${safeName}</span>
+              <span class="text-[9px] opacity-75">${seats} Kursi</span>
+            </button>
+          `;
+      }).join("");
+    }
+
+    function updateFallbackBypassNotice(bypassedTableLabel, fallbackTableObj) {
+      const notice = document.getElementById("qrTableFallbackNotice");
+      if (!notice) return;
+      if (!bypassedTableLabel || !fallbackTableObj) {
+        notice.classList.add("hidden");
+        return;
+      }
+      const lic = (typeof RestoSync !== "undefined" && typeof RestoSync.getLicenseData === "function")
+        ? RestoSync.getLicenseData()
+        : { isPaidActive: true, isMaster: true };
+      const reason = (!lic.isPaidActive && !lic.isMaster)
+        ? "Limit Belum Bayar: Maks. 4 Meja Aktif"
+        : "Meja tidak tersedia";
+      notice.textContent = `Meja ${bypassedTableLabel} terkunci (${reason}). Dialihkan otomatis ke ${fallbackTableObj.name}.`;
+      notice.classList.remove("hidden");
+    }
+
+    function initDynamicTable(options = {}) {
       if (typeof RestoSync !== "undefined") {
-        const live = RestoSync.getTables();
-        if (live && live.length > 0 && typeof RESTO_TABLES !== "undefined") {
+        if (typeof RestoSync.enforceTenantAccessGuard === "function") {
+          RestoSync.enforceTenantAccessGuard(document);
+        }
+        if (options.syncTableQuota !== false && typeof RestoSync.syncTablesForTenant === "function") {
+          RestoSync.syncTablesForTenant();
+        }
+        const live = typeof RestoSync.getUsableTables === "function"
+          ? RestoSync.getUsableTables()
+          : RestoSync.getTables();
+        if (Array.isArray(live) && typeof RESTO_TABLES !== "undefined") {
           RESTO_TABLES.length = 0;
           live.forEach(t => RESTO_TABLES.push(t));
         }
       }
-      const urlParams = new URLSearchParams(window.location.search);
-      const tbl = urlParams.get("table");
-      if (tbl && typeof RESTO_TABLES !== "undefined") {
-        const found = RESTO_TABLES.find(t => 
-          t.id.toLowerCase() === tbl.toLowerCase() || 
-          t.id.toLowerCase() === ("t" + tbl).toLowerCase() || 
-          t.name.toLowerCase().includes(tbl.toLowerCase())
+
+      populateCustomerReservationTables();
+
+      const tbl = getQueryParamSafe("table");
+      let matched = null;
+      if (tbl && typeof RESTO_TABLES !== "undefined" && (!userManuallySelectedTable || options.fromInit)) {
+        const term = String(tbl).trim().toLowerCase();
+        matched = RESTO_TABLES.find(t =>
+          t.id.toLowerCase() === term ||
+          t.id.toLowerCase() === ("t" + term) ||
+          t.id.toLowerCase() === ("t0" + term) ||
+          t.name.toLowerCase().includes(term)
         );
-        if (found) {
-          setCustomerTable(found.id);
-          return;
-        }
       }
-      setCustomerTable("T05");
+
+      if (matched) {
+        setCustomerTable(matched.id);
+        updateFallbackBypassNotice(null, null);
+        renderTableSwitchGrid();
+        return;
+      }
+
+      const currentUsable = typeof RESTO_TABLES !== "undefined"
+        ? RESTO_TABLES.find(t => t.id === currentTableId)
+        : null;
+
+      if (currentUsable && (!tbl || userManuallySelectedTable)) {
+        setCustomerTable(currentUsable.id);
+        updateFallbackBypassNotice(null, null);
+        renderTableSwitchGrid();
+        return;
+      }
+
+      // Fallback aman ke meja usable pertama (atau T05 jika tidak ada ?table= & T05 tersedia untuk demo Master/Berbayar)
+      let fallback = null;
+      if (!tbl && options.fromInit && typeof RESTO_TABLES !== "undefined") {
+        fallback = RESTO_TABLES.find(t => t.id === "T05") || RESTO_TABLES[0];
+      } else if (typeof RESTO_TABLES !== "undefined") {
+        fallback = RESTO_TABLES[0];
+      }
+
+      if (fallback) {
+        const bypassed = tbl || (currentTableId && !currentUsable ? currentTableId : null);
+        setCustomerTable(fallback.id);
+        if (bypassed && bypassed.toUpperCase() !== fallback.id.toUpperCase()) {
+          updateFallbackBypassNotice(bypassed, fallback);
+          if (options.fromInit) {
+            showToast(`⚠️ Meja ${bypassed} tidak tersedia (Maks. 4 Meja). Dialihkan ke ${fallback.name}.`);
+          }
+        } else {
+          updateFallbackBypassNotice(null, null);
+        }
+      } else {
+        applyCustomerTenantBranding(null);
+      }
+      renderTableSwitchGrid();
     }
 
     function setCustomerTable(tableId) {
       if (typeof RESTO_TABLES === "undefined") return;
-      const t = RESTO_TABLES.find(x => x.id === tableId);
-      if (!t) return;
+      let t = RESTO_TABLES.find(x => x.id === tableId);
+      if (!t && RESTO_TABLES.length > 0) {
+        t = RESTO_TABLES[0];
+      }
+      if (!t) {
+        applyCustomerTenantBranding(null);
+        return;
+      }
 
       currentTableId = t.id;
       currentTableName = t.name;
@@ -692,14 +858,7 @@
       const submitBtnText = document.getElementById("submitOrderTableBtnText");
       if (submitBtnText) submitBtnText.textContent = `Kirim Pesanan ke Dapur (${t.name})`;
 
-      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
-      const isMaster = !tenantId || tenantId === "default";
-      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
-      const restoName = (tenantInfo && !isMaster) ? tenantInfo.name : "Resto Pro";
-      const restoHeader = document.getElementById("headerRestoName");
-      if (restoHeader) restoHeader.textContent = restoName;
-
-      document.title = `${restoName} • QR Self-Order (${t.name})`;
+      applyCustomerTenantBranding(t);
     }
 
     function openTableSwitchModal() {
@@ -707,18 +866,7 @@
       const grid = document.getElementById("tableSwitchGrid");
       if (!modal || !grid) return;
 
-      if (typeof RESTO_TABLES !== "undefined") {
-        grid.innerHTML = RESTO_TABLES.map(t => {
-          const isSelected = t.id === currentTableId;
-          const bg = isSelected ? "bg-amber-500 text-[#0F172A] font-extrabold border-2 border-amber-600 shadow-sm" : "bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-amber-500";
-          return `
-            <button onclick="selectCustomerTable('${t.id}')" class="p-2 rounded-xl ${bg} text-center touch-btn flex flex-col items-center transition-all">
-              <span class="text-xs font-bold">${t.name}</span>
-              <span class="text-[9px] opacity-75">${t.seats} Kursi</span>
-            </button>
-          `;
-        }).join("");
-      }
+      renderTableSwitchGrid();
 
       modal.classList.remove("hidden");
       modal.classList.add("flex");
@@ -733,7 +881,10 @@
     }
 
     function selectCustomerTable(tableId) {
+      userManuallySelectedTable = true;
       setCustomerTable(tableId);
+      updateFallbackBypassNotice(null, null);
+      renderTableSwitchGrid();
       closeTableSwitchModal();
       showToast(`📍 Berpindah ke ${currentTableName} (${currentTableSection})`, "table_restaurant");
     }
@@ -741,12 +892,29 @@
     // Inisialisasi Aplikasi Saat Halaman Selesai Dimuat
     document.addEventListener("DOMContentLoaded", () => {
       ThemeManager.init();
-      initDynamicTable();
+      initDynamicTable({ fromInit: true, syncTableQuota: true });
       renderMenuCards(getActiveMenuCatalog());
 
       // PWA Service Worker Registration
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js').catch(e => console.warn('PWA SW:', e));
+      }
+
+      // Sinkronisasi perubahan profil tenant & kuota meja dari Cloud/tab lain
+      RestoSync.on("TENANTS_UPDATED", () => {
+        initDynamicTable({ fromInit: false, syncTableQuota: true });
+      });
+
+      RestoSync.on("TABLES_UPDATED", () => {
+        initDynamicTable({ fromInit: false, syncTableQuota: false });
+      });
+
+      RestoSync.on("LICENSE_STATUS_CHANGED", () => {
+        initDynamicTable({ fromInit: false, syncTableQuota: true });
+      });
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
+        RestoSync.syncTenantsFromCloud({ mode: "tenant" }).catch(() => {});
       }
 
       // Dengarkan update status dari Dapur (KDS)
@@ -1281,6 +1449,7 @@
     // RESERVASI MEJA PELANGGAN DARI MOBILE QR
     // ============================================================
     function openCustomerReservationModal() {
+      populateCustomerReservationTables();
       const modal = document.getElementById("customerReservationModal");
       const dateInput = document.getElementById("custResDate");
       if (dateInput && !dateInput.value) {

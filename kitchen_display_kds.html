@@ -143,7 +143,7 @@
       </div>
 
       <!-- Quick Back to POS -->
-      <a href="cashier_pos_register.html" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold flex items-center gap-1.5 hover:bg-amber-500/30 transition-all">
+      <a id="navKdsPosLink" href="cashier_pos_register.html" class="touch-btn px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold flex items-center gap-1.5 hover:bg-amber-500/30 transition-all">
         <span class="material-symbols-outlined text-[16px]">point_of_sale</span>
         <span class="hidden md:inline">Kasir POS</span>
       </a>
@@ -190,32 +190,70 @@
   </main>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.6.0"></script>
-  <script src="assets/js/resto-config.js?v=2.6.0"></script>
-  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
+  <script src="assets/js/resto-data.js?v=2.7.0"></script>
+  <script src="assets/js/resto-config.js?v=2.7.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.7.0"></script>
   <script>
     let activeStationFilter = "all";
     let isSoundEnabled = true;
+
+    function escapeHtmlSafe(str) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._escapeHtml === "function") {
+        return RestoSync._escapeHtml(str);
+      }
+      return String(str === undefined || str === null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getQueryParamSafe(key) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._getQueryParam === "function") {
+        return RestoSync._getQueryParam(window.location.search, key);
+      }
+      if (typeof URLSearchParams !== "undefined") {
+        return new URLSearchParams(window.location.search).get(key);
+      }
+      return null;
+    }
+
+    function applyKdsTenantBranding() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const isMaster = !tenantId || tenantId === "default";
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo(tenantId) : null;
+      const titleEl = document.getElementById("kdsBrandTitle");
+      const subEl = document.getElementById("kdsBrandSub");
+      const posLink = document.getElementById("navKdsPosLink");
+
+      if (tenantInfo && tenantInfo.name && !isMaster) {
+        const safeName = escapeHtmlSafe(tenantInfo.name);
+        if (titleEl) titleEl.innerHTML = `${safeName} • KDS <span class="text-amber-400">🍳</span>`;
+        if (subEl) subEl.textContent = `Kitchen Display System • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
+        document.title = `${tenantInfo.name} • KDS Kitchen Display`;
+        if (posLink) posLink.href = `cashier_pos_register.html?tenant=${encodeURIComponent(tenantId)}`;
+      } else {
+        if (titleEl) titleEl.innerHTML = `Resto Pro KDS • Layar Monitor Dapur <span class="text-amber-400">🍳</span>`;
+        if (subEl) subEl.textContent = "Kitchen Display System • Arab, Malaysia & Thai Fusion Hotline";
+        document.title = "Resto Pro KDS • Kitchen Display System 🍳";
+        if (posLink) posLink.href = "cashier_pos_register.html";
+      }
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       ThemeManager.init();
       initKdsClock();
 
-      // Branding Dinamis Multi-Tenant
-      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
-      const isMaster = !tenantId || tenantId === "default";
-      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
-      if (tenantInfo && tenantInfo.name && !isMaster) {
-        const titleEl = document.getElementById("kdsBrandTitle");
-        if (titleEl) titleEl.innerHTML = `${tenantInfo.name} • KDS <span class="text-amber-400">🍳</span>`;
-        const subEl = document.getElementById("kdsBrandSub");
-        if (subEl) subEl.textContent = `Kitchen Display System • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
-        document.title = `${tenantInfo.name} • KDS Kitchen Display`;
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.enforceTenantAccessGuard === "function") {
+        RestoSync.enforceTenantAccessGuard(document);
       }
 
+      // Branding Dinamis Multi-Tenant
+      applyKdsTenantBranding();
+
       // Cek parameter URL ?station=drinks atau ?station=kitchen dari device bar/dapur
-      const urlParams = new URLSearchParams(window.location.search);
-      const stParam = urlParams.get('station');
+      const stParam = getQueryParamSafe('station');
       if (stParam) {
         filterStation(stParam.toLowerCase());
       } else {
@@ -224,6 +262,23 @@
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js').catch(e => {});
+      }
+
+      RestoSync.on("TENANTS_UPDATED", () => {
+        if (typeof RestoSync.enforceTenantAccessGuard === "function") {
+          RestoSync.enforceTenantAccessGuard(document);
+        }
+        applyKdsTenantBranding();
+      });
+
+      RestoSync.on("LICENSE_STATUS_CHANGED", () => {
+        if (typeof RestoSync.enforceTenantAccessGuard === "function") {
+          RestoSync.enforceTenantAccessGuard(document);
+        }
+      });
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
+        RestoSync.syncTenantsFromCloud({ mode: "tenant" }).catch(() => {});
       }
 
       // Listen for Live Orders from QR Self-Order or POS

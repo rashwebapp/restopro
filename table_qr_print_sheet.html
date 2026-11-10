@@ -78,10 +78,15 @@
         <span class="material-symbols-outlined text-[24px]">qr_code_2</span>
       </div>
       <div>
-        <h1 class="font-heading font-extrabold text-lg text-slate-900 dark:text-white">
-          Cetak Kartu & Stiker QR Meja Restoran
-        </h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400">
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 id="qrPrintPageTitle" class="font-heading font-extrabold text-lg text-slate-900 dark:text-white">
+            Cetak Kartu & Stiker QR Meja Restoran
+          </h1>
+          <span id="qrPrintLimitBadge" class="hidden px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 text-[10px] font-bold">
+            Limit Belum Bayar: Maks. 4 Meja Aktif
+          </span>
+        </div>
+        <p id="qrPrintPageSub" class="text-xs text-slate-500 dark:text-slate-400">
           Format siap potong untuk Stand Akrilik Meja (10 x 15 cm) & Stiker Meja Makan.
         </p>
       </div>
@@ -103,7 +108,7 @@
       </button>
 
       <!-- Kembali -->
-      <a href="owner_settings_saas.html" class="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors">
+      <a id="qrBackToOwnerLink" href="owner_settings_saas.html" class="px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-colors">
         ← Kembali
       </a>
     </div>
@@ -113,38 +118,89 @@
        PRINT CARDS GRID CONTAINER
        ============================================================ -->
   <main class="print-container max-w-6xl mx-auto">
+    <p id="cardsGridSubtitle" class="hidden no-print text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 rounded-2xl px-4 py-2.5 mb-5">
+      Limit Belum Bayar: Maks. 4 Meja Aktif — Upgrade ke Paket Bulanan atau Lifetime untuk mencetak seluruh QR meja restoran Anda.
+    </p>
     <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
       <!-- Rendered dynamically by JS -->
     </div>
   </main>
 
   <!-- Shared Scripts -->
-  <script src="assets/js/resto-config.js?v=2.6.0"></script>
-  <script src="assets/js/resto-data.js?v=2.6.0"></script>
-  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
+  <script src="assets/js/resto-config.js?v=2.7.0"></script>
+  <script src="assets/js/resto-data.js?v=2.7.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.7.0"></script>
 
   <script>
+    function escapeHtmlSafe(str) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._escapeHtml === "function") {
+        return RestoSync._escapeHtml(str);
+      }
+      return String(str === undefined || str === null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function getBaseUrl() {
       const loc = window.location.href;
-      const idx = loc.lastIndexOf("/");
-      return idx !== -1 ? loc.substring(0, idx + 1) : "";
+      const cleanLoc = loc.split("#")[0].split("?")[0];
+      const idx = cleanLoc.lastIndexOf("/");
+      return idx !== -1 ? cleanLoc.substring(0, idx + 1) : "";
     }
 
     function renderQrCards() {
       const grid = document.getElementById("cardsGrid");
-      const filter = document.getElementById("sectionFilter").value;
-      const tables = RestoSync.getTables();
+      if (!grid) return;
+      const filterEl = document.getElementById("sectionFilter");
+      const filter = filterEl ? filterEl.value : "all";
+      const tables = (typeof RestoSync.getUsableTables === "function")
+        ? RestoSync.getUsableTables()
+        : RestoSync.getTables();
       const baseUrl = getBaseUrl();
       const tenantId = RestoSync.getTenantId();
-      const tenantInfo = RestoSync.getTenantInfo();
+      const tenantInfo = RestoSync.getTenantInfo(tenantId);
+      const lic = (typeof RestoSync.getLicenseData === "function")
+        ? RestoSync.getLicenseData()
+        : { isPaidActive: true, isMaster: true };
       const isMaster = !tenantId || tenantId === "default";
-      const restoName = (tenantInfo && !isMaster) ? tenantInfo.name : "Resto Pro • Halal Food";
+      const restoName = (tenantInfo && !isMaster && tenantInfo.name) ? tenantInfo.name : "Resto Pro • Halal Food";
       const restoSub = (tenantInfo && !isMaster) ? (tenantInfo.city || "Restoran & Kafe Modern") : "Arabian, Malaysian & Thai Culinary";
 
-      // Perbarui judul halaman jika ada tenant aktif
-      if (tenantInfo && tenantInfo.name && !isMaster) {
-        const titleEl = document.querySelector("h1");
-        if (titleEl) titleEl.innerText = `Cetak QR Code Meja • ${tenantInfo.name}`;
+      // Perbarui judul halaman & link kembali agar tetap membawa ?tenant=
+      const titleEl = document.getElementById("qrPrintPageTitle") || document.querySelector("h1");
+      if (titleEl) {
+        titleEl.textContent = (tenantInfo && tenantInfo.name && !isMaster)
+          ? `Cetak QR Code Meja • ${tenantInfo.name}`
+          : "Cetak Kartu & Stiker QR Meja Restoran";
+      }
+      document.title = (tenantInfo && tenantInfo.name && !isMaster)
+        ? `Cetak QR Meja • ${tenantInfo.name}`
+        : "Cetak Kartu & Stiker QR Meja • Resto Pro by RASH ✨";
+
+      const backLink = document.getElementById("qrBackToOwnerLink");
+      if (backLink) {
+        backLink.href = isMaster
+          ? "owner_settings_saas.html"
+          : `owner_settings_saas.html?tenant=${encodeURIComponent(tenantId)}`;
+      }
+
+      const isTableCapped = !lic.isPaidActive && !lic.isMaster;
+      const limitBadge = document.getElementById("qrPrintLimitBadge");
+      const gridSub = document.getElementById("cardsGridSubtitle");
+      if (limitBadge) {
+        if (isTableCapped) limitBadge.classList.remove("hidden");
+        else limitBadge.classList.add("hidden");
+      }
+      if (gridSub) {
+        if (isTableCapped) {
+          gridSub.textContent = "Limit Belum Bayar: Maks. 4 Meja Aktif — Upgrade ke Paket Bulanan atau Lifetime untuk mencetak seluruh QR meja restoran Anda.";
+          gridSub.classList.remove("hidden");
+        } else {
+          gridSub.classList.add("hidden");
+        }
       }
 
       grid.innerHTML = "";
@@ -164,15 +220,24 @@
         return;
       }
 
-      filteredTables.forEach((table, index) => {
+      const safeRestoName = escapeHtmlSafe(restoName);
+      const safeRestoSub = escapeHtmlSafe(restoSub);
+      const safeInitials = escapeHtmlSafe(String(restoName).substring(0, 2).toUpperCase());
+
+      filteredTables.forEach((table) => {
         const qrTargetUrl = (tenantId && tenantId !== "default")
-          ? `${baseUrl}customer_qr_self_order.html?table=${table.id}&tenant=${encodeURIComponent(tenantId)}`
-          : `${baseUrl}customer_qr_self_order.html?table=${table.id}`;
+          ? `${baseUrl}customer_qr_self_order.html?table=${encodeURIComponent(table.id)}&tenant=${encodeURIComponent(tenantId)}`
+          : `${baseUrl}customer_qr_self_order.html?table=${encodeURIComponent(table.id)}`;
         const cardId = `qr_card_${table.id}`;
         const qrContainerId = `qrcode_${table.id}`;
+        const safeSection = escapeHtmlSafe(table.section || "Indoor AC");
+        const safeTableName = escapeHtmlSafe(table.name);
+        const safeTableId = escapeHtmlSafe(table.id);
+        const safeQrUrl = escapeHtmlSafe(qrTargetUrl);
 
         const card = document.createElement("div");
         card.id = cardId;
+        card.setAttribute("data-qr-url", qrTargetUrl);
         card.className = "qr-card bg-white text-slate-900 border-2 border-slate-300 rounded-3xl p-6 shadow-md flex flex-col justify-between items-center text-center relative overflow-hidden";
         card.style.minHeight = "440px";
 
@@ -181,20 +246,20 @@
           <div class="w-full flex items-center justify-between pb-3 border-b-2 border-dashed border-slate-200">
             <div class="flex items-center gap-2 text-left">
               <span class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-heading font-extrabold text-sm shadow-xs">
-                ${restoName.substring(0, 2).toUpperCase()}
+                ${safeInitials}
               </span>
               <div>
                 <span class="font-heading font-extrabold text-xs uppercase tracking-wider block text-slate-900">
-                  ${restoName}
+                  ${safeRestoName}
                 </span>
                 <span class="text-[9px] text-slate-500 block font-medium">
-                  ${restoSub}
+                  ${safeRestoSub}
                 </span>
               </div>
             </div>
 
             <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-              ${table.section || 'Indoor AC'}
+              ${safeSection}
             </span>
           </div>
 
@@ -204,16 +269,16 @@
               NOMOR MEJA RESTORAN
             </span>
             <h2 class="font-heading font-black text-3xl sm:text-4xl text-slate-900 tracking-tight">
-              ${table.name}
+              ${safeTableName}
             </h2>
             <span class="text-[11px] text-slate-500 font-medium block">
-              Kapasitas: ${table.seats || 4} Kursi Tamu • Meja ID: <strong>${table.id}</strong>
+              Kapasitas: ${Number(table.seats) || 4} Kursi Tamu • Meja ID: <strong>${safeTableId}</strong>
             </span>
           </div>
 
           <!-- QR Code Display Box -->
           <div class="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 shadow-inner flex flex-col items-center justify-center my-1">
-            <div id="${qrContainerId}" class="p-1.5 bg-white rounded-xl shadow-xs"></div>
+            <div id="${escapeHtmlSafe(qrContainerId)}" data-qr-url="${safeQrUrl}" class="p-1.5 bg-white rounded-xl shadow-xs"></div>
             <span class="text-[10px] font-mono text-slate-400 mt-1 block">Scan untuk Buka Menu & Pesan</span>
           </div>
 
@@ -258,15 +323,43 @@
               });
             } catch (err) {
               // Fallback SVG mockup QR if library error
-              container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrTargetUrl)}" class="w-[140px] h-[140px]" alt="QR ${table.name}" />`;
+              container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(qrTargetUrl)}" class="w-[140px] h-[140px]" alt="QR ${safeTableName}" />`;
             }
           }
         }, 50);
       });
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function refreshQrPrintSheet(options = {}) {
+      if (typeof RestoSync !== "undefined") {
+        if (typeof RestoSync.enforceTenantAccessGuard === "function") {
+          RestoSync.enforceTenantAccessGuard(document);
+        }
+        if (options.syncTableQuota !== false && typeof RestoSync.syncTablesForTenant === "function") {
+          RestoSync.syncTablesForTenant();
+        }
+      }
       renderQrCards();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      refreshQrPrintSheet({ syncTableQuota: true });
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.on === "function") {
+        RestoSync.on("TENANTS_UPDATED", () => {
+          refreshQrPrintSheet({ syncTableQuota: true });
+        });
+        RestoSync.on("TABLES_UPDATED", () => {
+          refreshQrPrintSheet({ syncTableQuota: false });
+        });
+        RestoSync.on("LICENSE_STATUS_CHANGED", () => {
+          refreshQrPrintSheet({ syncTableQuota: true });
+        });
+      }
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
+        RestoSync.syncTenantsFromCloud({ mode: "tenant" }).catch(() => {});
+      }
     });
   </script>
 </body>

@@ -129,11 +129,11 @@
             </button>
           </div>
           <div class="py-1">
-            <a href="table_qr_print_sheet.html" target="_blank" onclick="togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
+            <a id="navQrPrintLink" href="table_qr_print_sheet.html" target="_blank" onclick="togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
               <span class="material-symbols-outlined text-indigo-500 text-[18px]">print</span>
               <span>Cetak Lembaran QR Meja (PDF)</span>
             </a>
-            <a href="customer_qr_self_order.html" target="_blank" onclick="togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
+            <a id="navQrGuestLink" href="customer_qr_self_order.html" target="_blank" onclick="togglePosNavMenu(false)" class="w-full px-3.5 py-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-left flex items-center gap-2.5 font-medium transition-colors">
               <span class="material-symbols-outlined text-amber-500 text-[18px]">qr_code_2</span>
               <span>Simulasi QR Meja Tamu</span>
             </a>
@@ -460,13 +460,18 @@
     <div class="bg-white dark:bg-[#1E293B] w-full max-w-2xl rounded-3xl border border-[#E7DFD5] dark:border-[#334155] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
       
       <!-- Header -->
-      <div class="p-4 border-b border-[#E7DFD5] dark:border-[#334155] bg-[#FAF7F2] dark:bg-[#0F172A] flex items-center justify-between">
+      <div id="tablePickerModalHeader" class="p-4 border-b border-[#E7DFD5] dark:border-[#334155] bg-[#FAF7F2] dark:bg-[#0F172A] flex items-center justify-between gap-2 flex-wrap">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-amber-500 text-[#0F172A] flex items-center justify-center font-bold">
             <span class="material-symbols-outlined text-[20px]">table_restaurant</span>
           </div>
           <div>
-            <h3 class="font-heading font-bold text-base text-[#1C1917] dark:text-white">Pilih Meja Resto</h3>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="font-heading font-bold text-base text-[#1C1917] dark:text-white">Pilih Meja Resto</h3>
+              <span id="posTableLimitNotice" class="hidden px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 text-[10px] font-bold">
+                Limit Belum Bayar: Maks. 4 Meja
+              </span>
+            </div>
             <p class="text-xs text-[#78716C] dark:text-[#94A3B8]">Sentuh salah satu meja untuk membuka pesanan atau input menu</p>
           </div>
         </div>
@@ -503,7 +508,7 @@
 
         <!-- Filter Pills -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 mb-3 text-xs font-heading font-bold shrink-0" id="tableFilterPills">
-          <button onclick="filterTableGrid('all')" class="table-pill px-3 py-1 rounded-xl bg-amber-500 text-[#0F172A]">Semua (12)</button>
+          <button id="tableFilterAllBtn" onclick="filterTableGrid('all')" class="table-pill px-3 py-1 rounded-xl bg-amber-500 text-[#0F172A]">Semua (12)</button>
           <button onclick="filterTableGrid('available')" class="table-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Kosong</button>
           <button onclick="filterTableGrid('occupied')" class="table-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Terisi</button>
           <button onclick="filterTableGrid('bill_requested')" class="table-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Bill</button>
@@ -1501,9 +1506,9 @@
   <div id="posToastContainer" class="fixed top-5 right-5 z-[70] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Shared Data & Logic Scripts -->
-  <script src="assets/js/resto-data.js?v=2.6.0"></script>
-  <script src="assets/js/resto-config.js?v=2.6.0"></script>
-  <script src="assets/js/resto-sync.js?v=2.6.0"></script>
+  <script src="assets/js/resto-data.js?v=2.7.0"></script>
+  <script src="assets/js/resto-config.js?v=2.7.0"></script>
+  <script src="assets/js/resto-sync.js?v=2.7.0"></script>
   <script>
     // State Kasir
     let activeTableId = "T03";
@@ -1873,28 +1878,172 @@
       }
     });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      ThemeManager.init();
-      initClock();
-      updateCashierUI();
-      initPosPinLock();
-      
-      // Branding Dinamis Multi-Tenant
-      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+    function escapeHtmlSafe(str) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._escapeHtml === "function") {
+        return RestoSync._escapeHtml(str);
+      }
+      return String(str === undefined || str === null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function getQueryParamSafe(key) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._getQueryParam === "function") {
+        return RestoSync._getQueryParam(window.location.search, key);
+      }
+      if (typeof URLSearchParams !== "undefined") {
+        return new URLSearchParams(window.location.search).get(key);
+      }
+      return null;
+    }
+
+    function applyPosTenantBranding() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const isMaster = !tenantId || tenantId === "default";
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo(tenantId) : null;
+
       if (tenantInfo && tenantInfo.name) {
+        const safeName = escapeHtmlSafe(tenantInfo.name);
         const brandTitle = document.getElementById("posBrandTitle");
-        if (brandTitle) brandTitle.innerHTML = `${tenantInfo.name} <span class="text-amber-500">✨</span>`;
+        if (brandTitle) brandTitle.innerHTML = `${safeName} <span class="text-amber-500">✨</span>`;
         const brandSub = document.getElementById("posBrandSub");
         if (brandSub) brandSub.textContent = `Aplikasi Kasir POS • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
         document.title = `${tenantInfo.name} • Cashier POS & Table Map`;
       }
-      
-      // Sinkronkan RESTO_TABLES dengan master meja dinamis dari RestoSync
-      const liveTables = RestoSync.getTables();
-      if (liveTables && liveTables.length > 0) {
-        RESTO_TABLES.length = 0;
+
+      const qrPrintLink = document.getElementById("navQrPrintLink");
+      const qrGuestLink = document.getElementById("navQrGuestLink");
+      if (!isMaster) {
+        const encoded = encodeURIComponent(tenantId);
+        if (qrPrintLink) qrPrintLink.href = `table_qr_print_sheet.html?tenant=${encoded}`;
+        if (qrGuestLink) qrGuestLink.href = `customer_qr_self_order.html?tenant=${encoded}&table=${encodeURIComponent(activeTableId || "T01")}`;
+      } else {
+        if (qrPrintLink) qrPrintLink.href = "table_qr_print_sheet.html";
+        if (qrGuestLink) qrGuestLink.href = "customer_qr_self_order.html";
+      }
+    }
+
+    function updateTableLimitNotice() {
+      const notice = document.getElementById("posTableLimitNotice");
+      if (!notice || typeof RestoSync === "undefined" || typeof RestoSync.getLicenseData !== "function") return;
+      const lic = RestoSync.getLicenseData();
+      const isCapped = !lic.isPaidActive && !lic.isMaster;
+      if (isCapped) {
+        notice.textContent = "Limit Belum Bayar: Maks. 4 Meja";
+        notice.classList.remove("hidden");
+      } else {
+        notice.classList.add("hidden");
+      }
+    }
+
+    function populateReservationTableOptions() {
+      const select = document.getElementById("resFormTable");
+      if (!select || typeof RESTO_TABLES === "undefined") return;
+      if (RESTO_TABLES.length === 0) {
+        select.innerHTML = "";
+        return;
+      }
+      const prevVal = select.value;
+      select.innerHTML = RESTO_TABLES.map(t => {
+        const safeId = escapeHtmlSafe(t.id);
+        const safeName = escapeHtmlSafe(t.name);
+        const safeSection = escapeHtmlSafe(t.section || "Indoor AC");
+        const seats = Number(t.seats) || 4;
+        return `<option value="${safeId}">${safeName} (${safeSection} - ${seats} Kursi)</option>`;
+      }).join("");
+      if (prevVal && RESTO_TABLES.some(t => t.id === prevVal)) {
+        select.value = prevVal;
+      } else if (RESTO_TABLES[0]) {
+        select.value = RESTO_TABLES[0].id;
+      }
+    }
+
+    function syncUsableTablesIntoGlobal(options = {}) {
+      if (typeof RestoSync === "undefined") return;
+      if (options.syncTableQuota && typeof RestoSync.syncTablesForTenant === "function") {
+        RestoSync.syncTablesForTenant();
+      }
+      const liveTables = typeof RestoSync.getUsableTables === "function"
+        ? RestoSync.getUsableTables()
+        : RestoSync.getTables();
+      RESTO_TABLES.length = 0;
+      if (Array.isArray(liveTables)) {
         liveTables.forEach(t => RESTO_TABLES.push(t));
       }
+      updateTableLimitNotice();
+      populateReservationTableOptions();
+    }
+
+    function resolveInitialOrValidActiveTable(useUrlParam) {
+      if (!Array.isArray(RESTO_TABLES) || RESTO_TABLES.length === 0) return null;
+      if (useUrlParam) {
+        const paramTbl = getQueryParamSafe("table");
+        if (paramTbl) {
+          const term = String(paramTbl).trim().toLowerCase();
+          const matched = RESTO_TABLES.find(t =>
+            t.id.toLowerCase() === term ||
+            t.id.toLowerCase() === ("t" + term) ||
+            t.id.toLowerCase() === ("t0" + term) ||
+            String(t.name || "").toLowerCase().includes(term)
+          );
+          if (matched) {
+            activeTableId = matched.id;
+            return matched;
+          }
+          // Jika meja dari URL tidak tersedia (mis. melebihi limit 4 meja), fallback ke meja usable pertama
+          activeTableId = RESTO_TABLES[0].id;
+          return RESTO_TABLES[0];
+        }
+      }
+      const existing = RESTO_TABLES.find(t => t.id === activeTableId);
+      if (existing) return existing;
+      activeTableId = RESTO_TABLES[0].id;
+      return RESTO_TABLES[0];
+    }
+
+    function refreshPosTenantState(options = {}) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.enforceTenantAccessGuard === "function") {
+        RestoSync.enforceTenantAccessGuard(document);
+      }
+      const prevActiveId = activeTableId;
+      syncUsableTablesIntoGlobal({ syncTableQuota: options.syncTableQuota !== false });
+      const activeTable = resolveInitialOrValidActiveTable(Boolean(options.useUrlParam));
+      applyPosTenantBranding();
+      updateCashierUI();
+
+      const modal = document.getElementById("posPinLoginModal");
+      if (modal && !modal.classList.contains("hidden")) {
+        const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+        const restoTitle = document.getElementById("pinModalRestoTitle");
+        if (restoTitle) restoTitle.textContent = tenantInfo ? tenantInfo.name : "Resto Pro POS";
+        const cashierName = document.getElementById("pinModalCashierName");
+        if (cashierName) cashierName.textContent = getActiveCashierName();
+      }
+
+      if (activeTable && (options.forceSelectTable || activeTable.id !== prevActiveId)) {
+        selectTable(activeTable.id);
+      } else {
+        renderTablesGrid();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      ThemeManager.init();
+      initClock();
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.enforceTenantAccessGuard === "function") {
+        RestoSync.enforceTenantAccessGuard(document);
+      }
+
+      syncUsableTablesIntoGlobal({ syncTableQuota: true });
+      resolveInitialOrValidActiveTable(true);
+      applyPosTenantBranding();
+      updateCashierUI();
+      initPosPinLock();
+
       renderTablesGrid();
       updateOnlineOrdersBadge();
       renderOnlineOrdersList();
@@ -1926,10 +2075,16 @@
       });
 
       // Dengarkan perubahan meja jika ada penambahan / penghapusan dari Owner
-      RestoSync.on("TABLES_UPDATED", (newTables) => {
-        RESTO_TABLES.length = 0;
-        newTables.forEach(t => RESTO_TABLES.push(t));
-        renderTablesGrid();
+      RestoSync.on("TABLES_UPDATED", () => {
+        refreshPosTenantState({ syncTableQuota: false });
+      });
+
+      RestoSync.on("TENANTS_UPDATED", () => {
+        refreshPosTenantState({ syncTableQuota: true });
+      });
+
+      RestoSync.on("LICENSE_STATUS_CHANGED", () => {
+        refreshPosTenantState({ syncTableQuota: true });
       });
       
       if ('serviceWorker' in navigator) {
@@ -1940,6 +2095,11 @@
       const catalog = RestoSync.getMenuCatalog();
       renderPosTiles(catalog);
       selectTable(activeTableId);
+
+      // Sinkronkan status tenant terbaru dari Cloud secara non-blocking
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
+        RestoSync.syncTenantsFromCloud({ mode: "tenant" }).catch(() => {});
+      }
 
       // Pre-select default VIP Member (Kevin Sanjaya) jika ada
       const defaultVip = RestoSync.findMember("081234567890");
@@ -2425,16 +2585,31 @@
       renderTablesGrid();
     }
 
-    // Render 12 Meja dengan Dukungan Reservasi Real-Time
+    // Render Meja Aktif dengan Dukungan Reservasi Real-Time
     function renderTablesGrid() {
       const container = document.getElementById("tablesGridContainer");
       const reservations = RestoSync.getReservations();
       const activeResList = reservations.filter(r => r.status === "confirmed");
 
-      // Update badge jumlah reservasi aktif di header
+      // Update badge jumlah reservasi aktif di header & pill Semua
       const resBadgeEl = document.getElementById("activeReservationBadge");
       if (resBadgeEl) {
         resBadgeEl.textContent = activeResList.length;
+      }
+      const allPillEl = document.getElementById("tableFilterAllBtn");
+      if (allPillEl) {
+        allPillEl.textContent = `Semua (${RESTO_TABLES.length})`;
+      }
+
+      updateTableLimitNotice();
+
+      // Update Okupansi Meja terlebih dahulu agar selalu akurat meski filter kosong
+      const totalTables = RESTO_TABLES.length;
+      const occupied = RESTO_TABLES.filter(t => t.status !== "available" || activeResList.some(r => r.tableId === t.id)).length;
+      const pct = totalTables > 0 ? Math.round((occupied / totalTables) * 100) : 0;
+      const occEl = document.getElementById("occupancyRateDisplay");
+      if (occEl) {
+        occEl.textContent = `${occupied} / ${totalTables} (${pct}%)`;
       }
 
       // Filter meja yang ditampilkan sesuai activeTableFilter
@@ -2472,7 +2647,7 @@
           borderHighlight = "border-2 border-amber-500 ring-2 ring-amber-500/30 shadow-lg";
         } else if (isReserved) {
           badgeColor = "bg-indigo-100 text-indigo-900 dark:bg-indigo-950/70 dark:text-indigo-300 font-bold";
-          badgeText = `Booked ${res.timeStr.replace(" WIB", "")}`;
+          badgeText = `Booked ${escapeHtmlSafe(String(res.timeStr || "").replace(" WIB", ""))}`;
           displayCustomer = res.customerName;
           displayElapsed = `<span class="text-indigo-600 dark:text-indigo-400 font-bold">Booking</span>`;
           borderHighlight = isSelected ? "border-2 border-indigo-500 shadow-md ring-2 ring-indigo-500/20" : "border border-indigo-200 dark:border-indigo-800/60 bg-indigo-50/30 dark:bg-indigo-950/20";
@@ -2487,11 +2662,16 @@
           badgeText = `Bill: ${formatRupiah(table.runningTotal)}`;
         }
 
+        const safeIdAttr = escapeHtmlSafe(String(table.id || "").replace(/'/g, "\\'"));
+        const safeName = escapeHtmlSafe(table.name);
+        const safeSection = escapeHtmlSafe(table.section || "Indoor AC");
+        const safeCustomer = escapeHtmlSafe(displayCustomer || "-");
+
         return `
-          <div onclick="selectTable('${table.id}')" class="touch-btn cursor-pointer p-2.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] ${borderHighlight} flex flex-col justify-between h-24 transition-all hover:scale-[1.02]">
+          <div onclick="selectTable('${safeIdAttr}')" class="touch-btn cursor-pointer p-2.5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] ${borderHighlight} flex flex-col justify-between h-24 transition-all hover:scale-[1.02]">
             <div class="flex items-center justify-between">
               <span class="font-heading font-extrabold text-sm text-[#1C1917] dark:text-white">
-                ${table.name}
+                ${safeName}
               </span>
               <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full ${badgeColor} truncate max-w-[95px]">
                 ${badgeText}
@@ -2499,13 +2679,13 @@
             </div>
 
             <div class="text-[10px] text-[#78716C] dark:text-[#94A3B8] flex items-center justify-between">
-              <span>${table.seats} Kursi</span>
-              <span>${table.section}</span>
+              <span>${Number(table.seats) || 4} Kursi</span>
+              <span>${safeSection}</span>
             </div>
 
             <div class="flex items-center justify-between pt-1 border-t border-stone-200/60 dark:border-stone-800 text-[10px]">
               <span class="truncate max-w-[85px] font-medium text-stone-600 dark:text-stone-300">
-                ${displayCustomer}
+                ${safeCustomer}
               </span>
               ${displayElapsed.startsWith("<") ? displayElapsed : `
                 <span class="${table.elapsedMinutes > 0 ? 'text-stone-400 font-mono' : 'text-emerald-600 font-bold'}">${displayElapsed}</span>
@@ -2514,18 +2694,21 @@
           </div>
         `;
       }).join("");
-
-      // Update Okupansi Meja
-      const occupied = RESTO_TABLES.filter(t => t.status !== "available" || activeResList.some(r => r.tableId === t.id)).length;
-      const pct = Math.round((occupied / RESTO_TABLES.length) * 100);
-      document.getElementById("occupancyRateDisplay").textContent = `${occupied} / 12 (${pct}%)`;
     }
 
     // Pilih Meja dari Denah
     function selectTable(tableId) {
-      activeTableId = tableId;
+      let table = RESTO_TABLES.find(t => t.id === tableId);
+      if (!table) {
+        if (RESTO_TABLES.length === 0) return;
+        const fallback = RESTO_TABLES.find(t => t.id === activeTableId) || RESTO_TABLES[0];
+        activeTableId = fallback.id;
+        table = fallback;
+        showPosNotification(`⚠️ Meja ${tableId} tidak tersedia pada paket aktif. Dialihkan ke ${fallback.name}.`);
+      } else {
+        activeTableId = table.id;
+      }
 
-      const table = RESTO_TABLES.find(t => t.id === tableId);
       if (table && table.needsWaiter) {
         table.needsWaiter = false;
       }
@@ -3384,6 +3567,7 @@
     // MODAL RESERVASI MEJA & LOGIKA BOOKING KASIR
     // ============================================================
     function openCashierReservationModal() {
+      populateReservationTableOptions();
       const modal = document.getElementById("cashierReservationModal");
       modal.classList.remove("hidden");
       modal.classList.add("flex");

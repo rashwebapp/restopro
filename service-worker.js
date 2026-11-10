@@ -1,7 +1,7 @@
 // ============================================================
 // RESTO PRO SERVICE WORKER (OFFLINE PWA CACHE)
 // ============================================================
-const CACHE_NAME = 'resto-pro-v2.6.0';
+const CACHE_NAME = 'resto-pro-v2.7.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
