@@ -108,6 +108,48 @@ function sanitizeTenantPublicInfo_(tenant) {
 }
 
 /**
+ * Helper Konversi Boolean: Menangani boolean asli, string 'true'/'TRUE', angka 1, dll.
+ */
+function parseBool_(val) {
+  if (val === true || val === 1) return true;
+  if (typeof val === 'string') {
+    const s = val.trim().toLowerCase();
+    return s === 'true' || s === '1' || s === 'yes';
+  }
+  return false;
+}
+
+/**
+ * Normalisasi data baris dari sheet Tenants: Coerce string, boolean, dan number secara aman
+ */
+function normalizeTenantRecordFromSheet_(raw) {
+  if (!raw || typeof raw !== 'object') return raw;
+  const t = Object.assign({}, raw);
+
+  const stringFields = [
+    'id', 'name', 'pic', 'phone', 'cashierPhone', 'city', 'plan', 'planName',
+    'billingCycle', 'status', 'licenseKey', 'cashierPin', 'ownerPin',
+    'cashierPinHash', 'ownerPinHash', 'gasUrl', 'apiKey', 'createdAt', 'expiresAt', 'updatedAt'
+  ];
+  stringFields.forEach(function (f) {
+    if (t[f] !== undefined && t[f] !== null) {
+      let s = String(t[f]).trim();
+      if (s.startsWith("'")) s = s.slice(1);
+      t[f] = s;
+    } else {
+      t[f] = '';
+    }
+  });
+
+  t.isLifetime = parseBool_(t.isLifetime);
+  t.tablesCount = Number(t.tablesCount) || (t.plan === 'trial' ? 4 : 12);
+  t.price = Number(t.price) || 0;
+  t.originalPrice = Number(t.originalPrice) || 0;
+
+  return t;
+}
+
+/**
  * Helper Keamanan: Memverifikasi otorisasi API Secret Key dari request
  */
 function verifyAuthKey_(providedKey) {
@@ -700,16 +742,17 @@ function handleSyncFullState(fullData) {
  * Mengambil informasi publik tenant (tanpa membocorkan PIN/phone/key)
  */
 function handleGetTenantPublicInfo(tenantId) {
-  if (!tenantId) {
+  if (tenantId === undefined || tenantId === null || String(tenantId).trim() === '') {
     return { success: true, notFound: true, cloudInitialized: isCloudInitialized_() };
   }
   const cleanId = String(tenantId).trim().toLowerCase();
-  const tenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
-  const found = tenants.find(t => String(t.id).trim().toLowerCase() === cleanId);
+  const rawTenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
+  const found = rawTenants.find(t => String(t.id || '').trim().toLowerCase() === cleanId);
   if (!found) {
     return { success: true, notFound: true, cloudInitialized: isCloudInitialized_() };
   }
-  const publicTenant = sanitizeTenantPublicInfo_(found);
+  const normalized = normalizeTenantRecordFromSheet_(found);
+  const publicTenant = sanitizeTenantPublicInfo_(normalized);
   return {
     success: true,
     cloudInitialized: isCloudInitialized_(),
@@ -722,7 +765,8 @@ function handleGetTenantPublicInfo(tenantId) {
  * Mengambil seluruh data tenant (khusus Super Admin)
  */
 function handleGetAllTenants() {
-  const tenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
+  const rawTenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
+  const tenants = rawTenants.map(normalizeTenantRecordFromSheet_);
   return {
     success: true,
     cloudInitialized: isCloudInitialized_(),
@@ -735,7 +779,7 @@ function handleGetAllTenants() {
  * Menyimpan / Update data tenant ke sheet Tenants
  */
 function handleSaveTenant(data) {
-  if (!data || !data.id) {
+  if (!data || data.id === undefined || data.id === null || String(data.id).trim() === '') {
     throw new Error('Data tenant dan id tenant wajib diisi');
   }
   setCloudInitialized_();
@@ -749,18 +793,19 @@ function handleSaveTenant(data) {
   let existingObj = null;
 
   for (let r = 1; r < values.length; r++) {
-    if (String(values[r][idIdx]).trim().toLowerCase() === targetId) {
+    if (String(values[r][idIdx] || '').trim().toLowerCase() === targetId) {
       existingRow = r + 1; // 1-based index
       existingObj = {};
       headers.forEach((h, i) => {
         existingObj[h] = values[r][i];
       });
+      existingObj = normalizeTenantRecordFromSheet_(existingObj);
       break;
     }
   }
 
   const record = Object.assign({}, data);
-  record.id = targetId;
+  record.id = String(data.id).trim();
   const nowIso = new Date().toISOString();
 
   // Handle PIN hashes
@@ -783,23 +828,65 @@ function handleSaveTenant(data) {
   // Handle plan & lifetime
   if (record.plan !== undefined) {
     record.plan = String(record.plan).toLowerCase().trim();
+  } else if (existingObj && existingObj.plan) {
+    record.plan = existingObj.plan;
+  } else {
+    record.plan = 'monthly';
   }
+
   if (record.isLifetime !== undefined) {
-    record.isLifetime = Boolean(record.isLifetime === true || record.isLifetime === 'true' || record.plan === 'lifetime');
+    record.isLifetime = parseBool_(record.isLifetime);
+  } else if (existingObj && existingObj.isLifetime !== undefined) {
+    record.isLifetime = existingObj.isLifetime;
+  } else {
+    record.isLifetime = record.plan === 'lifetime';
   }
+
   if (record.isLifetime) {
+    record.expiresAt = '';
+  } else if (record.expiresAt !== undefined) {
+    record.expiresAt = String(record.expiresAt || '').trim();
+  } else if (existingObj && existingObj.expiresAt) {
+    record.expiresAt = existingObj.expiresAt;
+  } else {
     record.expiresAt = '';
   }
 
   if (record.tablesCount !== undefined) {
     record.tablesCount = Number(record.tablesCount) || 12;
+  } else if (existingObj && existingObj.tablesCount !== undefined) {
+    record.tablesCount = Number(existingObj.tablesCount) || 12;
+  } else {
+    record.tablesCount = 12;
   }
+
   if (record.price !== undefined) {
     record.price = Number(record.price) || 0;
+  } else if (existingObj && existingObj.price !== undefined) {
+    record.price = Number(existingObj.price) || 0;
+  } else {
+    record.price = 0;
   }
+
   if (record.originalPrice !== undefined) {
     record.originalPrice = Number(record.originalPrice) || 0;
+  } else if (existingObj && existingObj.originalPrice !== undefined) {
+    record.originalPrice = Number(existingObj.originalPrice) || 0;
+  } else {
+    record.originalPrice = 0;
   }
+
+  record.name = String(record.name !== undefined ? record.name : (existingObj ? existingObj.name : '')).trim();
+  record.pic = String(record.pic !== undefined ? record.pic : (existingObj ? existingObj.pic : '')).trim();
+  record.phone = String(record.phone !== undefined ? record.phone : (existingObj ? existingObj.phone : '')).trim();
+  record.cashierPhone = String(record.cashierPhone !== undefined ? record.cashierPhone : (existingObj ? existingObj.cashierPhone : '')).trim();
+  record.city = String(record.city !== undefined ? record.city : (existingObj ? existingObj.city : '')).trim();
+  record.planName = String(record.planName !== undefined ? record.planName : (existingObj ? existingObj.planName : '')).trim();
+  record.billingCycle = String(record.billingCycle !== undefined ? record.billingCycle : (existingObj ? existingObj.billingCycle : '')).trim();
+  record.status = String(record.status !== undefined ? record.status : (existingObj ? existingObj.status : 'active')).trim().toLowerCase();
+  record.licenseKey = String(record.licenseKey !== undefined ? record.licenseKey : (existingObj ? existingObj.licenseKey : '')).trim();
+  record.gasUrl = String(record.gasUrl !== undefined ? record.gasUrl : (existingObj ? existingObj.gasUrl : '')).trim();
+  record.apiKey = String(record.apiKey !== undefined ? record.apiKey : (existingObj ? existingObj.apiKey : '')).trim();
 
   record.createdAt = (existingObj && existingObj.createdAt) || record.createdAt || nowIso;
   record.updatedAt = nowIso;
@@ -808,13 +895,23 @@ function handleSaveTenant(data) {
     let val = record[h];
     if (val === undefined || val === null) return '';
     if (typeof val === 'object') return JSON.stringify(val);
+    if (typeof val === 'boolean') return val;
     return val;
   });
 
   if (existingRow > 0) {
-    sheet.getRange(existingRow, 1, 1, rowValues.length).setValues([rowValues]);
+    const range = sheet.getRange(existingRow, 1, 1, rowValues.length);
+    try {
+      if (typeof range.setNumberFormat === 'function') range.setNumberFormat('@');
+    } catch (e) {}
+    range.setValues([rowValues]);
   } else {
     sheet.appendRow(rowValues);
+    try {
+      const lastR = sheet.getLastRow();
+      const range = sheet.getRange(lastR, 1, 1, rowValues.length);
+      if (typeof range.setNumberFormat === 'function') range.setNumberFormat('@');
+    } catch (e) {}
   }
 
   invalidateCache();
@@ -830,7 +927,7 @@ function handleSaveTenant(data) {
  * Menghapus tenant dari cloud
  */
 function handleDeleteTenant(tenantId) {
-  if (!tenantId) {
+  if (tenantId === undefined || tenantId === null || String(tenantId).trim() === '') {
     throw new Error('Tenant ID wajib diisi untuk menghapus tenant');
   }
   setCloudInitialized_();
@@ -840,13 +937,13 @@ function handleDeleteTenant(tenantId) {
   const idIdx = values[0].indexOf('id');
 
   for (let r = 1; r < values.length; r++) {
-    if (String(values[r][idIdx]).trim().toLowerCase() === cleanId) {
+    if (String(values[r][idIdx] || '').trim().toLowerCase() === cleanId) {
       sheet.deleteRow(r + 1);
       invalidateCache();
       return {
         success: true,
         message: 'Tenant ' + tenantId + ' berhasil dihapus dari cloud!',
-        deletedId: tenantId,
+        deletedId: String(tenantId),
         cloudInitialized: true
       };
     }
@@ -864,13 +961,13 @@ function handleDeleteTenant(tenantId) {
  * Registrasi Trial Tenant Mandiri (Public Self-Serve)
  */
 function handleRegisterTrialTenant(data) {
-  if (!data || !data.name || !String(data.name).trim()) {
+  if (!data || data.name === undefined || data.name === null || String(data.name).trim() === '') {
     throw new Error('Nama resto wajib diisi');
   }
   setCloudInitialized_();
 
   const rawName = String(data.name).trim();
-  let baseSlug = (data.id ? String(data.id).trim().toLowerCase() : '') ||
+  let baseSlug = (data.id !== undefined && data.id !== null ? String(data.id).trim().toLowerCase() : '') ||
     rawName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') ||
     ('resto-' + Math.floor(1000 + Math.random() * 9000));
   baseSlug = baseSlug.toLowerCase().replace(/[^a-z0-9_-]/g, '-');
@@ -882,7 +979,7 @@ function handleRegisterTrialTenant(data) {
 
   const existingIds = new Set();
   for (let r = 1; r < values.length; r++) {
-    existingIds.add(String(values[r][idIdx]).trim().toLowerCase());
+    existingIds.add(String(values[r][idIdx] || '').trim().toLowerCase());
   }
 
   let finalSlug = baseSlug;
@@ -929,10 +1026,16 @@ function handleRegisterTrialTenant(data) {
     let val = trialTenant[h];
     if (val === undefined || val === null) return '';
     if (typeof val === 'object') return JSON.stringify(val);
+    if (typeof val === 'boolean') return val;
     return val;
   });
 
   sheet.appendRow(rowValues);
+  try {
+    const lastR = sheet.getLastRow();
+    const range = sheet.getRange(lastR, 1, 1, rowValues.length);
+    if (typeof range.setNumberFormat === 'function') range.setNumberFormat('@');
+  } catch (e) {}
   invalidateCache();
 
   return {

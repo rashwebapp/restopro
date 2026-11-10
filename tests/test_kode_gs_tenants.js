@@ -156,6 +156,7 @@ function createMockRange(sheet, startRow, startCol, numRows, numCols) {
       sheet._rows[rIdx][startCol - 1] = val;
       return this;
     },
+    setNumberFormat: function () { return this; },
     setFontWeight: function () { return this; },
     setBackground: function () { return this; },
     setFontColor: function () { return this; },
@@ -667,6 +668,122 @@ tests.push({
     assertEqual(updatedInfo.tenant.tablesCount, 25, "tablesCount updated");
     assertEqual(updatedInfo.tenant.cashierPinHash, initialCashierHash, "cashierPinHash must be preserved");
     assertEqual(updatedInfo.tenant.ownerPinHash, initialOwnerHash, "ownerPinHash must be preserved");
+  }
+});
+
+tests.push({
+  name: "9. Real Google Sheets Cell Coercion: handles numeric id (2026), uppercase isLifetime ('TRUE'), and uncoerced cells",
+  fn: function () {
+    resetGasEnv();
+    const sheet = currentSpreadsheet.insertSheet("Tenants");
+    sheet.appendRow(TENANT_HEADERS);
+
+    // Simulate Google Sheets returning raw cells:
+    // row 2: id is numeric 2026, phone is numeric, isLifetime is uppercase string 'TRUE', tablesCount is string '12'
+    sheet.appendRow([
+      2026,
+      "Resto 2026",
+      "Pak Joko",
+      8123456789,
+      8129999999,
+      RestoSync.hashTenantPin("2026", "1234"),
+      RestoSync.hashTenantPin("2026", "1234"),
+      "Jakarta",
+      "monthly",
+      "Paket Bulanan",
+      199000,
+      199000,
+      "monthly",
+      12,
+      "active",
+      "TRUE",
+      "2026-01-01T00:00:00.000Z",
+      "",
+      "2026-01-01T00:00:00.000Z",
+      "",
+      "custom-secret",
+      "RP-MTH-2026"
+    ]);
+
+    // Mark cloud as initialized
+    PropertiesService.getScriptProperties().setProperty("TENANTS_CLOUD_INITIALIZED", "true");
+
+    // 1. Query getTenantPublicInfo with string "2026"
+    const resString = parseResponse(doGet({
+      parameter: { action: "getTenantPublicInfo", tenantId: "2026" }
+    }));
+    assertEqual(resString.success, true, "resString.success must be true");
+    assertEqual(resString.notFound, undefined, "resString should find the tenant");
+    assert(resString.tenant !== undefined, "tenant must be found");
+    assertEqual(typeof resString.tenant.id, "string", "tenant.id must be coerced to string");
+    assertEqual(resString.tenant.id, "2026", "tenant.id value must be '2026'");
+    assertEqual(resString.tenant.isLifetime, true, "isLifetime 'TRUE' must be normalized to boolean true");
+
+    // 2. Query getTenantPublicInfo with numeric 2026 in parameter
+    const resNum = parseResponse(doGet({
+      parameter: { action: "getTenantPublicInfo", tenantId: 2026 }
+    }));
+    assertEqual(resNum.success, true, "resNum.success must be true");
+    assertEqual(resNum.tenant.id, "2026", "tenant.id must match");
+
+    // 3. Query getTenants
+    const allRes = parseResponse(doGet({
+      parameter: { action: "getTenants", apiKey: TEST_API_KEY }
+    }));
+    assertEqual(allRes.success, true, "allRes.success must be true");
+    const t0 = (allRes.tenants || allRes.data)[0];
+    assertEqual(typeof t0.id, "string", "getTenants tenant.id must be string");
+    assertEqual(typeof t0.phone, "string", "getTenants phone must be string");
+    assertEqual(t0.phone, "8123456789", "phone string value match");
+    assertEqual(t0.isLifetime, true, "getTenants isLifetime must be boolean true");
+
+    // 4. Update existing tenant 2026 with saveTenant (should update row, not insert a duplicate!)
+    const saveRes = parseResponse(doPost({
+      postData: {
+        contents: JSON.stringify({
+          action: "saveTenant",
+          apiKey: TEST_API_KEY,
+          data: {
+            id: 2026,
+            name: "Resto 2026 Renovated",
+            isLifetime: "TRUE"
+          }
+        })
+      }
+    }));
+    assertEqual(saveRes.success, true, "saveRes.success must be true");
+    assertEqual(sheet.getLastRow(), 2, "Sheet must still have exactly 2 rows (header + 1 tenant), no duplicate inserted!");
+
+    // 5. Test registerTrialTenant collision with name "2026"
+    const regRes = parseResponse(doPost({
+      postData: {
+        contents: JSON.stringify({
+          action: "registerTrialTenant",
+          data: {
+            name: 2026
+          }
+        })
+      }
+    }));
+    assertEqual(regRes.success, true, "regRes.success must be true");
+    assert(regRes.tenant.id !== "2026", "slug collision must be resolved");
+    assert(regRes.tenant.id.indexOf("2026-") === 0, "new trial id must prefix with '2026-'");
+
+    // 6. Delete tenant 2026
+    const delRes = parseResponse(doPost({
+      postData: {
+        contents: JSON.stringify({
+          action: "deleteTenant",
+          apiKey: TEST_API_KEY,
+          data: { id: 2026 }
+        })
+      }
+    }));
+    assertEqual(delRes.success, true, "delRes.success must be true");
+    const checkDeleted = parseResponse(doGet({
+      parameter: { action: "getTenantPublicInfo", tenantId: "2026" }
+    }));
+    assertEqual(checkDeleted.notFound, true, "tenant 2026 must be deleted");
   }
 });
 
