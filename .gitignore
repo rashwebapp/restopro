@@ -18,3 +18,5 @@ yarn-error.log*
 # Local development scratch
 .idea/
 .vscode/
+.worktrees/
+.superpowers/
