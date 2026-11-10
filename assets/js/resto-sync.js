@@ -6,6 +6,235 @@
 
 const RestoSync = {
   TENANTS_DIRECTORY_KEY: "resto_pro_super_admin_tenants_v1",
+  TENANTS_INIT_FLAG_KEY: "resto_pro_tenants_initialized_v1",
+
+  RESTO_SAAS_PLANS: {
+    trial: {
+      id: "trial",
+      name: "Free Trial (14 Hari)",
+      price: 0,
+      originalPrice: 0,
+      durationDays: 14,
+      billingCycle: "trial",
+      isLifetime: false,
+      maxTables: 4,
+      isPaidPlan: false
+    },
+    monthly: {
+      id: "monthly",
+      name: "Paket Bulanan",
+      price: 199000,
+      originalPrice: 199000,
+      durationDays: 30,
+      billingCycle: "monthly",
+      isLifetime: false,
+      maxTables: 999,
+      isPaidPlan: true
+    },
+    lifetime: {
+      id: "lifetime",
+      name: "Paket Lifetime",
+      price: 2999000,
+      originalPrice: 3500000,
+      durationDays: null,
+      billingCycle: "lifetime",
+      isLifetime: true,
+      maxTables: 999,
+      isPaidPlan: true
+    }
+  },
+
+  _safeWarn(msg, err) {
+    try {
+      if (typeof console !== "undefined" && typeof console.warn === "function") {
+        console.warn(msg, err);
+      }
+    } catch (e) {}
+  },
+
+  _getQueryParam(searchStr, key) {
+    if (!searchStr || !key) return null;
+    try {
+      if (typeof URLSearchParams !== "undefined") {
+        return new URLSearchParams(searchStr).get(key);
+      }
+    } catch (e) {}
+    const clean = String(searchStr).replace(/^\?/, "");
+    if (!clean) return null;
+    const pairs = clean.split("&");
+    for (let i = 0; i < pairs.length; i++) {
+      const idx = pairs[i].indexOf("=");
+      const k = idx >= 0 ? pairs[i].slice(0, idx) : pairs[i];
+      if (decodeURIComponent(k.replace(/\+/g, " ")) === key) {
+        const v = idx >= 0 ? pairs[i].slice(idx + 1) : "";
+        return decodeURIComponent(v.replace(/\+/g, " "));
+      }
+    }
+    return null;
+  },
+
+  sha256Hex(str) {
+    const input = String(str === undefined || str === null ? "" : str);
+    const bytes = [];
+    for (let i = 0; i < input.length; i++) {
+      const code = input.charCodeAt(i);
+      if (code < 0x80) {
+        bytes.push(code);
+      } else if (code < 0x800) {
+        bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+      } else if (code >= 0xd800 && code <= 0xdbff && i + 1 < input.length) {
+        const next = input.charCodeAt(i + 1);
+        if (next >= 0xdc00 && next <= 0xdfff) {
+          const cp = 0x10000 + ((code - 0xd800) << 10) + (next - 0xdc00);
+          bytes.push(
+            0xf0 | (cp >> 18),
+            0x80 | ((cp >> 12) & 0x3f),
+            0x80 | ((cp >> 6) & 0x3f),
+            0x80 | (cp & 0x3f)
+          );
+          i++;
+        } else {
+          bytes.push(0xef, 0xbf, 0xbd);
+        }
+      } else if (code >= 0xd800 && code <= 0xdfff) {
+        bytes.push(0xef, 0xbf, 0xbd);
+      } else {
+        bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+      }
+    }
+
+    const K = [
+      0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+      0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+      0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+      0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+      0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+      0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+      0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+      0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+    ];
+    const H = [
+      0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+      0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+    ];
+
+    const bitLen = bytes.length * 8;
+    bytes.push(0x80);
+    while ((bytes.length % 64) !== 56) bytes.push(0);
+    const hiLen = Math.floor(bitLen / 0x100000000);
+    const loLen = bitLen >>> 0;
+    bytes.push(
+      (hiLen >>> 24) & 0xff, (hiLen >>> 16) & 0xff, (hiLen >>> 8) & 0xff, hiLen & 0xff,
+      (loLen >>> 24) & 0xff, (loLen >>> 16) & 0xff, (loLen >>> 8) & 0xff, loLen & 0xff
+    );
+
+    const w = new Array(64);
+    const rotr = (n, x) => (x >>> n) | (x << (32 - n));
+    for (let i = 0; i < bytes.length; i += 64) {
+      for (let t = 0; t < 16; t++) {
+        const j = i + t * 4;
+        w[t] = ((bytes[j] << 24) | (bytes[j + 1] << 16) | (bytes[j + 2] << 8) | bytes[j + 3]) >>> 0;
+      }
+      for (let t = 16; t < 64; t++) {
+        const s0 = rotr(7, w[t - 15]) ^ rotr(18, w[t - 15]) ^ (w[t - 15] >>> 3);
+        const s1 = rotr(17, w[t - 2]) ^ rotr(19, w[t - 2]) ^ (w[t - 2] >>> 10);
+        w[t] = (w[t - 16] + s0 + w[t - 7] + s1) >>> 0;
+      }
+      let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (let t = 0; t < 64; t++) {
+        const S1 = rotr(6, e) ^ rotr(11, e) ^ rotr(25, e);
+        const ch = (e & f) ^ ((~e) & g);
+        const temp1 = (h + S1 + ch + K[t] + w[t]) >>> 0;
+        const S0 = rotr(2, a) ^ rotr(13, a) ^ rotr(22, a);
+        const maj = (a & b) ^ (a & c) ^ (b & c);
+        const temp2 = (S0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + temp1) >>> 0;
+        d = c; c = b; b = a; a = (temp1 + temp2) >>> 0;
+      }
+      H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+      H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+      H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0;
+      H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+    }
+    let hex = "";
+    for (let i = 0; i < 8; i++) {
+      hex += ("00000000" + H[i].toString(16)).slice(-8);
+    }
+    return hex;
+  },
+
+  hashTenantPin(tenantId, pin) {
+    const tid = (tenantId && String(tenantId).trim()) ? String(tenantId).trim() : "default";
+    return this.sha256Hex("RESTO_PRO_PIN_V1:" + tid + ":" + String(pin || "").trim());
+  },
+
+  getSaasPlanConfig(planId) {
+    const key = String(planId || "monthly").toLowerCase().trim();
+    if (this.RESTO_SAAS_PLANS[key]) return this.RESTO_SAAS_PLANS[key];
+    if (key === "basic") {
+      return { id: "basic", name: "Paket Basic", price: 99000, originalPrice: 99000, durationDays: 30, billingCycle: "monthly", isLifetime: false, maxTables: 999, isPaidPlan: true };
+    }
+    if (key === "pro") {
+      return { id: "pro", name: "Paket Pro", price: 199000, originalPrice: 199000, durationDays: 30, billingCycle: "monthly", isLifetime: false, maxTables: 999, isPaidPlan: true };
+    }
+    if (key === "enterprise") {
+      return { id: "enterprise", name: "Paket Enterprise", price: 2999000, originalPrice: 3500000, durationDays: 365, billingCycle: "yearly", isLifetime: false, maxTables: 999, isPaidPlan: true };
+    }
+    return this.RESTO_SAAS_PLANS.monthly;
+  },
+
+  _parseExpiryInput(val) {
+    if (val === null || val === undefined || val === "") return null;
+    const str = String(val).trim();
+    if (!str) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      const parts = str.split("-").map(Number);
+      return new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999).toISOString();
+    }
+    return str;
+  },
+
+  _formatDateId(dateInput) {
+    const months = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    try {
+      const d = new Date(dateInput);
+      if (Number.isNaN(d.getTime())) return String(dateInput || "");
+      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    } catch (e) {
+      return String(dateInput || "");
+    }
+  },
+
+  _normalizeTenantRecord(raw) {
+    if (!raw || typeof raw !== "object") return raw;
+    const t = Object.assign({}, raw);
+    const planId = String(t.plan || "monthly").toLowerCase().trim();
+    const cfg = this.getSaasPlanConfig(planId);
+    t.plan = planId;
+    t.isLifetime = Boolean(t.isLifetime === true || t.isLifetime === "true" || planId === "lifetime");
+    if (t.isLifetime) {
+      t.expiresAt = null;
+    }
+    const parsedTables = Number(t.tablesCount);
+    t.tablesCount = Number.isFinite(parsedTables) && parsedTables >= 1 ? Math.min(50, Math.round(parsedTables)) : 12;
+    if (t.price === undefined || t.price === null || t.price === "") t.price = cfg.price;
+    else t.price = Number(t.price) || 0;
+    if (t.originalPrice === undefined || t.originalPrice === null || t.originalPrice === "") t.originalPrice = cfg.originalPrice;
+    else t.originalPrice = Number(t.originalPrice) || 0;
+    if (!t.planName) t.planName = cfg.name;
+    if (!t.billingCycle) t.billingCycle = cfg.billingCycle;
+    if (t.cashierPin && !t.cashierPinHash) {
+      t.cashierPinHash = this.hashTenantPin(t.id, t.cashierPin);
+    }
+    if (t.ownerPin && !t.ownerPinHash) {
+      t.ownerPinHash = this.hashTenantPin(t.id, t.ownerPin);
+    }
+    t.notSynced = false;
+    return t;
+  },
 
   // --------------------------------------------------------------------------
   // MULTI-TENANT SAAS ROUTING & NAMESPACE ISOLATION
@@ -14,17 +243,25 @@ const RestoSync = {
     try {
       if (typeof window !== "undefined" && window.location) {
         if (window.location.search) {
-          const params = new URLSearchParams(window.location.search);
-          const t = params.get("tenant") || params.get("resto");
+          const t = this._getQueryParam(window.location.search, "tenant") || this._getQueryParam(window.location.search, "resto");
           if (t && t.trim()) {
             const clean = t.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "-");
-            sessionStorage.setItem("resto_pro_active_tenant", clean);
+            if (typeof sessionStorage !== "undefined") {
+              sessionStorage.setItem("resto_pro_active_tenant", clean);
+            }
             return clean;
           }
         }
         // Jika membuka halaman master tanpa parameter query tenant di URL,
         // selalu kembali ke master "default" agar tidak tertukar dengan tenant lain!
-        sessionStorage.removeItem("resto_pro_active_tenant");
+        if (typeof sessionStorage !== "undefined") {
+          sessionStorage.removeItem("resto_pro_active_tenant");
+        }
+        return "default";
+      }
+      if (typeof sessionStorage !== "undefined") {
+        const saved = sessionStorage.getItem("resto_pro_active_tenant");
+        if (saved) return saved;
       }
     } catch (e) {}
     return "default";
@@ -33,7 +270,9 @@ const RestoSync = {
   setTenantId(tenantId) {
     try {
       const clean = (tenantId || "default").trim().toLowerCase().replace(/[^a-z0-9_-]/g, "-");
-      sessionStorage.setItem("resto_pro_active_tenant", clean);
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("resto_pro_active_tenant", clean);
+      }
       return clean;
     } catch (e) {
       return "default";
@@ -71,18 +310,8 @@ const RestoSync = {
   get SUPABASE_URL_STORAGE_KEY() { return this.getStorageKey("resto_pro_supabase_url"); },
   get SUPABASE_KEY_STORAGE_KEY() { return this.getStorageKey("resto_pro_supabase_key"); },
 
-  // Super Admin Tenant Directory Helpers
-  getAllTenants() {
-    try {
-      const raw = localStorage.getItem(this.TENANTS_DIRECTORY_KEY);
-      if (raw) {
-        const list = JSON.parse(raw);
-        if (Array.isArray(list) && list.length > 0) return list;
-      }
-    } catch (e) {}
-
-    // Inisialisasi default demo tenants jika masih kosong
-    const defaultTenants = [
+  _buildDefaultDemoTenants() {
+    return [
       {
         id: "harapan-corner",
         name: "Harapan Corner Resto & Coffee",
@@ -91,18 +320,22 @@ const RestoSync = {
         cashierPhone: "081299887766",
         cashierPin: "1234",
         ownerPin: "1234",
+        cashierPinHash: this.hashTenantPin("harapan-corner", "1234"),
+        ownerPinHash: this.hashTenantPin("harapan-corner", "1234"),
         city: "Kab Bogor, Jawa Barat",
-        plan: "pro",
-        planName: "Paket Pro (Multi-Stasiun + GrabFood/GoFood)",
+        plan: "monthly",
+        planName: "Paket Bulanan",
         price: 199000,
+        originalPrice: 199000,
         billingCycle: "monthly",
         tablesCount: 12,
         status: "active",
+        isLifetime: false,
         createdAt: "2026-11-01T08:00:00Z",
         expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
         gasUrl: "",
         apiKey: "",
-        licenseKey: "RP-PRO-HARAPAN-CORNER-L9X4K2"
+        licenseKey: "RP-MTH-HARAPAN-CORNER-L9X4K2"
       },
       {
         id: "kopi-senja",
@@ -112,13 +345,17 @@ const RestoSync = {
         cashierPhone: "",
         cashierPin: "1234",
         ownerPin: "1234",
+        cashierPinHash: this.hashTenantPin("kopi-senja", "1234"),
+        ownerPinHash: this.hashTenantPin("kopi-senja", "1234"),
         city: "Jakarta Selatan",
         plan: "trial",
-        planName: "Trial (14 Hari Gratis)",
+        planName: "Free Trial (14 Hari)",
         price: 0,
+        originalPrice: 0,
         billingCycle: "trial",
-        tablesCount: 8,
+        tablesCount: 4,
         status: "trial",
+        isLifetime: false,
         createdAt: "2026-11-05T10:30:00Z",
         expiresAt: new Date(Date.now() + 10 * 86400000).toISOString(),
         gasUrl: "",
@@ -133,31 +370,82 @@ const RestoSync = {
         cashierPhone: "",
         cashierPin: "1234",
         ownerPin: "1234",
+        cashierPinHash: this.hashTenantPin("warung-bu-siti", "1234"),
+        ownerPinHash: this.hashTenantPin("warung-bu-siti", "1234"),
         city: "Surabaya",
-        plan: "basic",
-        planName: "Paket Basic (Kasir POS + QR Meja)",
-        price: 99000,
-        billingCycle: "monthly",
+        plan: "lifetime",
+        planName: "Paket Lifetime",
+        price: 2999000,
+        originalPrice: 3500000,
+        billingCycle: "lifetime",
         tablesCount: 10,
         status: "active",
+        isLifetime: true,
         createdAt: "2026-10-20T09:00:00Z",
-        expiresAt: new Date(Date.now() + 20 * 86400000).toISOString(),
+        expiresAt: null,
         gasUrl: "",
         apiKey: "",
-        licenseKey: "RP-BSC-WARUNG-BU-SITI-33C14E"
+        licenseKey: "RP-LIFE-WARUNG-BU-SITI-33C14E"
       }
     ];
-    this.saveAllTenants(defaultTenants);
-    return defaultTenants;
+  },
+
+  seedDemoTenants() {
+    const demos = this._buildDefaultDemoTenants();
+    let merged = demos;
+    try {
+      if (typeof localStorage !== "undefined") {
+        const raw = localStorage.getItem(this.TENANTS_DIRECTORY_KEY);
+        if (raw !== null && raw !== undefined) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const existingIds = new Set(parsed.map(t => t.id));
+            merged = parsed.slice();
+            demos.forEach(d => {
+              if (!existingIds.has(d.id)) merged.push(d);
+            });
+          }
+        }
+        localStorage.setItem(this.TENANTS_INIT_FLAG_KEY, "true");
+      }
+    } catch (e) {}
+    this.saveAllTenants(merged);
+    return merged;
+  },
+
+  // Super Admin Tenant Directory Helpers
+  getAllTenants() {
+    if (typeof localStorage === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(this.TENANTS_DIRECTORY_KEY);
+      if (raw !== null && raw !== undefined) {
+        const list = JSON.parse(raw);
+        if (Array.isArray(list)) {
+          if (localStorage.getItem(this.TENANTS_INIT_FLAG_KEY) !== "true") {
+            localStorage.setItem(this.TENANTS_INIT_FLAG_KEY, "true");
+          }
+          return list;
+        }
+      }
+      if (localStorage.getItem(this.TENANTS_INIT_FLAG_KEY) === "true") {
+        return [];
+      }
+    } catch (e) {}
+
+    // Inisialisasi demo tenants HANYA 1x saat pertama kali dibuka
+    return this.seedDemoTenants();
   },
 
   saveAllTenants(tenants) {
     try {
-      localStorage.setItem(this.TENANTS_DIRECTORY_KEY, JSON.stringify(tenants || []));
-      this.emit("TENANTS_UPDATED", { count: (tenants || []).length });
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(this.TENANTS_INIT_FLAG_KEY, "true");
+        localStorage.setItem(this.TENANTS_DIRECTORY_KEY, JSON.stringify(Array.isArray(tenants) ? tenants : []));
+      }
+      this.emit("TENANTS_UPDATED", { count: Array.isArray(tenants) ? tenants.length : 0 });
       return true;
     } catch (e) {
-      console.warn("Gagal simpan tenant directory:", e);
+      this._safeWarn("Gagal simpan tenant directory:", e);
       return false;
     }
   },
@@ -174,23 +462,34 @@ const RestoSync = {
           cashierPhone: "081299887766",
           cashierPin: "1234",
           ownerPin: "1234",
+          cashierPinHash: this.hashTenantPin("default", "1234"),
+          ownerPinHash: this.hashTenantPin("default", "1234"),
           city: "Master Headquarters",
           plan: "enterprise",
           planName: "Master Core Resto Pro",
           tablesCount: 12,
-          status: "active"
+          status: "active",
+          isLifetime: true,
+          expiresAt: null,
+          notSynced: false
         };
       }
       const all = this.getAllTenants();
-      return all.find(t => t.id === tenantId) || {
+      const found = all.find(t => t.id === tenantId);
+      if (found) {
+        return Object.assign({}, found, { notSynced: Boolean(found.notSynced) });
+      }
+      return {
         id: tenantId,
         name: tenantId.replace(/-/g, " ").toUpperCase(),
         pic: "Kasir Resto",
-        cashierPin: "1234",
-        ownerPin: "1234",
-        plan: "pro",
-        status: "active",
-        tablesCount: 12
+        plan: "unknown",
+        planName: "Belum Tersinkronisasi",
+        status: "unknown",
+        tablesCount: 4,
+        isLifetime: false,
+        expiresAt: null,
+        notSynced: true
       };
     } catch (e) {
       return null;
@@ -200,73 +499,187 @@ const RestoSync = {
   createLicenseToken(payload = {}) {
     const appCode = "RESTO";
     const clientTag = (payload.tenantId || payload.restaurantName || "CLIENT").replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toUpperCase();
-    const expiryYear = new Date(payload.expiresAt || (Date.now() + 365 * 86400000)).getFullYear();
+    const expiryTag = payload.isLifetime ? "LIFE" : new Date(payload.expiresAt || (Date.now() + 365 * 86400000)).getFullYear();
     const randChecksum = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `RASH-${appCode}-PRO-${clientTag}-${expiryYear}-${randChecksum}`;
+    return `RASH-${appCode}-PRO-${clientTag}-${expiryTag}-${randChecksum}`;
   },
 
   registerNewTenant(data) {
     if (!data || !data.name) throw new Error("Nama resto wajib diisi");
-    const rawName = data.name.trim();
+    const rawName = String(data.name).trim();
     const slug = (data.id || rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")) || ("resto-" + Date.now().toString().slice(-4));
-    
-    // Hitung tanggal kedaluwarsa
-    let durationDays = 30;
-    if (data.plan === "trial") durationDays = 14;
-    else if (data.billingCycle === "yearly" || data.plan === "enterprise") durationDays = 365;
 
-    const expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
-    
-    // Bangkitkan token lisensi HMAC-SHA256
+    const planId = String(data.plan || "monthly").toLowerCase().trim();
+    const planCfg = this.getSaasPlanConfig(planId);
+    const isLifetime = data.isLifetime !== undefined ? Boolean(data.isLifetime) : Boolean(planCfg.isLifetime);
+
+    let expiresAt = null;
+    if (!isLifetime) {
+      if (data.expiresAt !== undefined) {
+        expiresAt = this._parseExpiryInput(data.expiresAt);
+      } else {
+        const durationDays = planCfg.durationDays || 30;
+        expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
+      }
+    }
+
+    const parsedTables = Number(data.tablesCount);
+    const tablesCount = Number.isFinite(parsedTables) && parsedTables >= 1 ? Math.min(50, Math.round(parsedTables)) : 12;
+
     const licensePayload = {
       tenantId: slug,
       restaurantName: rawName,
-      plan: data.plan || "pro",
-      billingCycle: data.billingCycle || (data.plan === "trial" ? "trial" : "monthly"),
+      plan: planId,
+      billingCycle: data.billingCycle || planCfg.billingCycle,
       issuedAt: new Date().toISOString(),
       expiresAt: expiresAt,
-      maxTables: Number(data.tablesCount || 12),
-      isUnlimited: (data.plan === "enterprise" || data.plan === "pro")
+      isLifetime: isLifetime,
+      maxTables: tablesCount,
+      isUnlimited: Boolean(planCfg.isPaidPlan)
     };
-    const licenseToken = this.createLicenseToken(licensePayload);
+    const licenseToken = data.licenseKey || this.createLicenseToken(licensePayload);
+
+    const tenants = this.getAllTenants();
+    const existingIdx = tenants.findIndex(t => t.id === slug);
+    const existing = existingIdx >= 0 ? tenants[existingIdx] : null;
+
+    const cashierPin = data.cashierPin ? String(data.cashierPin).trim() : (existing && existing.cashierPin ? String(existing.cashierPin).trim() : "1234");
+    const ownerPin = data.ownerPin ? String(data.ownerPin).trim() : (existing && existing.ownerPin ? String(existing.ownerPin).trim() : cashierPin);
+    const nowIso = new Date().toISOString();
 
     const newTenant = {
       id: slug,
       name: rawName,
       pic: data.pic || "Pemilik Resto",
       phone: data.phone || "",
-      cashierPhone: data.cashierPhone || "",
-      cashierPin: String(data.cashierPin || "1234").trim(),
-      ownerPin: String(data.ownerPin || "1234").trim(),
+      cashierPhone: data.cashierPhone || (existing && existing.cashierPhone ? existing.cashierPhone : ""),
+      cashierPin: cashierPin,
+      ownerPin: ownerPin,
+      cashierPinHash: this.hashTenantPin(slug, cashierPin),
+      ownerPinHash: this.hashTenantPin(slug, ownerPin),
       city: data.city || "-",
-      plan: data.plan || "pro",
-      planName: data.planName || (data.plan === "trial" ? "Trial (14 Hari Gratis)" : (data.plan === "basic" ? "Paket Basic" : "Paket Pro")),
-      price: Number(data.price || (data.plan === "trial" ? 0 : (data.plan === "basic" ? 99000 : 199000))),
-      billingCycle: data.billingCycle || (data.plan === "trial" ? "trial" : "monthly"),
-      tablesCount: Number(data.tablesCount || 12),
-      status: data.plan === "trial" ? "trial" : "active",
-      createdAt: new Date().toISOString(),
+      plan: planId,
+      planName: data.planName || planCfg.name,
+      price: data.price !== undefined ? Number(data.price) : planCfg.price,
+      originalPrice: data.originalPrice !== undefined ? Number(data.originalPrice) : planCfg.originalPrice,
+      billingCycle: data.billingCycle || planCfg.billingCycle,
+      tablesCount: tablesCount,
+      status: data.status || (planId === "trial" ? "trial" : "active"),
+      isLifetime: isLifetime,
+      createdAt: (existing && existing.createdAt) || data.createdAt || nowIso,
       expiresAt: expiresAt,
+      updatedAt: nowIso,
       gasUrl: (data.gasUrl || "").trim(),
       apiKey: (data.apiKey || "").trim(),
       licenseKey: licenseToken
     };
 
-    const tenants = this.getAllTenants();
-    // Cek jika ID sudah ada, timpa
-    const existingIdx = tenants.findIndex(t => t.id === slug);
     if (existingIdx >= 0) {
-      // Pertahankan PIN lama jika tidak disediakan
-      if (!data.cashierPin && tenants[existingIdx].cashierPin) newTenant.cashierPin = tenants[existingIdx].cashierPin;
-      if (!data.ownerPin && tenants[existingIdx].ownerPin) newTenant.ownerPin = tenants[existingIdx].ownerPin;
-      if (!data.cashierPhone && tenants[existingIdx].cashierPhone) newTenant.cashierPhone = tenants[existingIdx].cashierPhone;
       tenants[existingIdx] = newTenant;
     } else {
       tenants.unshift(newTenant);
     }
 
     this.saveAllTenants(tenants);
+    if (!data._skipCloud) {
+      this.pushTenantToCloud(newTenant);
+    }
     return newTenant;
+  },
+
+  updateTenant(tenantId, updates = {}) {
+    if (!tenantId) return { success: false, message: "Tenant ID wajib diisi" };
+    const tenants = this.getAllTenants();
+    const idx = tenants.findIndex(t => t.id === tenantId);
+    if (idx === -1) return { success: false, message: "Klien restoran tidak ditemukan" };
+
+    const t = Object.assign({}, tenants[idx]);
+
+    if (updates.plan !== undefined) {
+      const nextPlan = String(updates.plan).toLowerCase().trim();
+      const planChanged = nextPlan !== t.plan;
+      const cfg = this.getSaasPlanConfig(nextPlan);
+      t.plan = nextPlan;
+      if (updates.planName === undefined) t.planName = cfg.name;
+      if (updates.price === undefined) t.price = cfg.price;
+      if (updates.originalPrice === undefined) t.originalPrice = cfg.originalPrice;
+      if (updates.billingCycle === undefined) t.billingCycle = cfg.billingCycle;
+
+      if (nextPlan === "lifetime") {
+        t.isLifetime = true;
+        if (updates.expiresAt === undefined) t.expiresAt = null;
+        if (updates.status === undefined) t.status = "active";
+      } else {
+        t.isLifetime = updates.isLifetime !== undefined ? Boolean(updates.isLifetime) : Boolean(cfg.isLifetime);
+        if (updates.expiresAt === undefined && (planChanged || !t.expiresAt)) {
+          t.expiresAt = new Date(Date.now() + (cfg.durationDays || 30) * 86400000).toISOString();
+        }
+        if (updates.status === undefined && planChanged) {
+          t.status = nextPlan === "trial" ? "trial" : "active";
+        }
+      }
+    }
+
+    if (updates.name !== undefined) t.name = String(updates.name).trim() || t.name;
+    if (updates.pic !== undefined) t.pic = String(updates.pic).trim();
+    if (updates.phone !== undefined) t.phone = String(updates.phone).trim();
+    if (updates.cashierPhone !== undefined) t.cashierPhone = String(updates.cashierPhone).trim();
+    if (updates.city !== undefined) t.city = String(updates.city).trim();
+    if (updates.gasUrl !== undefined) t.gasUrl = String(updates.gasUrl).trim();
+    if (updates.apiKey !== undefined) t.apiKey = String(updates.apiKey).trim();
+    if (updates.licenseKey !== undefined) t.licenseKey = String(updates.licenseKey).trim();
+    if (updates.planName !== undefined) t.planName = String(updates.planName).trim();
+    if (updates.billingCycle !== undefined) t.billingCycle = String(updates.billingCycle).trim();
+    if (updates.price !== undefined) t.price = Number(updates.price) || 0;
+    if (updates.originalPrice !== undefined) t.originalPrice = Number(updates.originalPrice) || 0;
+    if (updates.status !== undefined) t.status = String(updates.status).toLowerCase().trim();
+
+    if (updates.tablesCount !== undefined) {
+      const tc = Number(updates.tablesCount);
+      if (Number.isFinite(tc) && tc >= 1) {
+        t.tablesCount = Math.min(50, Math.round(tc));
+      }
+    }
+
+    if (updates.isLifetime !== undefined) {
+      t.isLifetime = Boolean(updates.isLifetime);
+      if (t.isLifetime && updates.expiresAt === undefined) {
+        t.expiresAt = null;
+      }
+    }
+
+    if (updates.expiresAt !== undefined) {
+      t.expiresAt = updates.expiresAt === null ? null : this._parseExpiryInput(updates.expiresAt);
+      if (t.expiresAt === null && t.plan === "lifetime") t.isLifetime = true;
+    }
+
+    if (updates.cashierPin !== undefined && String(updates.cashierPin).trim()) {
+      t.cashierPin = String(updates.cashierPin).trim();
+      t.cashierPinHash = this.hashTenantPin(t.id, t.cashierPin);
+    } else if (updates.cashierPinHash !== undefined) {
+      t.cashierPinHash = String(updates.cashierPinHash).trim();
+    } else if (t.cashierPin && !t.cashierPinHash) {
+      t.cashierPinHash = this.hashTenantPin(t.id, t.cashierPin);
+    }
+
+    if (updates.ownerPin !== undefined && String(updates.ownerPin).trim()) {
+      t.ownerPin = String(updates.ownerPin).trim();
+      t.ownerPinHash = this.hashTenantPin(t.id, t.ownerPin);
+    } else if (updates.ownerPinHash !== undefined) {
+      t.ownerPinHash = String(updates.ownerPinHash).trim();
+    } else if (t.ownerPin && !t.ownerPinHash) {
+      t.ownerPinHash = this.hashTenantPin(t.id, t.ownerPin);
+    }
+
+    t.updatedAt = new Date().toISOString();
+    t.notSynced = false;
+
+    tenants[idx] = t;
+    this.saveAllTenants(tenants);
+    if (!updates._skipCloud) {
+      this.pushTenantToCloud(t);
+    }
+    return { success: true, message: `Data ${t.name} berhasil diperbarui`, tenant: t };
   },
 
   // --------------------------------------------------------------------------
@@ -283,50 +696,69 @@ const RestoSync = {
 
   getCashierPin(tenantId) {
     const t = this.getTenantInfo(tenantId);
-    return (t && t.cashierPin) ? String(t.cashierPin).trim() : "1234";
+    if (t && t.cashierPin) return String(t.cashierPin).trim();
+    if (t && t.cashierPinHash) return "";
+    return "1234";
   },
 
   getOwnerPin(tenantId) {
     const t = this.getTenantInfo(tenantId);
-    return (t && t.ownerPin) ? String(t.ownerPin).trim() : "1234";
+    if (t && t.ownerPin) return String(t.ownerPin).trim();
+    if (t && t.ownerPinHash) return "";
+    return "1234";
   },
 
   verifyPosPin(pin, tenantId) {
     if (!pin) return false;
     const clean = String(pin).trim();
+    if (!clean) return false;
     if (this.isEmergencyPin(clean)) return true;
-    const targetPin = this.getCashierPin(tenantId);
-    return clean === targetPin || clean === "1234";
+    const tid = tenantId || this.getTenantId() || "default";
+    const t = this.getTenantInfo(tid);
+    if (t && t.cashierPinHash) {
+      return this.hashTenantPin(tid, clean) === String(t.cashierPinHash).trim();
+    }
+    if (t && t.cashierPin) {
+      return clean === String(t.cashierPin).trim();
+    }
+    return clean === "1234";
   },
 
   verifyOwnerPin(pin, tenantId) {
     if (!pin) return false;
     const clean = String(pin).trim();
+    if (!clean) return false;
     if (this.isEmergencyPin(clean)) return true;
-    const targetPin = this.getOwnerPin(tenantId);
-    return clean === targetPin || clean === "1234";
+    const tid = tenantId || this.getTenantId() || "default";
+    const t = this.getTenantInfo(tid);
+    if (t && t.ownerPinHash) {
+      return this.hashTenantPin(tid, clean) === String(t.ownerPinHash).trim();
+    }
+    if (t && t.ownerPin) {
+      return clean === String(t.ownerPin).trim();
+    }
+    return clean === "1234";
   },
 
   resetTenantPins(tenantId, newPin = "1234") {
-    const tenants = this.getAllTenants();
-    const idx = tenants.findIndex(t => t.id === tenantId);
-    if (idx >= 0) {
-      tenants[idx].cashierPin = String(newPin).trim();
-      tenants[idx].ownerPin = String(newPin).trim();
-      this.saveAllTenants(tenants);
-      return { success: true, message: `PIN Kasir & PIN Owner ${tenants[idx].name} berhasil di-reset ke ${newPin}`, tenant: tenants[idx] };
+    const pinStr = String(newPin).trim();
+    const res = this.updateTenant(tenantId, {
+      cashierPin: pinStr,
+      ownerPin: pinStr
+    });
+    if (res.success) {
+      return { success: true, message: `PIN Kasir & PIN Owner ${res.tenant.name} berhasil di-reset ke ${pinStr}`, tenant: res.tenant };
     }
     return { success: false, message: "Klien restoran tidak ditemukan" };
   },
 
   updateTenantPins(tenantId, { cashierPin, ownerPin }) {
-    const tenants = this.getAllTenants();
-    const idx = tenants.findIndex(t => t.id === tenantId);
-    if (idx >= 0) {
-      if (cashierPin) tenants[idx].cashierPin = String(cashierPin).trim();
-      if (ownerPin) tenants[idx].ownerPin = String(ownerPin).trim();
-      this.saveAllTenants(tenants);
-      return { success: true, tenant: tenants[idx] };
+    const updates = {};
+    if (cashierPin) updates.cashierPin = String(cashierPin).trim();
+    if (ownerPin) updates.ownerPin = String(ownerPin).trim();
+    const res = this.updateTenant(tenantId, updates);
+    if (res.success) {
+      return { success: true, tenant: res.tenant };
     }
     return { success: false, message: "Klien tidak ditemukan" };
   },
@@ -335,12 +767,12 @@ const RestoSync = {
     try {
       const tid = tenantId || this.getTenantId();
       if (typeof window !== "undefined" && window.location && window.location.search) {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("emergency_bypass") === "1" || params.get("quick_access") === "1") {
+        if (this._getQueryParam(window.location.search, "emergency_bypass") === "1" ||
+            this._getQueryParam(window.location.search, "quick_access") === "1") {
           return true;
         }
       }
-      return sessionStorage.getItem(`resto_pro_pos_unlocked_${tid}`) === "true";
+      return typeof sessionStorage !== "undefined" && sessionStorage.getItem(`resto_pro_pos_unlocked_${tid}`) === "true";
     } catch (e) {
       return true;
     }
@@ -349,7 +781,9 @@ const RestoSync = {
   unlockPos(tenantId) {
     try {
       const tid = tenantId || this.getTenantId();
-      sessionStorage.setItem(`resto_pro_pos_unlocked_${tid}`, "true");
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem(`resto_pro_pos_unlocked_${tid}`, "true");
+      }
       return true;
     } catch (e) {
       return false;
@@ -359,7 +793,9 @@ const RestoSync = {
   lockPos(tenantId) {
     try {
       const tid = tenantId || this.getTenantId();
-      sessionStorage.removeItem(`resto_pro_pos_unlocked_${tid}`);
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.removeItem(`resto_pro_pos_unlocked_${tid}`);
+      }
       return true;
     } catch (e) {
       return false;
@@ -372,40 +808,53 @@ const RestoSync = {
     if (idx === -1) return { success: false, message: "Klien tidak ditemukan" };
 
     const t = tenants[idx];
-    const currentExp = new Date(t.expiresAt).getTime();
+    if (t.isLifetime || t.plan === "lifetime") {
+      return this.updateTenant(tenantId, { status: "active", isLifetime: true, expiresAt: null });
+    }
+
+    const currentExp = t.expiresAt ? new Date(t.expiresAt).getTime() : 0;
     const baseTime = currentExp > Date.now() ? currentExp : Date.now();
     const newExp = new Date(baseTime + addDays * 86400000).toISOString();
 
-    t.expiresAt = newExp;
-    t.status = "active";
+    const updates = {
+      expiresAt: newExp,
+      status: "active",
+      isLifetime: false
+    };
     if (t.plan === "trial") {
-      t.plan = "pro";
-      t.planName = "Paket Pro (Berlangganan)";
-      t.price = 199000;
-      t.billingCycle = "monthly";
+      const monthlyCfg = this.RESTO_SAAS_PLANS.monthly;
+      updates.plan = "monthly";
+      updates.planName = monthlyCfg.name;
+      updates.price = monthlyCfg.price;
+      updates.originalPrice = monthlyCfg.originalPrice;
+      updates.billingCycle = monthlyCfg.billingCycle;
     }
-
-    // Perbarui token lisensi
-    const licensePayload = {
+    updates.licenseKey = this.createLicenseToken({
       tenantId: t.id,
       restaurantName: t.name,
-      plan: t.plan,
-      billingCycle: t.billingCycle,
+      plan: updates.plan || t.plan,
+      billingCycle: updates.billingCycle || t.billingCycle,
       issuedAt: new Date().toISOString(),
       expiresAt: newExp,
       maxTables: t.tablesCount,
       isUnlimited: true
-    };
-    t.licenseKey = this.createLicenseToken(licensePayload);
+    });
 
-    tenants[idx] = t;
-    this.saveAllTenants(tenants);
-    return { success: true, message: `Langganan ${t.name} berhasil diperpanjang hingga ${new Date(newExp).toLocaleDateString("id-ID")}`, tenant: t };
+    const res = this.updateTenant(tenantId, updates);
+    if (res.success) {
+      return {
+        success: true,
+        message: `Langganan ${res.tenant.name} berhasil diperpanjang hingga ${this._formatDateId(newExp)}`,
+        tenant: res.tenant
+      };
+    }
+    return res;
   },
 
   deleteTenant(tenantId) {
     const tenants = this.getAllTenants().filter(t => t.id !== tenantId);
     this.saveAllTenants(tenants);
+    this.deleteTenantFromCloud(tenantId);
     return { success: true };
   },
 
@@ -422,31 +871,35 @@ const RestoSync = {
           this.handleIncomingEvent(event.data);
         };
       } catch (e) {
-        console.warn("BroadcastChannel fallback ke storage listener:", e);
+        this._safeWarn("BroadcastChannel fallback ke storage listener:", e);
       }
     }
 
     // Storage Event Listener sebagai fallback cross-window yang andal
-    window.addEventListener("storage", (event) => {
-      if (event.key === this.STORAGE_EVENT_KEY && event.newValue) {
-        try {
-          const payload = JSON.parse(event.newValue);
-          this.handleIncomingEvent(payload);
-        } catch (err) {
-          console.error("Gagal mengurai sync event:", err);
+    if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+      window.addEventListener("storage", (event) => {
+        if (event.key === this.STORAGE_EVENT_KEY && event.newValue) {
+          try {
+            const payload = JSON.parse(event.newValue);
+            this.handleIncomingEvent(payload);
+          } catch (err) {
+            this._safeWarn("Gagal mengurai sync event:", err);
+          }
         }
-      }
-    });
+      });
+    }
 
     // Inisialisasi tiket KDS, online orders, riwayat transaksi, CRM member, katalog menu, reservasi, meja & lisensi
-    this.initDefaultKdsTickets();
-    this.initDefaultOnlineOrders();
-    this.initDefaultTransactions();
-    this.initDefaultMembers();
-    this.initDefaultMenuCatalog();
-    this.initDefaultReservations();
-    this.initDefaultTables();
-    this.initLicenseData();
+    if (typeof localStorage !== "undefined") {
+      this.initDefaultKdsTickets();
+      this.initDefaultOnlineOrders();
+      this.initDefaultTransactions();
+      this.initDefaultMembers();
+      this.initDefaultMenuCatalog();
+      this.initDefaultReservations();
+      this.initDefaultTables();
+      this.initLicenseData();
+    }
 
     // Periksa apakah ada parameter magic setup link di URL (?setupGasUrl=...&setupApiKey=...)
     this.checkUrlAutoConfig();
@@ -2104,71 +2557,180 @@ const RestoSync = {
   // ============================================================
   // MANAJEMEN DENAH MEJA DINAMIS (DYNAMIC TABLE CRUD)
   // ============================================================
+  _buildDefaultTableItem(i) {
+    const num = i < 10 ? "0" + i : "" + i;
+    let sec = "Indoor AC";
+    let seats = 4;
+    if (i >= 7 && i <= 10) {
+      sec = "Outdoor Garden";
+      seats = (i === 7 ? 8 : 4);
+    } else if (i >= 11) {
+      sec = "VIP Private Room";
+      seats = 6;
+    }
+    return {
+      id: "T" + num,
+      name: "Meja " + num,
+      seats: seats,
+      section: sec,
+      status: "available",
+      runningTotal: 0,
+      elapsedMinutes: 0,
+      customer: "-",
+      orderCount: 0,
+      items: []
+    };
+  },
+
+  _isTableBusy(table) {
+    if (!table) return false;
+    if (table.status === "occupied" || table.status === "bill_requested") return true;
+    if (Array.isArray(table.items) && table.items.length > 0) return true;
+    if (Number(table.runningTotal) > 0 || Number(table.orderCount) > 0) return true;
+    return false;
+  },
+
+  _getDesiredTablesTarget() {
+    const tenantId = this.getTenantId();
+    const tenant = this.getTenantInfo(tenantId);
+    const lic = this.getLicenseData();
+    let rawCount = Number(tenant && tenant.tablesCount);
+    if (!Number.isFinite(rawCount) || rawCount < 1) rawCount = 12;
+    rawCount = Math.min(50, Math.max(1, Math.round(rawCount)));
+    return lic.isPaidActive ? rawCount : Math.min(4, rawCount);
+  },
+
   initDefaultTables() {
+    if (typeof localStorage === "undefined") return [];
     const existing = localStorage.getItem(this.TABLES_STORAGE_KEY);
     if (!existing) {
+      const tenantId = this.getTenantId();
+      const targetCount = this._getDesiredTablesTarget();
       let tables = [];
-      if (typeof RESTO_TABLES !== "undefined" && Array.isArray(RESTO_TABLES)) {
-        tables = JSON.parse(JSON.stringify(RESTO_TABLES));
+
+      if (tenantId === "default" && typeof RESTO_TABLES !== "undefined" && Array.isArray(RESTO_TABLES) && RESTO_TABLES.length > 0) {
+        const base = JSON.parse(JSON.stringify(RESTO_TABLES));
+        tables = base.slice(0, targetCount);
+        for (let i = tables.length + 1; i <= targetCount; i++) {
+          tables.push(this._buildDefaultTableItem(i));
+        }
       } else {
-        // Fallback 12 meja awal
-        for (let i = 1; i <= 12; i++) {
-          const num = i < 10 ? "0" + i : "" + i;
-          let sec = "Indoor AC";
-          let seats = 4;
-          if (i >= 7 && i <= 10) { sec = "Outdoor Garden"; seats = (i === 7 ? 8 : 4); }
-          else if (i >= 11) { sec = "VIP Private Room"; seats = 6; }
-          tables.push({
-            id: "T" + num,
-            name: "Meja " + num,
-            seats: seats,
-            section: sec,
-            status: "available",
-            runningTotal: 0,
-            elapsedMinutes: 0,
-            customer: "-",
-            orderCount: 0,
-            items: []
-          });
+        for (let i = 1; i <= targetCount; i++) {
+          tables.push(this._buildDefaultTableItem(i));
         }
       }
+
       this.saveTables(tables);
+      return tables;
+    }
+    try {
+      return JSON.parse(existing);
+    } catch (e) {
+      return [];
     }
   },
 
   getTables() {
     try {
-      const data = localStorage.getItem(this.TABLES_STORAGE_KEY);
-      if (data) return JSON.parse(data);
-      if (typeof RESTO_TABLES !== "undefined" && Array.isArray(RESTO_TABLES)) {
+      if (typeof localStorage !== "undefined") {
+        const data = localStorage.getItem(this.TABLES_STORAGE_KEY);
+        if (data) return JSON.parse(data);
+      }
+      if (this.getTenantId() === "default" && typeof RESTO_TABLES !== "undefined" && Array.isArray(RESTO_TABLES)) {
         return RESTO_TABLES;
       }
     } catch (e) {}
     return [];
   },
 
+  getUsableTables() {
+    const tables = this.getTables();
+    const lic = this.getLicenseData();
+    if (lic.isPaidActive || lic.isMaster) {
+      return tables;
+    }
+    const cap = Math.min(4, Number(lic.maxTables) || 4);
+    return tables.slice(0, cap);
+  },
+
+  syncTablesForTenant() {
+    const tenantId = this.getTenantId();
+    const tenant = this.getTenantInfo(tenantId);
+    if (tenant && tenant.notSynced) {
+      return this.getTables();
+    }
+
+    if (typeof localStorage !== "undefined" && !localStorage.getItem(this.TABLES_STORAGE_KEY)) {
+      return this.initDefaultTables();
+    }
+
+    const lic = this.getLicenseData();
+    const targetCount = this._getDesiredTablesTarget();
+    const current = this.getTables().map(t => Object.assign({}, t));
+
+    if (current.length < targetCount) {
+      let nextNum = current.length + 1;
+      while (current.length < targetCount) {
+        let nextId = "T" + (nextNum < 10 ? "0" + nextNum : "" + nextNum);
+        while (current.some(t => t.id === nextId)) {
+          nextNum++;
+          nextId = "T" + (nextNum < 10 ? "0" + nextNum : "" + nextNum);
+        }
+        const item = this._buildDefaultTableItem(nextNum);
+        item.id = nextId;
+        current.push(item);
+        nextNum++;
+      }
+    } else if (current.length > targetCount) {
+      for (let i = current.length - 1; i >= targetCount; i--) {
+        const tbl = current[i];
+        const isDefaultName = !tbl.name || /^Meja \d+$/.test(String(tbl.name).trim());
+        const isUncustomizedAvailable = !this._isTableBusy(tbl) && tbl.status === "available" && !tbl.isCustom && isDefaultName;
+        if (isUncustomizedAvailable) {
+          current.splice(i, 1);
+        }
+      }
+    }
+
+    const cap = lic.isPaidActive ? 999 : (Number(lic.maxTables) || 4);
+    for (let i = 0; i < current.length; i++) {
+      if (!lic.isPaidActive && i >= cap) {
+        current[i].isLockedByBilling = true;
+      } else {
+        delete current[i].isLockedByBilling;
+      }
+    }
+
+    this.saveTables(current);
+    return current;
+  },
+
   saveTables(tables) {
     try {
-      localStorage.setItem(this.TABLES_STORAGE_KEY, JSON.stringify(tables));
-      if (typeof RESTO_TABLES !== "undefined") {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(this.TABLES_STORAGE_KEY, JSON.stringify(tables));
+      }
+      if (typeof RESTO_TABLES !== "undefined" && Array.isArray(RESTO_TABLES)) {
         RESTO_TABLES.length = 0;
         tables.forEach(t => RESTO_TABLES.push(t));
       }
       this.emit("TABLES_UPDATED", tables);
       return true;
     } catch (e) {
-      console.warn("Gagal simpan tables:", e);
+      this._safeWarn("Gagal simpan tables:", e);
       return false;
     }
   },
 
-  addTable(tableData) {
+  addTable(tableData = {}) {
     if (!this.canAddTable()) {
       const lic = this.getLicenseData();
-      this.showProFeatureLockedModal(
-        "Batas Kuota Meja Tercapai",
-        `Versi Starter Free Anda saat ini dibatasi maksimal ${lic.maxTables} meja. Upgrade ke Resto Pro Enterprise untuk mengelola meja tanpa batas (Unlimited Tables)!`
-      );
+      if (typeof document !== "undefined") {
+        this.showProFeatureLockedModal(
+          "Batas Kuota Meja Tercapai",
+          `Paket saat ini (${lic.tierLabel}) dibatasi maksimal ${lic.maxTables} meja aktif. Upgrade ke Paket Bulanan atau Lifetime untuk membuka Unlimited Meja!`
+        );
+      }
       return null;
     }
 
@@ -2180,9 +2742,11 @@ const RestoSync = {
       nextId = "T" + (nextNum < 10 ? "0" + nextNum : nextNum);
     }
 
+    const defaultName = "Meja " + (nextNum < 10 ? "0" + nextNum : nextNum);
+    const customName = tableData.name ? String(tableData.name).trim() : defaultName;
     const newTable = {
       id: nextId,
-      name: tableData.name || ("Meja " + (nextNum < 10 ? "0" + nextNum : nextNum)),
+      name: customName,
       seats: Number(tableData.seats) || 4,
       section: tableData.section || "Indoor AC",
       status: "available",
@@ -2190,7 +2754,8 @@ const RestoSync = {
       elapsedMinutes: 0,
       customer: "-",
       orderCount: 0,
-      items: []
+      items: [],
+      isCustom: customName !== defaultName
     };
 
     tables.push(newTable);
@@ -2203,7 +2768,10 @@ const RestoSync = {
     const tables = this.getTables();
     const table = tables.find(t => t.id === tableId);
     if (table) {
-      if (data.name) table.name = data.name;
+      if (data.name) {
+        table.name = data.name;
+        if (!/^Meja \d+$/.test(String(data.name).trim())) table.isCustom = true;
+      }
       if (data.seats) table.seats = Number(data.seats);
       if (data.section) table.section = data.section;
       if (data.status) table.status = data.status;
@@ -2221,7 +2789,9 @@ const RestoSync = {
     if (!table) return false;
 
     if (table.status === "occupied" || table.status === "bill_requested") {
-      alert(`Meja ${table.name} sedang terisi tamu! Harap selesaikan pembayaran kasir terlebih dahulu sebelum menghapus meja.`);
+      if (typeof alert === "function") {
+        alert(`Meja ${table.name} sedang terisi tamu! Harap selesaikan pembayaran kasir terlebih dahulu sebelum menghapus meja.`);
+      }
       return false;
     }
 
@@ -2235,42 +2805,135 @@ const RestoSync = {
   // SISTEM LISENSI SAAS & GEMBOK FITUR PRO (FEATURE GATING)
   // ============================================================
   initLicenseData() {
-    const existing = localStorage.getItem(this.LICENSE_STORAGE_KEY);
-    if (!existing) {
-      const defaultLicense = {
-        isPro: true,
-        tier: "enterprise",
-        tierLabel: "RASH Enterprise Tier",
-        token: "RASH-PRO-ENTERPRISE-2028",
-        expiry: "31 Desember 2028",
-        maxTables: 999,
-        activatedAt: Date.now()
-      };
-      this.saveLicenseData(defaultLicense);
-    }
+    // Lisensi sekarang dihitung dinamis dari profil tenant / Master Core
+    // agar tidak menampilkan masa aktif statis hardcoded pada perangkat tenant.
+    return this.getLicenseData();
   },
 
   getLicenseData() {
-    try {
-      const data = localStorage.getItem(this.LICENSE_STORAGE_KEY);
-      if (data) return JSON.parse(data);
-    } catch (e) {}
+    const tenantId = this.getTenantId();
+    if (!tenantId || tenantId === "default") {
+      try {
+        if (typeof localStorage !== "undefined") {
+          const raw = localStorage.getItem(this.LICENSE_STORAGE_KEY);
+          if (raw) {
+            const saved = JSON.parse(raw);
+            if (saved && saved.isSimFree === true) {
+              return Object.assign({}, saved, {
+                isMaster: true,
+                isPro: false,
+                isPaidActive: false,
+                isLifetime: false,
+                isExpired: false,
+                isSuspended: false,
+                notSynced: false,
+                maxTables: 4
+              });
+            }
+          }
+        }
+      } catch (e) {}
+
+      return {
+        isMaster: true,
+        isPro: true,
+        isPaidActive: true,
+        isLifetime: true,
+        isExpired: false,
+        isSuspended: false,
+        notSynced: false,
+        tier: "enterprise",
+        tierLabel: "Master Core Resto Pro",
+        plan: "enterprise",
+        status: "active",
+        token: "RASH-MASTER-CORE",
+        expiry: "Aktif Selamanya (Master)",
+        expiresAt: null,
+        daysLeft: null,
+        maxTables: 999
+      };
+    }
+
+    const t = this.getTenantInfo(tenantId);
+    if (!t || t.notSynced) {
+      return {
+        isMaster: false,
+        isPro: false,
+        isPaidActive: false,
+        isLifetime: false,
+        isExpired: false,
+        isSuspended: false,
+        notSynced: true,
+        tier: "unknown",
+        tierLabel: "Belum Tersinkronisasi",
+        plan: "unknown",
+        status: "unknown",
+        token: "",
+        expiry: "Belum Tersinkronisasi",
+        expiresAt: null,
+        daysLeft: null,
+        maxTables: 4
+      };
+    }
+
+    const plan = String(t.plan || "unknown").toLowerCase().trim();
+    const status = String(t.status || "unknown").toLowerCase().trim();
+    const planCfg = this.getSaasPlanConfig(plan);
+    const isLifetime = Boolean(t.isLifetime === true || t.isLifetime === "true" || plan === "lifetime");
+    const isSuspended = status === "suspended";
+
+    let expTime = null;
+    if (!isLifetime && t.expiresAt) {
+      const parsed = new Date(t.expiresAt).getTime();
+      if (!Number.isNaN(parsed)) expTime = parsed;
+    }
+
+    const isExpired = !isLifetime && (status === "expired" || (expTime !== null && expTime <= Date.now()));
+    const isPaidPlan = (plan === "monthly" || plan === "lifetime" || plan === "pro" || plan === "basic" || plan === "enterprise");
+    const isPaidActive = isPaidPlan && status === "active" && !isExpired && !isSuspended;
+    const isPro = !isSuspended && !isExpired;
+    const maxTables = isPaidActive ? 999 : 4;
+    const daysLeft = expTime !== null ? Math.ceil((expTime - Date.now()) / 86400000) : null;
+
+    let expiry = "Belum Diatur";
+    if (isSuspended) {
+      expiry = "Ditangguhkan (Suspended)";
+    } else if (isLifetime) {
+      expiry = "Aktif Selamanya (Lifetime)";
+    } else if (isExpired) {
+      expiry = expTime !== null ? `Sudah Berakhir (${this._formatDateId(expTime)})` : "Sudah Berakhir";
+    } else if (expTime !== null) {
+      expiry = this._formatDateId(expTime);
+    }
+
     return {
-      isPro: true,
-      tier: "enterprise",
-      tierLabel: "RASH Enterprise Tier",
-      token: "RASH-PRO-ENTERPRISE-2028",
-      expiry: "31 Desember 2028",
-      maxTables: 999
+      isMaster: false,
+      isPro: isPro,
+      isPaidActive: isPaidActive,
+      isLifetime: isLifetime,
+      isExpired: isExpired,
+      isSuspended: isSuspended,
+      notSynced: false,
+      tier: plan,
+      tierLabel: t.planName || planCfg.name,
+      plan: plan,
+      status: status,
+      token: t.licenseKey || "",
+      expiry: expiry,
+      expiresAt: t.expiresAt || null,
+      daysLeft: daysLeft,
+      maxTables: maxTables
     };
   },
 
   saveLicenseData(lic) {
     try {
-      localStorage.setItem(this.LICENSE_STORAGE_KEY, JSON.stringify(lic));
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(this.LICENSE_STORAGE_KEY, JSON.stringify(lic));
+      }
       this.emit("LICENSE_STATUS_CHANGED", lic);
     } catch (e) {
-      console.warn("Gagal simpan license data:", e);
+      this._safeWarn("Gagal simpan license data:", e);
     }
   },
 
@@ -2281,7 +2944,7 @@ const RestoSync = {
   canAddTable() {
     const lic = this.getLicenseData();
     const tables = this.getTables();
-    return tables.length < (lic.maxTables || 999);
+    return tables.length < (lic.maxTables || 4);
   },
 
   verifyLicenseToken(rawToken) {
@@ -2291,22 +2954,25 @@ const RestoSync = {
     }
 
     // Format valid: RASH-RESTO-PRO-..., RASH-PRO-..., RASH-APP-PRO-..., RASH-ENTERPRISE-...
-    const isMaster = token.includes("RASH-RESTO-PRO-") || token.includes("RASH-PRO-") || token.includes("RASH-APP-PRO-") || token.includes("RASH-ENTERPRISE-") || token === "RASH-2028";
-    if (!isMaster) {
+    const isMasterToken = token.includes("RASH-RESTO-PRO-") || token.includes("RASH-PRO-") || token.includes("RASH-APP-PRO-") || token.includes("RASH-ENTERPRISE-") || token === "RASH-2028";
+    if (!isMasterToken) {
       return { success: false, message: "Format token tidak dikenali oleh RASH Keynode. Pastikan token resmi diterbitkan oleh RASH WebApp Builder!" };
     }
 
-    let expiryStr = "31 Desember 2028";
+    let expiryStr = "Aktif Selamanya (Master)";
     if (token.includes("LIFETIME") || token.includes("VIP")) {
-      expiryStr = "Permanen / Lifetime (Tanpa Batas)";
+      expiryStr = "Aktif Selamanya (Lifetime)";
     } else if (token.includes("2027")) {
       expiryStr = "31 Desember 2027";
     }
 
     const lic = {
+      isMaster: this.getTenantId() === "default",
       isPro: true,
+      isPaidActive: true,
+      isSimFree: false,
       tier: "enterprise",
-      tierLabel: "RASH Enterprise Tier",
+      tierLabel: "Master Core Resto Pro",
       token: token,
       expiry: expiryStr,
       maxTables: 999,
@@ -2314,18 +2980,21 @@ const RestoSync = {
     };
 
     this.saveLicenseData(lic);
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: `Token lisensi "${token}" berhasil diverifikasi!\nSeluruh fitur Resto Pro Enterprise (Unlimited Meja, BI & WA CRM) telah aktif.`,
-      license: lic 
+      license: lic
     };
   },
 
   setSimulationFreeTier() {
     const freeLic = {
+      isMaster: this.getTenantId() === "default",
       isPro: false,
+      isPaidActive: false,
+      isSimFree: true,
       tier: "free",
-      tierLabel: "Starter Free Tier",
+      tierLabel: "Starter Free Tier (Simulasi)",
       token: "FREE-MODE",
       expiry: "Mode Gratis (Maksimal 4 Meja)",
       maxTables: 4,
@@ -2336,6 +3005,7 @@ const RestoSync = {
   },
 
   showProFeatureLockedModal(featureName, description) {
+    if (typeof document === "undefined" || !document.body) return;
     let modal = document.getElementById("proFeatureLockModal");
     if (!modal) {
       const div = document.createElement("div");
@@ -2360,7 +3030,7 @@ const RestoSync = {
           <div class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-xs text-amber-800 dark:text-amber-300 space-y-1">
             <span class="font-heading font-bold block flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px]">verified</span>
-              Keuntungan Lisensi Enterprise:
+              Keuntungan Paket Berbayar (Bulanan / Lifetime):
             </span>
             <ul class="list-disc list-inside space-y-0.5 text-[11px] text-stone-600 dark:text-stone-300">
               <li>Kelola Meja Tanpa Batas (Unlimited Tables)</li>
@@ -2370,9 +3040,9 @@ const RestoSync = {
             </ul>
           </div>
           <div class="space-y-2 pt-1">
-            <a href="https://wa.me/6281200000000?text=Halo%20RASH%20WebApp%20Builder%2C%20saya%20ingin%20upgrade%20ke%20Resto%20Pro%20Enterprise" target="_blank" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md">
+            <a href="https://wa.me/6282286452105?text=Halo%20Admin%20RASH%20Resto%20Pro%2C%20saya%20ingin%20upgrade%20ke%20Paket%20Berbayar%20(Bulanan%20%2F%20Lifetime)" target="_blank" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md">
               <span class="material-symbols-outlined text-[18px]">chat</span>
-              <span>Hubungi Developer via WhatsApp</span>
+              <span>Hubungi Admin RASH via WhatsApp</span>
             </a>
             <div class="flex items-center gap-1.5 pt-2 border-t border-stone-200 dark:border-stone-800">
               <input type="text" id="proModalTokenInput" placeholder="Punya Token? Masukkan di sini..." class="flex-1 px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono text-[#1C1917] dark:text-white outline-none" />
@@ -2385,9 +3055,11 @@ const RestoSync = {
       modal = div;
     }
 
-    document.getElementById("proModalFeatureTitle").textContent = featureName || "Fitur Resto Pro Enterprise";
-    document.getElementById("proModalFeatureDesc").textContent = description || "Fitur ini khusus untuk pengguna berlisensi Resto Pro Enterprise.";
-    modal.classList.remove("hidden");
+    const titleEl = document.getElementById("proModalFeatureTitle");
+    const descEl = document.getElementById("proModalFeatureDesc");
+    if (titleEl) titleEl.textContent = featureName || "Fitur Resto Pro Enterprise";
+    if (descEl) descEl.textContent = description || "Fitur ini khusus untuk pengguna berlisensi Resto Pro Enterprise.";
+    if (modal.classList) modal.classList.remove("hidden");
   },
 
   verifyFromModal() {
@@ -2683,6 +3355,7 @@ const RestoSync = {
   checkUrlAutoConfig() {
     if (typeof window === "undefined" || !window.location || !window.location.search) return;
     try {
+      if (typeof URLSearchParams === "undefined") return;
       const params = new URLSearchParams(window.location.search);
       const urlParam = params.get("setupGasUrl");
       const keyParam = params.get("setupApiKey");
@@ -2713,13 +3386,455 @@ const RestoSync = {
         params.delete("setupLicense");
         const newQuery = params.toString();
         const newUrl = window.location.pathname + (newQuery ? "?" + newQuery : "") + window.location.hash;
-        window.history.replaceState({}, document.title, newUrl);
+        if (window.history && typeof window.history.replaceState === "function") {
+          window.history.replaceState({}, (typeof document !== "undefined" ? document.title : ""), newUrl);
+        }
         this.emit("GAS_CONFIG_CHANGED", { autoConfigured: true });
-        console.log("Resto Pro: Konfigurasi Cloud berhasil dipasang otomatis via link!");
       }
     } catch (e) {
-      console.warn("Gagal membaca auto config URL:", e);
+      this._safeWarn("Gagal membaca auto config URL:", e);
     }
+  },
+
+  // ============================================================
+  // CLOUD TENANT DIRECTORY SYNC & ACCESS ENFORCEMENT (TAHAP 1)
+  // ============================================================
+  getMasterCloudConfig() {
+    try {
+      const cfg = (typeof window !== "undefined" && window.RESTO_CLOUD_CONFIG)
+        ? window.RESTO_CLOUD_CONFIG
+        : (typeof RESTO_CLOUD_CONFIG !== "undefined" ? RESTO_CLOUD_CONFIG : null);
+      return {
+        gasUrl: (cfg && cfg.GAS_URL) ? String(cfg.GAS_URL).trim() : "",
+        apiKey: (cfg && cfg.API_SECRET_KEY) ? String(cfg.API_SECRET_KEY).trim() : ""
+      };
+    } catch (e) {
+      return { gasUrl: "", apiKey: "" };
+    }
+  },
+
+  _readRawTenantsArray() {
+    try {
+      if (typeof localStorage === "undefined") return [];
+      const raw = localStorage.getItem(this.TENANTS_DIRECTORY_KEY);
+      if (raw !== null && raw !== undefined) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return [];
+  },
+
+  async pushTenantToCloud(tenant) {
+    try {
+      if (!tenant || !tenant.id) return { success: false, error: "Tenant tidak valid" };
+      const { gasUrl, apiKey } = this.getMasterCloudConfig();
+      if (!gasUrl || typeof fetch !== "function") {
+        return { success: false, offline: true };
+      }
+
+      const payload = Object.assign({}, tenant);
+      if (payload.cashierPin && !payload.cashierPinHash) {
+        payload.cashierPinHash = this.hashTenantPin(payload.id, payload.cashierPin);
+      }
+      if (payload.ownerPin && !payload.ownerPinHash) {
+        payload.ownerPinHash = this.hashTenantPin(payload.id, payload.ownerPin);
+      }
+
+      const res = await fetch(gasUrl, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "saveTenant",
+          data: payload,
+          apiKey: apiKey,
+          timestamp: Date.now()
+        })
+      });
+      if (!res || !res.ok) {
+        return { success: false, offline: true, status: res ? res.status : 0 };
+      }
+      return await res.json();
+    } catch (e) {
+      return { success: false, offline: true, error: e && e.message ? e.message : String(e) };
+    }
+  },
+
+  async deleteTenantFromCloud(tenantId) {
+    try {
+      if (!tenantId) return { success: false, error: "Tenant ID kosong" };
+      const { gasUrl, apiKey } = this.getMasterCloudConfig();
+      if (!gasUrl || typeof fetch !== "function") {
+        return { success: false, offline: true };
+      }
+
+      const res = await fetch(gasUrl, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "deleteTenant",
+          data: { id: tenantId },
+          apiKey: apiKey,
+          timestamp: Date.now()
+        })
+      });
+      if (!res || !res.ok) {
+        return { success: false, offline: true, status: res ? res.status : 0 };
+      }
+      return await res.json();
+    } catch (e) {
+      return { success: false, offline: true, error: e && e.message ? e.message : String(e) };
+    }
+  },
+
+  async syncTenantsFromCloud(options = {}) {
+    const mode = options && options.mode ? options.mode : "tenant";
+    const targetTenantId = (options && options.tenantId) ? options.tenantId : this.getTenantId();
+    const { gasUrl, apiKey } = this.getMasterCloudConfig();
+
+    if (!gasUrl || typeof fetch !== "function") {
+      return { success: false, offline: true, mode: mode };
+    }
+
+    try {
+      if (mode === "admin") {
+        const fetchUrl = gasUrl + (gasUrl.includes("?") ? "&" : "?") +
+          "action=getTenants" +
+          (apiKey ? "&apiKey=" + encodeURIComponent(apiKey) : "") +
+          "&_t=" + Date.now();
+        const res = await fetch(fetchUrl, { method: "GET", mode: "cors" });
+        if (!res || !res.ok) {
+          return { success: false, offline: true, mode: "admin", status: res ? res.status : 0 };
+        }
+        const json = await res.json();
+        if (!json || json.unauthorized || !json.success) {
+          return {
+            success: false,
+            mode: "admin",
+            unauthorized: Boolean(json && json.unauthorized),
+            error: (json && (json.error || json.message)) || "Gagal sinkronisasi admin"
+          };
+        }
+
+        const cloudInitialized = Boolean(json.cloudInitialized);
+        const rawList = Array.isArray(json.tenants) ? json.tenants : (Array.isArray(json.data) ? json.data : []);
+        const cloudList = rawList.map(item => this._normalizeTenantRecord(item));
+
+        if (cloudInitialized) {
+          this.saveAllTenants(cloudList);
+          return {
+            success: true,
+            mode: "admin",
+            cloudInitialized: true,
+            count: cloudList.length,
+            tenants: cloudList
+          };
+        }
+
+        const localList = this.getAllTenants();
+        if (localList.length > 0 && cloudList.length === 0) {
+          for (let i = 0; i < localList.length; i++) {
+            await this.pushTenantToCloud(localList[i]);
+          }
+          return {
+            success: true,
+            mode: "admin",
+            cloudInitialized: false,
+            pushedLocal: localList.length,
+            tenants: localList
+          };
+        }
+
+        if (cloudList.length > 0) {
+          this.saveAllTenants(cloudList);
+        }
+        return {
+          success: true,
+          mode: "admin",
+          cloudInitialized: false,
+          count: cloudList.length,
+          tenants: cloudList
+        };
+      }
+
+      // Client / Tenant mode
+      if (!targetTenantId || targetTenantId === "default") {
+        return { success: true, mode: "tenant", isMaster: true, tenant: this.getTenantInfo("default") };
+      }
+
+      const fetchUrl = gasUrl + (gasUrl.includes("?") ? "&" : "?") +
+        "action=getTenantPublicInfo&tenantId=" + encodeURIComponent(targetTenantId) +
+        "&_t=" + Date.now();
+      const res = await fetch(fetchUrl, { method: "GET", mode: "cors" });
+      if (!res || !res.ok) {
+        return { success: false, offline: true, mode: "tenant", status: res ? res.status : 0 };
+      }
+      const json = await res.json();
+      if (!json || !json.success) {
+        return {
+          success: false,
+          mode: "tenant",
+          error: (json && (json.error || json.message)) || "Gagal memuat profil tenant"
+        };
+      }
+
+      const cloudInitialized = Boolean(json.cloudInitialized);
+      if (json.notFound === true) {
+        if (cloudInitialized) {
+          const currentLocal = this._readRawTenantsArray();
+          const filtered = currentLocal.filter(t => t.id !== targetTenantId);
+          this.saveAllTenants(filtered);
+          return {
+            success: true,
+            mode: "tenant",
+            notFound: true,
+            cloudInitialized: true,
+            evicted: true
+          };
+        }
+        return {
+          success: true,
+          mode: "tenant",
+          notFound: true,
+          cloudInitialized: false,
+          evicted: false
+        };
+      }
+
+      const incomingRaw = json.tenant || json.data;
+      if (!incomingRaw) {
+        return { success: false, mode: "tenant", error: "Data tenant kosong dari server" };
+      }
+
+      const cloudTenant = this._normalizeTenantRecord(incomingRaw);
+      const localArr = this._readRawTenantsArray();
+      const idx = localArr.findIndex(t => t.id === cloudTenant.id);
+      if (idx >= 0) {
+        const prev = localArr[idx];
+        const merged = Object.assign({}, prev, cloudTenant, { notSynced: false });
+        if (cloudTenant.cashierPinHash && prev.cashierPinHash !== cloudTenant.cashierPinHash) {
+          delete merged.cashierPin;
+        }
+        if (cloudTenant.ownerPinHash && prev.ownerPinHash !== cloudTenant.ownerPinHash) {
+          delete merged.ownerPin;
+        }
+        localArr[idx] = merged;
+      } else {
+        localArr.unshift(cloudTenant);
+      }
+
+      this.saveAllTenants(localArr);
+      if (cloudTenant.id === this.getTenantId() && typeof localStorage !== "undefined" && localStorage.getItem(this.TABLES_STORAGE_KEY)) {
+        this.syncTablesForTenant();
+      }
+      return {
+        success: true,
+        mode: "tenant",
+        cloudInitialized: cloudInitialized,
+        tenant: cloudTenant
+      };
+    } catch (e) {
+      return {
+        success: false,
+        offline: true,
+        mode: mode,
+        error: e && e.message ? e.message : String(e)
+      };
+    }
+  },
+
+  async registerTrialTenantPublic(data = {}) {
+    if (!data || !data.name || !String(data.name).trim()) {
+      throw new Error("Nama resto wajib diisi");
+    }
+
+    const rawName = String(data.name).trim();
+    const baseSlug = (data.id ? String(data.id).trim().toLowerCase() : rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")) || ("resto-" + Date.now().toString().slice(-4));
+    const cashierPin = String(data.cashierPin || "1234").trim();
+    const ownerPin = String(data.ownerPin || cashierPin).trim();
+    const trialCfg = this.RESTO_SAAS_PLANS.trial;
+    const { gasUrl } = this.getMasterCloudConfig();
+
+    if (gasUrl && typeof fetch === "function") {
+      try {
+        const res = await fetch(gasUrl, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "registerTrialTenant",
+            data: {
+              id: baseSlug,
+              name: rawName,
+              pic: data.pic || "Pemilik Resto",
+              phone: data.phone || "",
+              cashierPhone: data.cashierPhone || "",
+              city: data.city || "Indonesia",
+              plan: "trial",
+              planName: trialCfg.name,
+              price: 0,
+              originalPrice: 0,
+              billingCycle: "trial",
+              tablesCount: 4,
+              status: "trial",
+              isLifetime: false,
+              cashierPin: cashierPin,
+              ownerPin: ownerPin,
+              cashierPinHash: this.hashTenantPin(baseSlug, cashierPin),
+              ownerPinHash: this.hashTenantPin(baseSlug, ownerPin)
+            },
+            timestamp: Date.now()
+          })
+        });
+        if (res && res.ok) {
+          const json = await res.json();
+          if (json && json.success && json.tenant) {
+            const cloudTenant = this._normalizeTenantRecord(Object.assign({}, json.tenant, {
+              plan: "trial",
+              status: "trial",
+              price: 0,
+              isLifetime: false,
+              tablesCount: Number(json.tenant.tablesCount) || 4
+            }));
+            if (!cloudTenant.cashierPinHash) {
+              cloudTenant.cashierPinHash = this.hashTenantPin(cloudTenant.id, cashierPin);
+            }
+            if (!cloudTenant.ownerPinHash) {
+              cloudTenant.ownerPinHash = this.hashTenantPin(cloudTenant.id, ownerPin);
+            }
+            const existing = this.getAllTenants();
+            const existingIdx = existing.findIndex(t => t.id === cloudTenant.id);
+            if (existingIdx >= 0) existing[existingIdx] = cloudTenant;
+            else existing.unshift(cloudTenant);
+            this.saveAllTenants(existing);
+            return {
+              success: true,
+              source: "cloud",
+              tenant: cloudTenant,
+              slug: cloudTenant.id
+            };
+          }
+        }
+      } catch (e) {}
+    }
+
+    // Fallback lokal aman: jangan timpa slug yang sudah ada
+    const currentTenants = this.getAllTenants();
+    let finalSlug = baseSlug;
+    if (currentTenants.some(t => t.id === finalSlug)) {
+      let attempt = 0;
+      do {
+        const suffix = Math.floor(1000 + Math.random() * 9000);
+        finalSlug = `${baseSlug}-${suffix}`;
+        attempt++;
+      } while (currentTenants.some(t => t.id === finalSlug) && attempt < 10);
+    }
+
+    const created = this.registerNewTenant({
+      id: finalSlug,
+      name: rawName,
+      pic: data.pic || "Pemilik Resto",
+      phone: data.phone || "",
+      cashierPhone: data.cashierPhone || "",
+      cashierPin: cashierPin,
+      ownerPin: ownerPin,
+      city: data.city || "Indonesia",
+      plan: "trial",
+      planName: trialCfg.name,
+      price: 0,
+      originalPrice: 0,
+      billingCycle: "trial",
+      tablesCount: 4,
+      status: "trial",
+      isLifetime: false,
+      _skipCloud: true
+    });
+
+    return {
+      success: true,
+      source: "local",
+      offline: true,
+      tenant: created,
+      slug: created.id
+    };
+  },
+
+  enforceTenantAccessGuard(docRef) {
+    const doc = docRef || (typeof document !== "undefined" ? document : null);
+    const tenantId = this.getTenantId();
+
+    const clearOverlay = () => {
+      if (!doc || typeof doc.getElementById !== "function") return;
+      const existing = doc.getElementById("tenantSuspendedOverlay");
+      if (existing) {
+        if (existing.parentNode && typeof existing.parentNode.removeChild === "function") {
+          existing.parentNode.removeChild(existing);
+        } else if (existing.classList && typeof existing.classList.add === "function") {
+          existing.classList.add("hidden");
+        }
+      }
+    };
+
+    if (!tenantId || tenantId === "default") {
+      clearOverlay();
+      return { blocked: false, isMaster: true, reason: null, tenantId: "default" };
+    }
+
+    const lic = this.getLicenseData();
+    const tenant = this.getTenantInfo(tenantId);
+
+    if (lic.isSuspended) {
+      let overlayRendered = false;
+      if (doc && typeof doc.getElementById === "function" && typeof doc.createElement === "function" && doc.body) {
+        let overlay = doc.getElementById("tenantSuspendedOverlay");
+        const restoName = (tenant && tenant.name) ? tenant.name : tenantId;
+        const waMsg = encodeURIComponent(`Halo Admin RASH, akun restoran "${restoName}" (ID: ${tenantId}) berstatus Suspended. Mohon informasi aktivasi kembali.`);
+        if (!overlay) {
+          overlay = doc.createElement("div");
+          overlay.id = "tenantSuspendedOverlay";
+          overlay.className = "fixed inset-0 z-[9999] flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-md text-white";
+          if (typeof overlay.setAttribute === "function") {
+            overlay.setAttribute("data-suspended", "true");
+          }
+          overlay.innerHTML = `
+            <div class="max-w-md w-full bg-slate-900 border border-red-500/40 rounded-3xl p-8 text-center shadow-2xl space-y-5">
+              <div class="w-16 h-16 mx-auto rounded-2xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl">block</span>
+              </div>
+              <div class="space-y-2">
+                <span class="inline-block px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-[11px] font-bold uppercase tracking-wider">Akses Terkunci</span>
+                <h2 class="text-xl font-extrabold text-white">Akun Restoran Ditangguhkan (Suspended)</h2>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                  Layanan operasional untuk <strong>${restoName}</strong> (<code>${tenantId}</code>) sedang ditangguhkan sementara oleh Admin RASH.
+                </p>
+              </div>
+              <a href="https://wa.me/6282286452105?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider inline-flex items-center justify-center gap-2 shadow-lg">
+                <span>Hubungi Admin RASH via WhatsApp</span>
+              </a>
+            </div>
+          `;
+          if (typeof doc.body.appendChild === "function") {
+            doc.body.appendChild(overlay);
+          }
+        }
+        if (overlay.classList && typeof overlay.classList.remove === "function") {
+          overlay.classList.remove("hidden");
+        }
+        overlayRendered = true;
+      }
+      return {
+        blocked: true,
+        isMaster: false,
+        reason: "suspended",
+        tenantId: tenantId,
+        overlayRendered: overlayRendered
+      };
+    }
+
+    clearOverlay();
+    return { blocked: false, isMaster: false, reason: null, tenantId: tenantId };
   },
 
   getGasUrl() {
@@ -2752,7 +3867,7 @@ const RestoSync = {
       this.emit("GAS_CONFIG_CHANGED", { url: cleanUrl });
       return true;
     } catch (e) {
-      console.warn("Gagal simpan GAS URL:", e);
+      this._safeWarn("Gagal simpan GAS URL:", e);
       return false;
     }
   },
@@ -2787,7 +3902,7 @@ const RestoSync = {
       this.emit("GAS_CONFIG_CHANGED", { apiKey: cleanKey });
       return true;
     } catch (e) {
-      console.warn("Gagal simpan GAS API Key:", e);
+      this._safeWarn("Gagal simpan GAS API Key:", e);
       return false;
     }
   },
@@ -2829,7 +3944,7 @@ const RestoSync = {
 
   async postToGas(action, data = {}) {
     const url = this.getGasUrl();
-    if (!url) return null;
+    if (!url || typeof fetch !== "function") return null;
 
     try {
       // Menggunakan Content-Type text/plain agar tidak memicu CORS preflight OPTIONS check di GAS
@@ -2838,18 +3953,18 @@ const RestoSync = {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ 
-          action, 
-          data, 
+        body: JSON.stringify({
+          action,
+          data,
           apiKey: this.getGasApiKey(),
-          timestamp: Date.now() 
+          timestamp: Date.now()
         })
       });
-      if (res.ok) {
+      if (res && res.ok) {
         return await res.json();
       }
     } catch (e) {
-      console.warn("Background GAS POST warning (non-blocking):", e);
+      this._safeWarn("Background GAS POST warning (non-blocking):", e);
     }
     return null;
   },
@@ -2910,8 +4025,8 @@ const RestoSync = {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ 
-        action: "syncFullState", 
+      body: JSON.stringify({
+        action: "syncFullState",
         data: fullPayload,
         apiKey: this.getGasApiKey(),
         timestamp: Date.now()
@@ -2934,7 +4049,7 @@ const RestoSync = {
       localStorage.removeItem(this.MEMBERS_STORAGE_KEY);
       localStorage.removeItem(this.MENU_STORAGE_KEY);
       localStorage.removeItem(this.RESERVATIONS_STORAGE_KEY);
-      
+
       this.initDefaultKdsTickets();
       this.initDefaultOnlineOrders();
       this.initDefaultTransactions();
@@ -2954,4 +4069,7 @@ RestoSync.init();
 
 if (typeof window !== "undefined") {
   window.RestoSync = RestoSync;
+}
+if (typeof globalThis !== "undefined") {
+  globalThis.RestoSync = RestoSync;
 }
