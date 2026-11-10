@@ -135,7 +135,7 @@
             </span>
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px] text-amber-400">table_restaurant</span>
-              <span id="tenantTablesDisplay">12 Meja Operasional</span>
+              <span id="tenantTablesDisplay">Memuat meja...</span>
             </span>
           </div>
         </div>
@@ -145,9 +145,9 @@
           <div>
             <p class="text-[11px] text-stone-400 uppercase tracking-wider font-semibold">Masa Berlaku Lisensi:</p>
             <p id="tenantExpiryDisplay" class="font-heading font-extrabold text-sm md:text-base text-amber-400 mt-0.5">
-              s/d 23 November 2026
+              Memuat status lisensi...
             </p>
-            <p id="tenantDaysRemaining" class="text-[11px] text-stone-300">Sisa 14 Hari Masa Aktif</p>
+            <p id="tenantDaysRemaining" class="text-[11px] text-stone-300">Memeriksa sinkronisasi Cloud...</p>
           </div>
 
           <button onclick="copyRestoHubLink()" class="touch-btn px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-heading font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95" title="Salin Link Resto Hub ini untuk dibagikan ke staf / dibuka di tablet">
@@ -159,7 +159,49 @@
       </div>
     </div>
 
-    <!-- PIN QUICK-CARD BANNER (DEFAULT ACCESS) -->
+    <!-- EXPIRED SUBSCRIPTION RED WARNING BANNER (TAHAP 1) -->
+    <div id="hubExpiredBanner" class="hidden rounded-2xl bg-red-500/15 dark:bg-red-950/50 border border-red-500/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-start sm:items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-2xl">warning</span>
+        </div>
+        <div>
+          <h4 id="hubExpiredTitle" class="font-heading font-extrabold text-sm text-red-700 dark:text-red-300">
+            Masa Aktif Paket Restoran Telah Berakhir!
+          </h4>
+          <p id="hubExpiredDesc" class="text-xs text-red-700/90 dark:text-red-200/90 mt-0.5">
+            Operasional meja sementara dibatasi maksimal 4 meja (Meja 01–04). Segera hubungi Admin RASH untuk perpanjangan paket agar seluruh meja aktif kembali.
+          </p>
+        </div>
+      </div>
+      <a id="btnHubExpiredWa" href="https://wa.me/6282286452105" target="_blank" rel="noopener noreferrer" class="touch-btn px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">chat</span>
+        <span>Perpanjang via WhatsApp</span>
+      </a>
+    </div>
+
+    <!-- NOT SYNCED / UNKNOWN TENANT NOTICE BANNER -->
+    <div id="hubNotSyncedBanner" class="hidden rounded-2xl bg-amber-500/15 dark:bg-amber-950/40 border border-amber-500/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-start sm:items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-2xl">cloud_off</span>
+        </div>
+        <div>
+          <h4 class="font-heading font-extrabold text-sm text-amber-800 dark:text-amber-200">
+            Profil Restoran Belum Tersinkronisasi
+          </h4>
+          <p class="text-xs text-amber-800/90 dark:text-amber-200/90 mt-0.5">
+            Data restoran belum ditemukan di perangkat ini atau server Cloud. Pastikan tautan tenant benar atau coba sinkronkan ulang saat internet terhubung.
+          </p>
+        </div>
+      </div>
+      <button type="button" onclick="refreshTenantFromCloud()" class="touch-btn px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-heading font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">sync</span>
+        <span>Sinkronkan Cloud</span>
+      </button>
+    </div>
+
+    <!-- PIN QUICK-CARD BANNER (MASKED FOR SECURITY) -->
     <div class="bg-amber-500/10 dark:bg-amber-500/5 border border-amber-500/30 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
@@ -170,19 +212,19 @@
             PIN Akses Operasional Kasir & Owner
           </h4>
           <p class="text-xs text-stone-600 dark:text-stone-300">
-            Gunakan PIN berikut saat membuka layar Kasir POS atau Panel Owner:
+            Gunakan PIN Kasir / Owner yang telah ditetapkan oleh Pemilik Restoran atau Admin RASH (tersimpan terenkripsi untuk keamanan).
           </p>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1.5 bg-white dark:bg-[#1E293B] px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 shadow-2xs">
+        <div class="flex items-center gap-1.5 bg-white dark:bg-[#1E293B] px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 shadow-2xs" title="PIN disamarkan demi keamanan">
           <span class="text-xs text-stone-500">PIN Kasir:</span>
-          <span id="displayCashierPin" class="font-mono font-black text-sm text-amber-600 dark:text-amber-400 tracking-wider">1234</span>
+          <span id="displayCashierPin" class="font-mono font-black text-sm text-amber-600 dark:text-amber-400 tracking-wider">••••</span>
         </div>
-        <div class="flex items-center gap-1.5 bg-white dark:bg-[#1E293B] px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 shadow-2xs">
+        <div class="flex items-center gap-1.5 bg-white dark:bg-[#1E293B] px-3 py-1.5 rounded-xl border border-stone-200 dark:border-stone-700 shadow-2xs" title="PIN disamarkan demi keamanan">
           <span class="text-xs text-stone-500">PIN Owner:</span>
-          <span id="displayOwnerPin" class="font-mono font-black text-sm text-indigo-600 dark:text-indigo-400 tracking-wider">1234</span>
+          <span id="displayOwnerPin" class="font-mono font-black text-sm text-indigo-600 dark:text-indigo-400 tracking-wider">••••</span>
         </div>
       </div>
     </div>
@@ -214,11 +256,11 @@
           <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500">
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px] text-emerald-500">check_circle</span>
-              <span>Login PIN Cepat (1234)</span>
+              <span>Login PIN Kasir Terproteksi</span>
             </span>
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px] text-amber-500">emergency_home</span>
-              <span>Pintu Darurat 9999</span>
+              <span>Akses Darurat Pemilik</span>
             </span>
           </div>
         </div>
@@ -295,13 +337,13 @@
             3. Cetak QR Stand Meja Resto
           </h3>
           <p class="text-xs text-stone-600 dark:text-stone-300 mt-1.5 leading-relaxed">
-            Hasilkan lembaran stand QR Meja 01 s/d 12 siap cetak A4 atau akrilik meja. Tamu cukup arahkan kamera smartphone untuk melihat foto menu dan memesan mandiri tanpa antre.
+            Hasilkan lembaran stand QR meja siap cetak A4 atau akrilik meja. Tamu cukup arahkan kamera smartphone untuk melihat foto menu dan memesan mandiri tanpa antre.
           </p>
 
           <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500">
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px] text-indigo-500">print</span>
-              <span>12 Barcode QR Otomatis</span>
+              <span id="cardQrTablesBadge">Barcode QR Meja Otomatis</span>
             </span>
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px] text-emerald-500">no_sim</span>
@@ -344,7 +386,7 @@
           <div class="mt-4 pt-3 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between text-xs text-stone-500">
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px] text-indigo-500">lock</span>
-              <span>Proteksi PIN Owner (1234)</span>
+              <span>Proteksi PIN Owner</span>
             </span>
             <span class="flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px] text-amber-500">bar_chart</span>
@@ -419,6 +461,7 @@
   <!-- ========================================================================= -->
   <script>
     let currentTenant = null;
+    let hubListenersBound = false;
 
     function getBaseUrl() {
       const loc = window.location.href;
@@ -426,13 +469,18 @@
       return idx !== -1 ? loc.substring(0, idx + 1) : "";
     }
 
-    function initRestoHub() {
-      // Baca tenant ID dari URL atau session
+    function refreshTenantFromCloud() {
+      if (typeof RestoSync === "undefined" || typeof RestoSync.syncTenantsFromCloud !== "function") {
+        return Promise.resolve(null);
+      }
+      return RestoSync.syncTenantsFromCloud({ mode: "tenant" }).catch(() => null);
+    }
+
+    function syncAndRenderHub() {
       const tenantId = RestoSync.getTenantId();
       currentTenant = RestoSync.getTenantInfo(tenantId);
 
-      // Sembunyikan tombol Admin RASH jika dibuka oleh tenant restoran!
-      // Hanya tampilkan jika membuka master headquarters pusat
+      // Sembunyikan tombol Admin RASH jika dibuka oleh tenant restoran
       const isMaster = !tenantId || tenantId === "default";
       const btnAdmin = document.getElementById("btnSuperAdminNav");
       const footerSep = document.getElementById("footerAdminSeparator");
@@ -448,95 +496,195 @@
         if (footerAdmin) footerAdmin.classList.add("hidden");
       }
 
-      // Render informasi restoran
-      renderRestaurantInfo(currentTenant);
+      if (typeof RestoSync.enforceTenantAccessGuard === "function") {
+        RestoSync.enforceTenantAccessGuard(document);
+      }
 
-      // Render link tombol operasional
+      renderRestaurantInfo(currentTenant);
       renderOperationalLinks(currentTenant);
     }
 
+    function initRestoHub() {
+      if (typeof ThemeManager !== "undefined" && typeof ThemeManager.init === "function") {
+        ThemeManager.init();
+      }
+
+      syncAndRenderHub();
+
+      if (!hubListenersBound && typeof RestoSync !== "undefined" && typeof RestoSync.on === "function") {
+        hubListenersBound = true;
+        RestoSync.on("TENANTS_UPDATED", () => {
+          syncAndRenderHub();
+        });
+      }
+
+      refreshTenantFromCloud();
+    }
+
     function renderRestaurantInfo(t) {
+      if (!t) {
+        t = RestoSync.getTenantInfo() || { id: "default", name: "Resto Pro POS", plan: "unknown", status: "unknown" };
+      }
+
+      const lic = RestoSync.getLicenseData();
       const name = t.name || "Resto Pro POS";
       document.title = `${name} • Resto Pro Hub`;
-      document.getElementById("restaurantTitle").textContent = name;
-      document.getElementById("tenantIdDisplay").textContent = t.id;
-      document.getElementById("tenantPicDisplay").textContent = `${t.pic || "Pemilik Resto"}`;
-      document.getElementById("tenantCityDisplay").textContent = t.city || "Indonesia";
-      document.getElementById("tenantTablesDisplay").textContent = `${t.tablesCount || 12} Meja Operasional`;
 
-      // PIN
-      const cPin = t.cashierPin || "1234";
-      const oPin = t.ownerPin || cPin;
-      document.getElementById("displayCashierPin").textContent = cPin;
-      document.getElementById("displayOwnerPin").textContent = oPin;
+      const titleEl = document.getElementById("restaurantTitle");
+      const idEl = document.getElementById("tenantIdDisplay");
+      const picEl = document.getElementById("tenantPicDisplay");
+      const cityEl = document.getElementById("tenantCityDisplay");
+      const tablesEl = document.getElementById("tenantTablesDisplay");
+      const qrBadgeEl = document.getElementById("cardQrTablesBadge");
 
-      // Status & Plan
+      if (titleEl) titleEl.textContent = name;
+      if (idEl) idEl.textContent = t.id || "default";
+      if (picEl) picEl.textContent = t.pic || "Pemilik Resto";
+      if (cityEl) cityEl.textContent = t.city || "Indonesia";
+
+      // Batas meja operasional sesuai status pembayaran
+      const isTableCapped = !lic.isPaidActive && !lic.isMaster;
+      if (tablesEl) {
+        tablesEl.textContent = isTableCapped
+          ? "Maks. 4 Meja Aktif (Belum Bayar)"
+          : `${t.tablesCount || 12} Meja Operasional`;
+      }
+      if (qrBadgeEl) {
+        qrBadgeEl.textContent = isTableCapped
+          ? "Maks. 4 Barcode QR (Belum Bayar)"
+          : `${t.tablesCount || 12} Barcode QR Otomatis`;
+      }
+
+      // Keputusan 1A: Jangan pernah tampilkan plaintext PIN di Hub
+      const cPinEl = document.getElementById("displayCashierPin");
+      const oPinEl = document.getElementById("displayOwnerPin");
+      if (cPinEl) cPinEl.textContent = "••••";
+      if (oPinEl) oPinEl.textContent = "••••";
+
       const statusEl = document.getElementById("tenantStatusBadge");
       const statusText = document.getElementById("tenantStatusText");
       const planEl = document.getElementById("tenantPlanBadge");
+      const expiryEl = document.getElementById("tenantExpiryDisplay");
+      const daysEl = document.getElementById("tenantDaysRemaining");
+      const expiredBanner = document.getElementById("hubExpiredBanner");
+      const notSyncedBanner = document.getElementById("hubNotSyncedBanner");
+      const expiredWaBtn = document.getElementById("btnHubExpiredWa");
 
-      if (t.status === "trial") {
-        statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
-        statusText.textContent = "Trial 14 Hari";
-      } else {
-        statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
-        statusText.textContent = "Akun Aktif";
-      }
+      if (expiredBanner) expiredBanner.classList.add("hidden");
+      if (notSyncedBanner) notSyncedBanner.classList.add("hidden");
 
-      planEl.textContent = t.planName || (t.plan === "trial" ? "Trial 14 Hari Gratis" : (t.plan === "basic" ? "Paket Basic" : "Paket Pro"));
-
-      // Expiry calculation
-      if (t.expiresAt) {
-        try {
-          const expDate = new Date(t.expiresAt);
-          const diffMs = expDate.getTime() - Date.now();
-          const daysLeft = Math.ceil(diffMs / 86400000);
-          
-          const options = { day: 'numeric', month: 'long', year: 'numeric' };
-          document.getElementById("tenantExpiryDisplay").textContent = `s/d ${expDate.toLocaleDateString("id-ID", options)}`;
-
-          if (daysLeft > 0) {
-            document.getElementById("tenantDaysRemaining").textContent = `Sisa ${daysLeft} Hari Masa Aktif`;
-          } else {
-            document.getElementById("tenantDaysRemaining").textContent = `Masa aktif telah berakhir`;
-            document.getElementById("tenantDaysRemaining").className = "text-[11px] text-red-400 font-bold";
-          }
-        } catch (e) {
-          document.getElementById("tenantExpiryDisplay").textContent = "Aktif Selamanya";
-          document.getElementById("tenantDaysRemaining").textContent = "Lisensi Terverifikasi";
+      const csNumber = "6282286452105";
+      if (lic.isMaster) {
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = "Akun Aktif";
+        if (planEl) planEl.textContent = lic.tierLabel || "Master Core Resto Pro";
+        if (expiryEl) expiryEl.textContent = lic.expiry || "Aktif Selamanya (Master)";
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-stone-300";
+          daysEl.textContent = "Lisensi Pusat RASH Terverifikasi";
+        }
+      } else if (lic.notSynced) {
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-stone-500/20 text-stone-200 border border-stone-400/30 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = "Belum Tersinkronisasi";
+        if (planEl) planEl.textContent = "Belum Tersinkronisasi";
+        if (expiryEl) expiryEl.textContent = "Belum Tersinkronisasi";
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-amber-300 font-semibold";
+          daysEl.textContent = "Data tenant tidak ditemukan di lokal atau Cloud";
+        }
+        if (notSyncedBanner) notSyncedBanner.classList.remove("hidden");
+      } else if (lic.isSuspended) {
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = "Ditangguhkan (Suspended)";
+        if (planEl) planEl.textContent = t.planName || lic.tierLabel || "Paket Terkunci";
+        if (expiryEl) expiryEl.textContent = "Ditangguhkan (Suspended)";
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-red-400 font-bold";
+          daysEl.textContent = "Hubungi Admin RASH untuk aktivasi kembali";
+        }
+      } else if (lic.isExpired) {
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = "Masa Aktif Berakhir";
+        if (planEl) planEl.textContent = lic.plan === "trial" ? "Trial 14 Hari Gratis" : (t.planName || lic.tierLabel || "Paket Berlangganan");
+        if (expiryEl) expiryEl.textContent = lic.expiry || "Sudah Berakhir";
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-red-400 font-bold";
+          daysEl.textContent = "Masa aktif telah berakhir — Terbatas Maks. 4 Meja";
+        }
+        if (expiredBanner) expiredBanner.classList.remove("hidden");
+        if (expiredWaBtn) {
+          const expMsg = encodeURIComponent(`Halo Admin RASH Resto Pro, masa aktif restoran "${name}" (ID: ${t.id}) telah berakhir. Mohon informasi perpanjangan paket.`);
+          expiredWaBtn.href = `https://wa.me/${csNumber}?text=${expMsg}`;
+        }
+      } else if (lic.isLifetime) {
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = "Akun Aktif";
+        if (planEl) planEl.textContent = t.planName || lic.tierLabel || "Paket Lifetime";
+        if (expiryEl) expiryEl.textContent = "Aktif Selamanya (Lifetime)";
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-emerald-300 font-semibold";
+          daysEl.textContent = "Lisensi Lifetime Terverifikasi";
+        }
+      } else if (lic.plan === "trial") {
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = "Trial 14 Hari";
+        if (planEl) planEl.textContent = "Trial 14 Hari Gratis";
+        if (expiryEl) expiryEl.textContent = t.expiresAt ? ("s/d " + RestoSync._formatDateId(t.expiresAt)) : "Trial 14 Hari";
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-stone-300";
+          daysEl.textContent = lic.daysLeft !== null ? `Sisa ${Math.max(0, lic.daysLeft)} Hari Masa Aktif` : "Masa Trial Aktif";
+        }
+      } else if (lic.isPaidActive) {
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = "Akun Aktif";
+        if (planEl) planEl.textContent = t.planName || lic.tierLabel || "Paket Bulanan";
+        if (expiryEl) expiryEl.textContent = t.expiresAt ? ("s/d " + RestoSync._formatDateId(t.expiresAt)) : (lic.expiry || "Aktif");
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-stone-300";
+          daysEl.textContent = (lic.daysLeft !== null && lic.daysLeft > 0) ? `Sisa ${lic.daysLeft} Hari Masa Aktif` : "Lisensi Terverifikasi";
         }
       } else {
-        document.getElementById("tenantExpiryDisplay").textContent = "Aktif Selamanya";
-        document.getElementById("tenantDaysRemaining").textContent = "Lisensi Terverifikasi";
+        if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
+        if (statusText) statusText.textContent = lic.status === "pending" ? "Menunggu Pembayaran" : "Belum Aktif";
+        if (planEl) planEl.textContent = t.planName || lic.tierLabel || "Paket Resto Pro";
+        if (expiryEl) expiryEl.textContent = t.expiresAt ? ("s/d " + RestoSync._formatDateId(t.expiresAt)) : (lic.expiry || "Belum Aktif");
+        if (daysEl) {
+          daysEl.className = "text-[11px] text-amber-300 font-semibold";
+          daysEl.textContent = "Maks. 4 Meja hingga pembayaran aktif";
+        }
       }
 
       // WhatsApp CS Button Link
       const waCs = document.getElementById("btnWhatsappSupport");
-      const csNumber = "6282286452105";
-      const csMsg = encodeURIComponent(`Halo Tim Support RASH Resto Pro, saya pemilik dari "${t.name}" (Tenant ID: ${t.id}). Saya membutuhkan bantuan teknis operasional.`);
-      waCs.href = `https://wa.me/${csNumber}?text=${csMsg}`;
+      if (waCs) {
+        const csMsg = encodeURIComponent(`Halo Tim Support RASH Resto Pro, saya pemilik dari "${name}" (Tenant ID: ${t.id}). Saya membutuhkan bantuan teknis operasional.`);
+        waCs.href = `https://wa.me/${csNumber}?text=${csMsg}`;
+      }
     }
 
     function renderOperationalLinks(t) {
+      if (!t) return;
       const base = getBaseUrl();
-      const slugParam = (t.id && t.id !== "default") ? `?tenant=${t.id}` : "";
+      const encodedTenant = (t.id && t.id !== "default") ? encodeURIComponent(t.id) : "";
+      const slugParam = encodedTenant ? `?tenant=${encodedTenant}` : "";
 
-      // 1. Kasir POS
-      document.getElementById("btnLaunchPos").href = `${base}cashier_pos_register.html${slugParam}`;
+      const posBtn = document.getElementById("btnLaunchPos");
+      const guestBtn = document.getElementById("btnSimulateGuest");
+      const kdsBtn = document.getElementById("btnLaunchKds");
+      const qrBtn = document.getElementById("btnLaunchQrSheet");
+      const ownerBtn = document.getElementById("btnLaunchOwner");
 
-      // Simulasi Tamu Meja 01
-      const sampleParam = (t.id && t.id !== "default") ? `?tenant=${t.id}&table=T01` : "?table=T01";
-      document.getElementById("btnSimulateGuest").href = `${base}customer_qr_self_order.html${sampleParam}`;
-
-      // 2. KDS Dapur
-      const kdsParam = (t.id && t.id !== "default") ? `?tenant=${t.id}&station=kitchen` : "?station=kitchen";
-      document.getElementById("btnLaunchKds").href = `${base}kitchen_display_kds.html${kdsParam}`;
-
-      // 3. QR Sheet PDF
-      document.getElementById("btnLaunchQrSheet").href = `${base}table_qr_print_sheet.html${slugParam}`;
-
-      // 4. Owner Portal
-      document.getElementById("btnLaunchOwner").href = `${base}owner_settings_saas.html${slugParam}`;
+      if (posBtn) posBtn.href = `${base}cashier_pos_register.html${slugParam}`;
+      if (guestBtn) {
+        const sampleParam = encodedTenant ? `?tenant=${encodedTenant}&table=T01` : "?table=T01";
+        guestBtn.href = `${base}customer_qr_self_order.html${sampleParam}`;
+      }
+      if (kdsBtn) {
+        const kdsParam = encodedTenant ? `?tenant=${encodedTenant}&station=kitchen` : "?station=kitchen";
+        kdsBtn.href = `${base}kitchen_display_kds.html${kdsParam}`;
+      }
+      if (qrBtn) qrBtn.href = `${base}table_qr_print_sheet.html${slugParam}`;
+      if (ownerBtn) ownerBtn.href = `${base}owner_settings_saas.html${slugParam}`;
     }
 
     function copyRestoHubLink() {
@@ -563,9 +711,13 @@
           : "bg-stone-900 text-white border-stone-700"
       }`;
 
+      const safeMessage = (typeof RestoSync !== "undefined" && RestoSync._escapeHtml)
+        ? RestoSync._escapeHtml(message)
+        : String(message || "");
+
       toast.innerHTML = `
         <span class="material-symbols-outlined text-[18px]">info</span>
-        <span>${message}</span>
+        <span>${safeMessage}</span>
       `;
 
       container.appendChild(toast);

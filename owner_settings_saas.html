@@ -133,13 +133,13 @@
           <div class="flex flex-wrap items-center gap-2">
             <span id="licenseTierBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-[#0F172A] shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider">
               <span class="material-symbols-outlined text-[16px]">verified</span>
-              <span id="licenseTierLabel">RASH Enterprise Tier</span>
+              <span id="licenseTierLabel">Memuat Paket...</span>
             </span>
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-heading font-bold text-xs border border-emerald-300 dark:border-emerald-700/60">
+            <span id="licenseSyncStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-heading font-bold text-xs border border-emerald-300 dark:border-emerald-700/60">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-              Live Sync Multi-Terminal Aktif
+              <span id="licenseSyncStatusText">Live Sync Multi-Terminal Aktif</span>
             </span>
-            <button onclick="toggleSimulationLicense()" class="text-[10px] text-stone-400 hover:text-amber-500 underline ml-2 cursor-pointer" title="Uji Coba Gembok Free vs Pro Enterprise">
+            <button id="btnToggleSimLicense" onclick="toggleSimulationLicense()" class="text-[10px] text-stone-400 hover:text-amber-500 underline ml-2 cursor-pointer" title="Uji Coba Gembok Free vs Pro Enterprise">
               🧪 Uji Mode Free/Pro
             </button>
           </div>
@@ -149,31 +149,31 @@
               Resto Pro by RASH WebApp Builder ✨
             </h2>
             <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-1 leading-relaxed">
-              Masa Aktif Lisensi: <strong id="licenseExpiryLabel" class="text-[#1C1917] dark:text-white">31 Desember 2028</strong> • 
-              <span class="text-amber-600 dark:text-amber-400 font-bold">Lisensi Resmi Terverifikasi</span> (Garansi Update & Cloud Sync Resmi).
+              Masa Aktif Lisensi: <strong id="licenseExpiryLabel" class="text-[#1C1917] dark:text-white">Memuat status lisensi...</strong> • 
+              <span id="licenseVerificationNote" class="text-amber-600 dark:text-amber-400 font-bold">Memeriksa Lisensi Cloud</span>
             </p>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
             <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
               <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Client ID Lisensi</span>
-              <div class="font-mono font-bold text-xs text-[#1C1917] dark:text-white mt-0.5">RASH-PRO-88219</div>
+              <div id="licenseClientIdLabel" class="font-mono font-bold text-xs text-[#1C1917] dark:text-white mt-0.5">-</div>
             </div>
             <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
               <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Restoran Terdaftar</span>
-              <div class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate mt-0.5">Grand Fusion Bistro Jakarta</div>
+              <div id="licenseRestoNameLabel" class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate mt-0.5">-</div>
             </div>
             <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
               <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Batas Meja & Terminal</span>
               <div id="licenseTableLimitLabel" class="font-heading font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
-                <span class="material-symbols-outlined text-[16px]">all_inclusive</span> Unlimited Tables
+                <span class="material-symbols-outlined text-[16px]">sync</span> Memuat kuota meja...
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Token Renewal Box -->
-        <div class="lg:w-80 shrink-0 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
+        <!-- Token Renewal Box (Khusus Mode Master) -->
+        <div id="masterManualTokenBox" class="lg:w-80 shrink-0 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-xs font-heading font-bold text-[#1C1917] dark:text-white uppercase tracking-wider">Aktivasi Token Lisensi</span>
             <span class="material-symbols-outlined text-amber-500 text-[18px]">key</span>
@@ -195,7 +195,51 @@
           </p>
         </div>
 
+        <!-- Cloud Package Status Box (Untuk Tenant Klien Non-Master) -->
+        <div id="tenantCloudPlanBox" class="hidden lg:w-80 shrink-0 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-heading font-bold text-[#1C1917] dark:text-white uppercase tracking-wider">Status Paket Cloud</span>
+            <span class="material-symbols-outlined text-amber-500 text-[18px]">cloud_done</span>
+          </div>
+          <div class="p-3 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] space-y-1">
+            <div id="tenantCloudPlanName" class="font-heading font-extrabold text-sm text-[#1C1917] dark:text-white">Memuat Paket...</div>
+            <div id="tenantCloudPlanStatus" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400">Memeriksa Cloud...</div>
+            <div id="tenantCloudTableQuota" class="text-[10px] text-[#78716C] dark:text-[#94A3B8]">Kuota Meja: Memuat...</div>
+          </div>
+          <div class="space-y-2">
+            <a id="btnTenantUpgradeWa" href="https://wa.me/6282286452105" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px]">chat</span>
+              <span id="btnTenantUpgradeWaLabel">Perpanjang / Hubungi Admin RASH</span>
+            </a>
+            <button type="button" onclick="handleTenantCloudSyncRefresh()" class="touch-btn w-full py-2 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors">
+              <span class="material-symbols-outlined text-[15px]">sync</span>
+              <span>Sinkronkan Status Cloud</span>
+            </button>
+          </div>
+        </div>
+
       </div>
+    </section>
+
+    <!-- BANNER PERINGATAN EXPIRED (KHUSUS TENANT KEDALUWARSA) -->
+    <section id="ownerExpiredWarningBanner" class="hidden rounded-2xl bg-red-500/15 dark:bg-red-950/50 border border-red-500/40 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-start sm:items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-2xl">warning</span>
+        </div>
+        <div>
+          <h3 class="font-heading font-extrabold text-sm text-red-700 dark:text-red-300">
+            Masa Aktif Paket Restoran Telah Berakhir!
+          </h3>
+          <p id="ownerExpiredBannerDesc" class="text-xs text-red-700/90 dark:text-red-200/90 mt-0.5">
+            Kuota meja aktif dibatasi sementara maksimal 4 meja (Meja 01–04). Meja ke-5 ke atas terkunci sampai langganan diperpanjang melalui Admin RASH.
+          </p>
+        </div>
+      </div>
+      <a id="btnExpiredBannerWa" href="https://wa.me/6282286452105" target="_blank" rel="noopener noreferrer" class="touch-btn px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
+        <span class="material-symbols-outlined text-[16px]">chat</span>
+        <span>Perpanjang Paket via WhatsApp</span>
+      </a>
     </section>
 
 
@@ -774,9 +818,9 @@
           </div>
         </div>
 
-        <a href="https://wa.me/6281200000000?text=Halo%20RASH%20WebApp%20Builder%2C%20saya%20pemilik%20Resto%20Pro%20ID%3A%20RASH-PRO-88219%20membutuhkan%20bantuan" target="_blank" class="touch-btn w-full py-3 rounded-xl bg-white text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:bg-amber-100 transition-all">
+        <a id="ownerConciergeWaLink" href="https://wa.me/6282286452105?text=Halo%20RASH%20WebApp%20Builder%2C%20saya%20pemilik%20Resto%20Pro%20membutuhkan%20bantuan" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-3 rounded-xl bg-white text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:bg-amber-100 transition-all">
           <span class="material-symbols-outlined text-[18px]">chat</span>
-          <span>Buka WhatsApp Support (+62 812-XXXX-RASH)</span>
+          <span>Buka WhatsApp Support RASH</span>
         </a>
       </div>
 
@@ -865,7 +909,7 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <a href="table_qr_print_sheet.html" target="_blank" class="touch-btn px-4 py-2.5 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-heading font-bold text-xs flex items-center gap-1.5 border border-stone-300 dark:border-stone-700 transition-all">
+          <a id="btnOwnerQrPrintLink" href="table_qr_print_sheet.html" target="_blank" class="touch-btn px-4 py-2.5 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-heading font-bold text-xs flex items-center gap-1.5 border border-stone-300 dark:border-stone-700 transition-all">
             <span class="material-symbols-outlined text-[18px]">print</span>
             <span>🖨️ Cetak Stiker QR Akrilik</span>
           </a>
@@ -1626,43 +1670,66 @@
     let activeReservationStatus = "all";
     let reservationSearchQuery = "";
 
+    function escapeHtmlSafe(str) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync._escapeHtml === "function") {
+        return RestoSync._escapeHtml(str);
+      }
+      return String(str === undefined || str === null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function applyOwnerTenantBranding() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const isMaster = !tenantId || tenantId === "default";
+      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo(tenantId) : null;
+
+      if (tenantInfo && tenantInfo.name && !isMaster) {
+        const safeName = escapeHtmlSafe(tenantInfo.name);
+        const titleEl = document.getElementById("ownerDashboardTitle");
+        if (titleEl) titleEl.innerHTML = `${safeName} • Pengaturan Resto <span class="text-amber-500">✨</span>`;
+        const subEl = document.getElementById("ownerDashboardSub");
+        if (subEl) subEl.textContent = `Panel Pengaturan Menu, Meja & Omset • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
+
+        const ownerNameEl = document.getElementById("ownerProfileName");
+        if (ownerNameEl) ownerNameEl.textContent = tenantInfo.pic || tenantInfo.name;
+        const ownerSubEl = document.getElementById("ownerProfileRole");
+        if (ownerSubEl) ownerSubEl.textContent = `Owner • ${tenantInfo.name}`;
+
+        const avatarEl = document.getElementById("ownerProfileAvatar");
+        if (avatarEl) avatarEl.textContent = String(tenantInfo.name).trim().substring(0, 2).toUpperCase() || "RP";
+
+        document.title = `${tenantInfo.name} • Pengaturan Owner & Menu`;
+      }
+
+      // Pertahankan parameter tenant pada navigasi antar layar
+      if (!isMaster) {
+        const encodedTenant = encodeURIComponent(tenantId);
+        const posLink = document.getElementById("navPosLink");
+        if (posLink) posLink.href = `cashier_pos_register.html?tenant=${encodedTenant}`;
+        const kdsLink = document.getElementById("navKdsLink");
+        if (kdsLink) kdsLink.href = `kitchen_display_kds.html?tenant=${encodedTenant}&station=kitchen`;
+        const qrLink = document.getElementById("navQrLink");
+        if (qrLink) qrLink.href = `customer_qr_self_order.html?tenant=${encodedTenant}&table=T01`;
+        const qrPrintLink = document.getElementById("btnOwnerQrPrintLink");
+        if (qrPrintLink) qrPrintLink.href = `table_qr_print_sheet.html?tenant=${encodedTenant}`;
+      }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       ThemeManager.init();
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js').catch(e => {});
       }
 
-      // Branding Dinamis Multi-Tenant
-      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
-      const isMaster = !tenantId || tenantId === "default";
-      const tenantInfo = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
-
-      if (tenantInfo && tenantInfo.name && !isMaster) {
-        const titleEl = document.getElementById("ownerDashboardTitle");
-        if (titleEl) titleEl.innerHTML = `${tenantInfo.name} • Pengaturan Resto <span class="text-amber-500">✨</span>`;
-        const subEl = document.getElementById("ownerDashboardSub");
-        if (subEl) subEl.textContent = `Panel Pengaturan Menu, Meja & Omset • ${tenantInfo.city || 'Resto Pro Enterprise'}`;
-        
-        const ownerNameEl = document.getElementById("ownerProfileName");
-        if (ownerNameEl) ownerNameEl.textContent = tenantInfo.pic || tenantInfo.name;
-        const ownerSubEl = document.getElementById("ownerProfileRole");
-        if (ownerSubEl) ownerSubEl.textContent = `Owner • ${tenantInfo.name}`;
-        
-        const avatarEl = document.getElementById("ownerProfileAvatar");
-        if (avatarEl) avatarEl.textContent = tenantInfo.name.substring(0, 2).toUpperCase();
-
-        document.title = `${tenantInfo.name} • Pengaturan Owner & Menu`;
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.enforceTenantAccessGuard === "function") {
+        RestoSync.enforceTenantAccessGuard(document);
       }
 
-      // Pertahankan parameter tenant pada navigasi antar layar
-      if (tenantId && tenantId !== "default") {
-        const posLink = document.getElementById("navPosLink");
-        if (posLink) posLink.href = `cashier_pos_register.html?tenant=${encodeURIComponent(tenantId)}`;
-        const kdsLink = document.getElementById("navKdsLink");
-        if (kdsLink) kdsLink.href = `kitchen_display_kds.html?tenant=${encodeURIComponent(tenantId)}&station=kitchen`;
-        const qrLink = document.getElementById("navQrLink");
-        if (qrLink) qrLink.href = `customer_qr_self_order.html?tenant=${encodeURIComponent(tenantId)}&table=T01`;
-      }
+      applyOwnerTenantBranding();
 
       initGasSettingsUI();
       renderCatalogManager();
@@ -1687,6 +1754,16 @@
 
       RestoSync.on("LICENSE_STATUS_CHANGED", () => {
         updateLicenseBannerUI();
+        renderOwnerTables();
+      });
+
+      RestoSync.on("TENANTS_UPDATED", () => {
+        if (typeof RestoSync.enforceTenantAccessGuard === "function") {
+          RestoSync.enforceTenantAccessGuard(document);
+        }
+        applyOwnerTenantBranding();
+        updateLicenseBannerUI();
+        renderOwnerTables();
       });
 
       RestoSync.on("TRANSACTION_SAVED", () => {
@@ -1717,6 +1794,10 @@
         alert("Database telah dipulihkan! Dashboard SaaS akan memuat ulang...");
         location.reload();
       });
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
+        RestoSync.syncTenantsFromCloud({ mode: "tenant" }).catch(() => {});
+      }
     });
 
     // ============================================================
@@ -2404,36 +2485,221 @@
     // ============================================================
     // 4. LISENSI SAAS, FINANCIAL & PRINTER SETTINGS
     // ============================================================
+    function handleTenantCloudSyncRefresh() {
+      if (typeof RestoSync === "undefined" || typeof RestoSync.syncTenantsFromCloud !== "function") return;
+      const statusEl = document.getElementById("tenantCloudPlanStatus");
+      if (statusEl) statusEl.textContent = "Menyinkronkan dari Cloud...";
+      RestoSync.syncTenantsFromCloud({ mode: "tenant" }).then(() => {
+        if (typeof RestoSync.enforceTenantAccessGuard === "function") {
+          RestoSync.enforceTenantAccessGuard(document);
+        }
+        applyOwnerTenantBranding();
+        updateLicenseBannerUI();
+        renderOwnerTables();
+      }).catch(() => {
+        updateLicenseBannerUI();
+      });
+    }
+
     function updateLicenseBannerUI() {
+      const tenantId = RestoSync.getTenantId();
+      const t = RestoSync.getTenantInfo(tenantId);
       const lic = RestoSync.getLicenseData();
+
       const badgeEl = document.getElementById("licenseTierBadge");
       const labelEl = document.getElementById("licenseTierLabel");
       const expiryEl = document.getElementById("licenseExpiryLabel");
+      const verifyNoteEl = document.getElementById("licenseVerificationNote");
+      const clientIdEl = document.getElementById("licenseClientIdLabel");
+      const restoNameEl = document.getElementById("licenseRestoNameLabel");
       const limitEl = document.getElementById("licenseTableLimitLabel");
+      const syncStatusEl = document.getElementById("licenseSyncStatusText");
 
-      if (labelEl) labelEl.textContent = lic.tierLabel || "RASH Enterprise Tier";
-      if (expiryEl) expiryEl.textContent = lic.expiry || "31 Desember 2028";
-      
+      const manualTokenBox = document.getElementById("masterManualTokenBox");
+      const tenantCloudBox = document.getElementById("tenantCloudPlanBox");
+      const simToggleBtn = document.getElementById("btnToggleSimLicense");
+      const expiredBanner = document.getElementById("ownerExpiredWarningBanner");
+      const expiredWaBtn = document.getElementById("btnExpiredBannerWa");
+      const cloudPlanNameEl = document.getElementById("tenantCloudPlanName");
+      const cloudPlanStatusEl = document.getElementById("tenantCloudPlanStatus");
+      const cloudQuotaEl = document.getElementById("tenantCloudTableQuota");
+      const upgradeWaBtn = document.getElementById("btnTenantUpgradeWa");
+      const upgradeWaLabel = document.getElementById("btnTenantUpgradeWaLabel");
+      const conciergeWaBtn = document.getElementById("ownerConciergeWaLink");
+
+      const resolvedId = (t && t.id) ? t.id : (tenantId || "default");
+      const resolvedName = (t && t.name) ? t.name : resolvedId;
+
+      if (clientIdEl) clientIdEl.textContent = resolvedId;
+      if (restoNameEl) restoNameEl.textContent = resolvedName;
+
+      // Keputusan 3A: Master vs Non-Master UI controls
+      if (lic.isMaster) {
+        if (manualTokenBox) manualTokenBox.classList.remove("hidden");
+        if (tenantCloudBox) tenantCloudBox.classList.add("hidden");
+        if (simToggleBtn) simToggleBtn.classList.remove("hidden");
+      } else {
+        if (manualTokenBox) manualTokenBox.classList.add("hidden");
+        if (tenantCloudBox) tenantCloudBox.classList.remove("hidden");
+        if (simToggleBtn) simToggleBtn.classList.add("hidden");
+      }
+
+      // Expired Banner (Keputusan 2A)
+      const adminWaNumber = "6282286452105";
+      if (expiredBanner) {
+        if (lic.isExpired && !lic.isMaster) {
+          expiredBanner.classList.remove("hidden");
+        } else {
+          expiredBanner.classList.add("hidden");
+        }
+      }
+
+      // Tier label & expiry text
+      let tierText = lic.tierLabel || "Resto Pro";
+      let expiryText = lic.expiry || "Belum Diatur";
+      let verifyText = "Lisensi Resmi Terverifikasi";
+      let verifyCls = "text-amber-600 dark:text-amber-400 font-bold";
+      let badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-[#0F172A] shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider";
+      let cloudStatusText = "Aktif";
+      let cloudStatusCls = "text-[11px] font-semibold text-emerald-600 dark:text-emerald-400";
+
+      if (lic.isMaster) {
+        tierText = lic.tierLabel || "Master Core Resto Pro";
+        expiryText = lic.expiry || "Aktif Selamanya (Master)";
+        if (!lic.isPaidActive) {
+          verifyText = "Mode Simulasi Free Aktif";
+          verifyCls = "text-stone-500 font-bold";
+          badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-xs uppercase tracking-wider";
+        }
+      } else if (lic.notSynced) {
+        tierText = "Belum Tersinkronisasi";
+        expiryText = "Belum Tersinkronisasi";
+        verifyText = "Menunggu Sinkronisasi Cloud";
+        verifyCls = "text-amber-600 dark:text-amber-400 font-bold";
+        badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-xs uppercase tracking-wider";
+        cloudStatusText = "Data belum ditemukan di perangkat / Cloud";
+        cloudStatusCls = "text-[11px] font-semibold text-amber-600 dark:text-amber-400";
+      } else if (lic.isSuspended) {
+        tierText = "Ditangguhkan (Suspended)";
+        expiryText = "Ditangguhkan (Suspended)";
+        verifyText = "Layanan Dihentikan Sementara oleh Admin RASH";
+        verifyCls = "text-red-600 dark:text-red-400 font-bold";
+        badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider";
+        cloudStatusText = "Status: Ditangguhkan (Suspended)";
+        cloudStatusCls = "text-[11px] font-bold text-red-600 dark:text-red-400";
+      } else if (lic.isExpired) {
+        tierText = `${lic.tierLabel || "Paket"} (Kedaluwarsa)`;
+        expiryText = lic.expiry || "Sudah Berakhir";
+        verifyText = "Masa Aktif Berakhir • Kuota Dibatasi 4 Meja";
+        verifyCls = "text-red-600 dark:text-red-400 font-bold";
+        badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider";
+        cloudStatusText = "Masa Aktif Berakhir — Segera Perpanjang";
+        cloudStatusCls = "text-[11px] font-bold text-red-600 dark:text-red-400";
+      } else if (lic.isLifetime) {
+        tierText = lic.tierLabel || "Paket Lifetime";
+        expiryText = "Aktif Selamanya (Lifetime)";
+        verifyText = "Lisensi Lifetime Resmi Terverifikasi";
+        verifyCls = "text-emerald-600 dark:text-emerald-400 font-bold";
+        cloudStatusText = "Aktif Selamanya (Lifetime)";
+        cloudStatusCls = "text-[11px] font-bold text-emerald-600 dark:text-emerald-400";
+      } else if (lic.plan === "trial") {
+        tierText = lic.tierLabel || "Free Trial (14 Hari)";
+        expiryText = (lic.daysLeft !== null && lic.daysLeft > 0)
+          ? `${lic.expiry} (Sisa ${lic.daysLeft} Hari)`
+          : (lic.expiry || "Trial 14 Hari");
+        verifyText = "Masa Uji Coba Gratis (Maks. 4 Meja)";
+        verifyCls = "text-amber-600 dark:text-amber-400 font-bold";
+        badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700 font-heading font-extrabold text-xs uppercase tracking-wider";
+        cloudStatusText = (lic.daysLeft !== null && lic.daysLeft > 0)
+          ? `Trial Aktif • Sisa ${lic.daysLeft} Hari`
+          : "Masa Trial Aktif";
+        cloudStatusCls = "text-[11px] font-semibold text-amber-600 dark:text-amber-400";
+      } else if (lic.isPaidActive) {
+        tierText = lic.tierLabel || "Paket Bulanan";
+        expiryText = (lic.daysLeft !== null && lic.daysLeft > 0)
+          ? `${lic.expiry} (Sisa ${lic.daysLeft} Hari)`
+          : (lic.expiry || "Aktif");
+        verifyText = "Lisensi Resmi Terverifikasi";
+        cloudStatusText = (lic.daysLeft !== null && lic.daysLeft > 0)
+          ? `Aktif Berbayar • Sisa ${lic.daysLeft} Hari`
+          : "Aktif Berbayar";
+      } else {
+        tierText = lic.tierLabel || "Belum Aktif";
+        expiryText = lic.expiry || "Menunggu Aktivasi";
+        verifyText = "Menunggu Pembayaran / Aktivasi Paket";
+        verifyCls = "text-amber-600 dark:text-amber-400 font-bold";
+        badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-xs uppercase tracking-wider";
+        cloudStatusText = "Belum Aktif / Menunggu Pembayaran";
+        cloudStatusCls = "text-[11px] font-semibold text-amber-600 dark:text-amber-400";
+      }
+
+      if (labelEl) labelEl.textContent = tierText;
+      if (expiryEl) expiryEl.textContent = expiryText;
+      if (verifyNoteEl) {
+        verifyNoteEl.textContent = verifyText;
+        verifyNoteEl.className = verifyCls;
+      }
+      if (badgeEl) badgeEl.className = badgeCls;
+      if (syncStatusEl) {
+        syncStatusEl.textContent = lic.notSynced
+          ? "Belum Tersinkronisasi Cloud"
+          : (lic.isMaster ? "Master Core Multi-Terminal" : "Tersinkronisasi Cloud RASH");
+      }
+
+      // Batas Meja (#licenseTableLimitLabel)
       if (limitEl) {
-        if (lic.isPro) {
+        if (lic.isPaidActive) {
           limitEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">all_inclusive</span> Unlimited Tables`;
           limitEl.className = "font-heading font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5";
+        } else if (lic.isMaster) {
+          limitEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">lock</span> Maksimal ${lic.maxTables || 4} Meja (Mode Free)`;
+          limitEl.className = "font-heading font-bold text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5";
         } else {
-          limitEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">lock</span> Maksimal ${lic.maxTables} Meja (Mode Free)`;
+          limitEl.innerHTML = `<span class="material-symbols-outlined text-[16px]">lock</span> Maksimal ${lic.maxTables || 4} Meja (Belum Bayar)`;
           limitEl.className = "font-heading font-bold text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5";
         }
       }
 
-      if (badgeEl) {
-        if (lic.isPro) {
-          badgeEl.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-[#0F172A] shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider";
-        } else {
-          badgeEl.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-xs uppercase tracking-wider";
-        }
+      // Update Cloud Plan Card (Non-Master)
+      if (cloudPlanNameEl) cloudPlanNameEl.textContent = tierText;
+      if (cloudPlanStatusEl) {
+        cloudPlanStatusEl.textContent = cloudStatusText;
+        cloudPlanStatusEl.className = cloudStatusCls;
+      }
+      if (cloudQuotaEl) {
+        cloudQuotaEl.textContent = lic.isPaidActive
+          ? `Kuota Meja: Unlimited (${t && t.tablesCount ? t.tablesCount : 12} meja awal)`
+          : `Kuota Meja: Maksimal ${lic.maxTables || 4} Meja (Belum Bayar)`;
+      }
+
+      const planLabelForWa = lic.tierLabel || lic.plan || "Belum Diketahui";
+      const statusLabelForWa = lic.notSynced
+        ? "Belum Tersinkronisasi"
+        : (lic.isSuspended ? "Suspended" : (lic.isExpired ? "Expired" : (lic.isLifetime ? "Lifetime Aktif" : (lic.status || "trial"))));
+      const waUpgradeMsg = encodeURIComponent(
+        `Halo Admin RASH Resto Pro, saya pemilik dari "${resolvedName}" (ID: ${resolvedId}). Paket saat ini: ${planLabelForWa} (Status: ${statusLabelForWa}). Saya ingin perpanjang / upgrade paket berbayar.`
+      );
+      const waUpgradeHref = `https://wa.me/${adminWaNumber}?text=${waUpgradeMsg}`;
+
+      if (upgradeWaBtn) upgradeWaBtn.href = waUpgradeHref;
+      if (upgradeWaLabel) {
+        upgradeWaLabel.textContent = lic.isExpired
+          ? "Perpanjang Paket Sekarang"
+          : (lic.isPaidActive ? "Kelola / Hubungi Admin RASH" : "Upgrade Paket Unlimited");
+      }
+      if (expiredWaBtn) expiredWaBtn.href = waUpgradeHref;
+      if (conciergeWaBtn) {
+        const conciergeMsg = encodeURIComponent(
+          `Halo RASH WebApp Builder, saya pemilik "${resolvedName}" (Tenant ID: ${resolvedId}, Paket: ${planLabelForWa}) membutuhkan bantuan teknis.`
+        );
+        conciergeWaBtn.href = `https://wa.me/${adminWaNumber}?text=${conciergeMsg}`;
       }
     }
 
     function handleActivateToken() {
+      const lic = RestoSync.getLicenseData();
+      if (!lic.isMaster) return;
+
       const input = document.getElementById("licenseKeyInput").value.trim();
       const feedback = document.getElementById("tokenFeedback");
 
@@ -2444,18 +2710,20 @@
 
       const res = RestoSync.verifyLicenseToken(input);
       if (res.success) {
-        if (feedback) feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✅ ${res.message}</span>`;
+        if (feedback) feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✅ ${escapeHtmlSafe(res.message)}</span>`;
         updateLicenseBannerUI();
         renderOwnerTables();
         alert(res.message);
       } else {
-        if (feedback) feedback.innerHTML = `<span class="text-red-500 font-bold">❌ ${res.message}</span>`;
+        if (feedback) feedback.innerHTML = `<span class="text-red-500 font-bold">❌ ${escapeHtmlSafe(res.message)}</span>`;
         alert(res.message);
       }
     }
 
     function toggleSimulationLicense() {
       const current = RestoSync.getLicenseData();
+      if (!current.isMaster) return;
+
       if (current.isPro) {
         RestoSync.setSimulationFreeTier();
         alert("Mode Simulasi Diubah: STARTER FREE TIER AKTIF (Maksimal 4 Meja, Fitur Pro Terkunci 🔒).\nCoba klik tombol '+ Tambah Meja' untuk melihat gembok!");
@@ -2683,11 +2951,34 @@
       if (!grid) return;
 
       const tables = RestoSync.getTables();
-      if (badge) badge.textContent = `${tables.length} Meja Aktif`;
+      const lic = RestoSync.getLicenseData();
+      const tenantId = RestoSync.getTenantId();
+      const isMaster = !tenantId || tenantId === "default";
+      const maxCap = lic.isPaidActive ? 999 : (Number(lic.maxTables) || 4);
 
-      grid.innerHTML = tables.map(t => {
+      if (badge) {
+        if (!lic.isPaidActive) {
+          const usableCount = Math.min(tables.length, maxCap);
+          const suffix = lic.isMaster ? "Mode Free" : `Maks. ${maxCap} Belum Bayar`;
+          badge.textContent = tables.length > maxCap
+            ? `${usableCount}/${tables.length} Meja Aktif (${suffix})`
+            : `${tables.length} Meja Aktif (${suffix})`;
+        } else {
+          badge.textContent = `${tables.length} Meja Aktif`;
+        }
+      }
+
+      grid.innerHTML = tables.map((t, idx) => {
+        const isLockedByLimit = (!lic.isPaidActive && idx >= maxCap) || Boolean(t.isLockedByBilling && !lic.isPaidActive);
+        const safeId = escapeHtmlSafe(t.id);
+        const safeName = escapeHtmlSafe(t.name);
+        const safeSection = escapeHtmlSafe(t.section || "Indoor AC");
+        const jsIdArg = escapeHtmlSafe(String(t.id || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'"));
+
         let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">Kosong</span>`;
-        if (t.status === "occupied") {
+        if (isLockedByLimit) {
+          statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300 border border-red-200 dark:border-red-800/50">🔒 Terkunci - Belum Bayar</span>`;
+        } else if (t.status === "occupied") {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/60 dark:text-red-300">Terisi</span>`;
         } else if (t.status === "bill_requested") {
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">Minta Bill</span>`;
@@ -2695,31 +2986,43 @@
           statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300">Booking</span>`;
         }
 
+        const cardCls = isLockedByLimit
+          ? "p-4 rounded-2xl bg-stone-100/80 dark:bg-slate-900/60 border border-red-300/70 dark:border-red-900/50 flex flex-col justify-between gap-3 shadow-xs opacity-80"
+          : "p-4 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between gap-3 shadow-xs";
+
+        const qrHref = isMaster
+          ? `customer_qr_self_order.html?table=${encodeURIComponent(t.id)}`
+          : `customer_qr_self_order.html?tenant=${encodeURIComponent(tenantId)}&table=${encodeURIComponent(t.id)}`;
+
+        const qrActionHtml = isLockedByLimit
+          ? `<button type="button" disabled class="px-2.5 py-1.5 rounded-xl bg-stone-200 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-400 text-[11px] font-bold flex items-center gap-1 cursor-not-allowed opacity-60" title="Meja terkunci — upgrade ke Paket Bulanan atau Lifetime untuk membuka meja ke-5 ke atas"><span class="material-symbols-outlined text-[14px]">lock</span> QR Terkunci</button>`
+          : `<a href="${qrHref}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#1E293B] border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:text-amber-600 text-[11px] font-bold flex items-center gap-1" title="Lihat Tampilan Menu Tamu"><span class="material-symbols-outlined text-[14px]">qr_code_2</span> QR</a>`;
+
+        const editBtnHtml = isLockedByLimit
+          ? `<button type="button" disabled class="p-1.5 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-400 cursor-not-allowed opacity-60" title="Upgrade paket untuk mengedit meja terkunci"><span class="material-symbols-outlined text-[16px]">edit_off</span></button>`
+          : `<button onclick="openEditTableModal('${jsIdArg}')" class="p-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-amber-100 text-stone-700 dark:text-stone-300 hover:text-amber-600 transition-colors" title="Edit Meja"><span class="material-symbols-outlined text-[16px]">edit</span></button>`;
+
         return `
-          <div class="p-4 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col justify-between gap-3 shadow-xs">
-            <div class="flex items-start justify-between">
+          <div data-table-locked="${isLockedByLimit ? "true" : "false"}" class="${cardCls}">
+            <div class="flex items-start justify-between gap-2">
               <div>
-                <span class="text-[10px] font-mono text-stone-400 font-bold">${t.id}</span>
-                <h4 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">${t.name}</h4>
+                <span class="text-[10px] font-mono text-stone-400 font-bold">${safeId}</span>
+                <h4 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">${safeName}</h4>
                 <div class="flex items-center gap-1.5 mt-1">
-                  <span class="text-[11px] text-stone-600 dark:text-stone-300 font-semibold">${t.seats} Kursi</span>
+                  <span class="text-[11px] text-stone-600 dark:text-stone-300 font-semibold">${Number(t.seats) || 4} Kursi</span>
                   <span class="text-stone-300 dark:text-stone-700">•</span>
-                  <span class="text-[11px] text-stone-500">${t.section}</span>
+                  <span class="text-[11px] text-stone-500">${safeSection}</span>
                 </div>
               </div>
               <div>${statusBadge}</div>
             </div>
 
             <div class="pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between gap-1.5">
-              <a href="customer_qr_self_order.html?table=${t.id}" target="_blank" class="px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#1E293B] border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:text-amber-600 text-[11px] font-bold flex items-center gap-1" title="Lihat Tampilan Menu Tamu">
-                <span class="material-symbols-outlined text-[14px]">qr_code_2</span> QR
-              </a>
+              ${qrActionHtml}
 
               <div class="flex items-center gap-1">
-                <button onclick="openEditTableModal('${t.id}')" class="p-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-amber-100 text-stone-700 dark:text-stone-300 hover:text-amber-600 transition-colors" title="Edit Meja">
-                  <span class="material-symbols-outlined text-[16px]">edit</span>
-                </button>
-                <button onclick="handleDeleteOwnerTable('${t.id}')" class="p-1.5 rounded-xl bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 transition-colors" title="Hapus Meja">
+                ${editBtnHtml}
+                <button onclick="handleDeleteOwnerTable('${jsIdArg}')" class="p-1.5 rounded-xl bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 transition-colors" title="Hapus Meja">
                   <span class="material-symbols-outlined text-[16px]">delete</span>
                 </button>
               </div>
@@ -2732,9 +3035,12 @@
     function openAddTableModal() {
       if (!RestoSync.canAddTable()) {
         const lic = RestoSync.getLicenseData();
+        const msg = lic.isMaster
+          ? `Mode simulasi Free dibatasi maksimal ${lic.maxTables || 4} meja. Verifikasi token Master atau aktifkan kembali Pro Enterprise untuk mengelola meja tanpa batas!`
+          : `Paket saat ini (${lic.tierLabel || "Belum Bayar"}) dibatasi maksimal ${lic.maxTables || 4} meja aktif. Hubungi Admin RASH untuk upgrade ke Paket Bulanan atau Lifetime (Unlimited Meja)!`;
         RestoSync.showProFeatureLockedModal(
-          "Tambah Meja Baru (Khusus Pro)",
-          `Versi Free Anda dibatasi maksimal ${lic.maxTables} meja. Masukkan token lisensi Resto Pro Enterprise untuk mengelola meja tanpa batas!`
+          "Tambah Meja Baru (Maks. 4 Meja Belum Bayar)",
+          msg
         );
         return;
       }
@@ -2749,8 +3055,19 @@
 
     function openEditTableModal(tableId) {
       const tables = RestoSync.getTables();
-      const t = tables.find(x => x.id === tableId);
+      const idx = tables.findIndex(x => x.id === tableId);
+      const t = idx >= 0 ? tables[idx] : null;
       if (!t) return;
+
+      const lic = RestoSync.getLicenseData();
+      const maxCap = lic.isPaidActive ? 999 : (Number(lic.maxTables) || 4);
+      if ((!lic.isPaidActive && idx >= maxCap) || (t.isLockedByBilling && !lic.isPaidActive)) {
+        const msg = lic.isMaster
+          ? `Meja "${t.name}" terkunci pada Mode Simulasi Free (maksimal ${maxCap} meja).`
+          : `Meja "${t.name}" terkunci karena batas maksimal ${maxCap} meja untuk paket belum bayar. Hubungi Admin RASH untuk upgrade ke Paket Bulanan atau Lifetime!`;
+        RestoSync.showProFeatureLockedModal("Meja Terkunci - Belum Bayar", msg);
+        return;
+      }
 
       document.getElementById("tableModalTitle").textContent = "Edit " + t.name;
       document.getElementById("tableFormEditId").value = t.id;
