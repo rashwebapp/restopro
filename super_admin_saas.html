@@ -138,15 +138,15 @@
                 RASH Super Admin <span class="text-brand-400">⚡</span>
               </h1>
               <span class="px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30 text-[10px] font-bold uppercase tracking-wider">
-                Multi-Tenant v2.5
+                Multi-Tenant v2.7
               </span>
             </div>
             <p class="text-[11px] text-slate-400 flex items-center gap-2">
               <span>SaaS Tenant Provisioner & Client Management</span>
               <span class="text-slate-600">•</span>
-              <span class="text-emerald-400 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                Cloud Engine Aktif
+              <span id="cloudSyncBadge" class="text-emerald-400 flex items-center gap-1">
+                <span id="cloudSyncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span id="cloudSyncStatusText">Cloud Engine Siap</span>
               </span>
             </p>
           </div>
@@ -154,6 +154,11 @@
 
         <!-- Right: Global Actions -->
         <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+          <button id="btnCloudRefreshTenants" onclick="handleCloudRefreshTenants()" title="Sinkronkan Direktori Klien dengan Google Sheets Cloud" class="touch-btn px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 border border-slate-700">
+            <span class="material-symbols-outlined text-base">cloud_sync</span>
+            <span class="hidden sm:inline">Sinkron Cloud</span>
+          </button>
+
           <a href="index.html" target="_blank" class="touch-btn px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 border border-slate-700">
             <span class="material-symbols-outlined text-base">storefront</span>
             <span class="hidden md:inline">Lihat Showroom</span>
@@ -207,7 +212,7 @@
             <h3 id="statActiveTenants" class="font-heading font-extrabold text-2xl lg:text-3xl text-emerald-400">0</h3>
             <span class="text-xs text-slate-500">SaaS Berbayar</span>
           </div>
-          <div class="mt-2 text-[11px] text-emerald-400/80 font-medium">Langganan Basic & Pro</div>
+          <div class="mt-2 text-[11px] text-emerald-400/80 font-medium">Paket Bulanan &amp; Lifetime</div>
         </div>
 
         <!-- KPI 3: Klien Trial -->
@@ -273,6 +278,7 @@
               <option value="active">🟢 Aktif Berbayar</option>
               <option value="trial">🟡 Masa Free Trial</option>
               <option value="expired">🔴 Telah Kedaluwarsa</option>
+              <option value="suspended">⛔ Ditangguhkan (Suspended)</option>
             </select>
           </div>
         </div>
@@ -286,10 +292,16 @@
         <div id="emptyState" class="hidden text-center py-16 text-slate-500">
           <span class="material-symbols-outlined text-5xl mb-3 text-slate-600">store_mall_directory</span>
           <h4 class="font-heading font-bold text-base text-slate-300 mb-1">Belum Ada Klien Ditemukan</h4>
-          <p class="text-xs max-w-sm mx-auto mb-4">Mulai daftarkan restoran pertama Anda (misal: Harapan Corner) sekarang!</p>
-          <button onclick="openNewTenantModal()" class="touch-btn px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-heading font-bold">
-            + Daftarkan Restoran Baru
-          </button>
+          <p class="text-xs max-w-sm mx-auto mb-5">Mulai daftarkan restoran pertama Anda atau muat contoh data demo untuk simulasi.</p>
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <button onclick="openNewTenantModal()" class="touch-btn px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-heading font-bold">
+              + Daftarkan Restoran Baru
+            </button>
+            <button id="btnLoadDemoTenants" onclick="handleLoadDemoTenants()" class="touch-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-heading font-bold flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-amber-400">science</span>
+              <span>Muat Contoh Data Demo</span>
+            </button>
+          </div>
         </div>
 
       </section>
@@ -415,41 +427,45 @@
           </div>
           <div>
             <label class="block font-bold text-slate-300 mb-1">Jumlah Meja Restoran</label>
-            <input type="number" id="inputTenantTables" min="1" max="50" value="12"
+            <input type="number" id="inputTenantTables" min="1" max="50" value="4"
               class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+            <span id="newTenantTableHint" class="text-[10px] text-amber-400 mt-1 block">⚠️ Trial/Belum Bayar dibatasi maksimal 4 meja aktif (Meja 01–04).</span>
           </div>
         </div>
 
         <!-- Pilihan Paket SaaS -->
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Pilihan Paket Langganan</label>
+          <label class="block font-bold text-slate-300 mb-1.5">Pilihan Paket Langganan</label>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             
-            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border border-slate-700 cursor-pointer hover:border-brand-500 transition-all">
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border border-amber-500/40 cursor-pointer hover:border-amber-400 transition-all">
               <div class="flex items-center justify-between mb-1">
-                <span class="font-bold text-amber-400 text-xs">Trial 14 Hari</span>
-                <input type="radio" name="planChoice" value="trial" checked class="text-brand-500">
+                <span class="font-bold text-amber-400 text-xs">Free Trial 14 Hari</span>
+                <input type="radio" name="planChoice" value="trial" checked onchange="handleNewPlanChange()" class="text-brand-500">
               </div>
-              <span class="text-[11px] text-slate-400">Gratis uji coba</span>
-              <span class="font-extrabold text-white text-xs mt-1">Rp 0</span>
+              <span class="text-[11px] text-slate-400">Maks. 4 Meja Uji Coba</span>
+              <span class="font-extrabold text-white text-xs mt-1.5">Rp 0</span>
             </label>
 
             <label class="flex flex-col p-3 rounded-xl bg-slate-900 border border-slate-700 cursor-pointer hover:border-brand-500 transition-all">
               <div class="flex items-center justify-between mb-1">
-                <span class="font-bold text-indigo-400 text-xs">Paket Basic</span>
-                <input type="radio" name="planChoice" value="basic" class="text-brand-500">
+                <span class="font-bold text-indigo-400 text-xs">Paket Bulanan</span>
+                <input type="radio" name="planChoice" value="monthly" onchange="handleNewPlanChange()" class="text-brand-500">
               </div>
-              <span class="text-[11px] text-slate-400">Kasir + QR Meja</span>
-              <span class="font-extrabold text-white text-xs mt-1">Rp 99.000<span class="text-[9px] font-normal text-slate-400">/bln</span></span>
+              <span class="text-[11px] text-slate-400">Unlimited Meja</span>
+              <span class="font-extrabold text-white text-xs mt-1.5">Rp 199.000<span class="text-[9px] font-normal text-slate-400">/bln</span></span>
             </label>
 
-            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border-2 border-brand-500/60 cursor-pointer hover:border-brand-400 transition-all bg-brand-950/20">
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border-2 border-emerald-500/50 cursor-pointer hover:border-emerald-400 transition-all bg-emerald-950/15">
               <div class="flex items-center justify-between mb-1">
-                <span class="font-bold text-emerald-400 text-xs">Paket Pro ⭐</span>
-                <input type="radio" name="planChoice" value="pro" class="text-brand-500">
+                <span class="font-bold text-emerald-400 text-xs">Paket Lifetime ♾️</span>
+                <input type="radio" name="planChoice" value="lifetime" onchange="handleNewPlanChange()" class="text-emerald-500">
               </div>
-              <span class="text-[11px] text-slate-400">KDS + Grab/Gojek + CRM</span>
-              <span class="font-extrabold text-white text-xs mt-1">Rp 199.000<span class="text-[9px] font-normal text-slate-400">/bln</span></span>
+              <span class="text-[11px] text-slate-400">Aktif Selamanya • Unlimited Meja</span>
+              <div class="mt-1.5 flex items-baseline gap-1.5 flex-wrap">
+                <span class="text-[10px] text-slate-500 line-through">Rp 3.500.000</span>
+                <span class="font-extrabold text-emerald-300 text-xs">Rp 2.999.000</span>
+              </div>
             </label>
 
           </div>
@@ -488,6 +504,174 @@
           </button>
         </div>
 
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 3B. MODAL: EDIT KLIEN & ATUR MASA AKTIF / PAKET                           -->
+  <!-- ========================================================================= -->
+  <div id="editTenantModal" class="fixed inset-0 z-50 bg-[#0B0F19]/80 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card max-w-xl w-full p-6 lg:p-8 rounded-3xl border border-indigo-500/30 shadow-2xl my-8">
+
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 flex items-center justify-center">
+            <span class="material-symbols-outlined text-2xl">edit_calendar</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-lg text-white">Edit Klien &amp; Atur Masa Aktif</h3>
+            <p class="text-xs text-slate-400">Slug Tenant: <code id="editTenantSlugBadge" class="text-brand-300 font-mono font-bold">-</code></p>
+          </div>
+        </div>
+        <button type="button" onclick="closeEditTenantModal()" class="touch-btn text-slate-400 hover:text-white p-1 rounded-lg">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form id="editTenantForm" onsubmit="handleEditTenantSubmit(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="editTenantId" />
+
+        <!-- Nama Restoran & Kota -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nama Restoran <span class="text-rose-400">*</span></label>
+            <input type="text" id="editTenantName" required
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Kota / Cabang</label>
+            <input type="text" id="editTenantCity"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- PIC & WA Pemilik -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nama Pemilik / PIC</label>
+            <input type="text" id="editTenantPic"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nomor WA Pemilik</label>
+            <input type="tel" id="editTenantPhone"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- WA Kasir & Jumlah Meja -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Nomor WA Kasir / Tablet</label>
+            <input type="tel" id="editTenantCashierPhone"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Jumlah Meja Restoran</label>
+            <input type="number" id="editTenantTables" min="1" max="50" value="12"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500">
+            <span id="editTenantTableHint" class="text-[10px] text-slate-400 mt-1 block">Kuota meja mengikuti status berbayar klien.</span>
+          </div>
+        </div>
+
+        <!-- PIN Kasir & Owner -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">PIN Login Kasir</label>
+            <input type="text" id="editTenantCashierPin" maxlength="6" placeholder="Kosongkan jika tetap"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-amber-300 font-mono font-bold text-center text-sm focus:outline-hidden focus:border-brand-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">PIN Login Owner</label>
+            <input type="text" id="editTenantOwnerPin" maxlength="6" placeholder="Kosongkan jika tetap"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-amber-300 font-mono font-bold text-center text-sm focus:outline-hidden focus:border-brand-500">
+          </div>
+        </div>
+
+        <!-- Pilihan Paket SaaS -->
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5">Pilihan Paket Langganan</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border border-amber-500/40 cursor-pointer hover:border-amber-400 transition-all">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-amber-400 text-xs">Free Trial 14 Hari</span>
+                <input type="radio" name="editPlanChoice" value="trial" onchange="handleEditPlanChange()" class="text-brand-500">
+              </div>
+              <span class="text-[11px] text-slate-400">Maks. 4 Meja Uji Coba</span>
+              <span class="font-extrabold text-white text-xs mt-1">Rp 0</span>
+            </label>
+
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border border-slate-700 cursor-pointer hover:border-brand-500 transition-all">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-indigo-400 text-xs">Paket Bulanan</span>
+                <input type="radio" name="editPlanChoice" value="monthly" onchange="handleEditPlanChange()" class="text-brand-500">
+              </div>
+              <span class="text-[11px] text-slate-400">Unlimited Meja</span>
+              <span class="font-extrabold text-white text-xs mt-1">Rp 199.000<span class="text-[9px] font-normal text-slate-400">/bln</span></span>
+            </label>
+
+            <label class="flex flex-col p-3 rounded-xl bg-slate-900 border-2 border-emerald-500/50 cursor-pointer hover:border-emerald-400 transition-all bg-emerald-950/15">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-emerald-400 text-xs">Paket Lifetime ♾️</span>
+                <input type="radio" name="editPlanChoice" value="lifetime" onchange="handleEditPlanChange()" class="text-emerald-500">
+              </div>
+              <span class="text-[11px] text-slate-400">Aktif Selamanya • Unlimited</span>
+              <div class="mt-1 flex items-baseline gap-1.5 flex-wrap">
+                <span class="text-[10px] text-slate-500 line-through">Rp 3.500.000</span>
+                <span class="font-extrabold text-emerald-300 text-xs">Rp 2.999.000</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Status & Tanggal Kedaluwarsa -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Status Akses Klien</label>
+            <select id="editTenantStatus" class="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-hidden focus:border-brand-500 font-semibold">
+              <option value="trial">🟡 Trial (Uji Coba)</option>
+              <option value="active">🟢 Active (Aktif)</option>
+              <option value="suspended">⛔ Suspended (Ditangguhkan)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">Berlaku Hingga Tanggal</label>
+            <input type="date" id="editTenantExpiresAt"
+              class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-white font-mono focus:outline-hidden focus:border-brand-500">
+            <span id="editTenantExpiryHint" class="text-[10px] text-slate-400 mt-1 block">Berlaku hingga 23:59 waktu lokal pada tanggal dipilih.</span>
+          </div>
+        </div>
+
+        <!-- Tombol Cepat Masa Aktif -->
+        <div>
+          <span class="block text-[11px] font-semibold text-slate-400 mb-1.5">Atur Cepat Masa Aktif:</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="quickAdjustEditExpiry('+14')" class="touch-btn px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[11px] font-bold">
+              +14 Hari
+            </button>
+            <button type="button" onclick="quickAdjustEditExpiry('+30')" class="touch-btn px-3 py-1.5 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 text-brand-300 border border-brand-500/30 text-[11px] font-bold">
+              +30 Hari
+            </button>
+            <button type="button" onclick="quickAdjustEditExpiry('lifetime')" class="touch-btn px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold">
+              ♾️ Set Lifetime
+            </button>
+            <button type="button" onclick="quickAdjustEditExpiry('expired')" class="touch-btn px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-[11px] font-bold">
+              🔴 Set Expired
+            </button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-800">
+          <button type="button" onclick="closeEditTenantModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold">
+            Batal
+          </button>
+          <button type="submit" class="touch-btn px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-brand-600 hover:from-indigo-500 hover:to-brand-500 text-white font-heading font-extrabold shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">save</span>
+            <span>Simpan Perubahan</span>
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -706,8 +890,86 @@
       }
     }
 
+    let syncEventsBound = false;
+
+    function bindRestoSyncEvents() {
+      if (syncEventsBound) return;
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.on === "function") {
+        syncEventsBound = true;
+        RestoSync.on("TENANTS_UPDATED", () => {
+          if (isUnlocked) {
+            try { renderAllTenants(); } catch (e) {}
+            try { updateKpis(); } catch (e) {}
+          }
+        });
+      }
+    }
+
+    function updateCloudSyncBadge(state, detail) {
+      const badge = document.getElementById("cloudSyncBadge");
+      const dot = document.getElementById("cloudSyncDot");
+      const text = document.getElementById("cloudSyncStatusText");
+      if (!badge || !text) return;
+
+      if (state === "syncing") {
+        badge.className = "text-amber-300 flex items-center gap-1";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping";
+        text.textContent = detail || "Menyinkronkan Cloud...";
+      } else if (state === "synced") {
+        badge.className = "text-emerald-400 flex items-center gap-1";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400";
+        text.textContent = detail || "Cloud Tersinkron";
+      } else if (state === "error") {
+        badge.className = "text-rose-400 flex items-center gap-1";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-rose-400";
+        text.textContent = detail || "Gagal Sinkron Cloud";
+      } else {
+        badge.className = "text-amber-400 flex items-center gap-1";
+        if (dot) dot.className = "w-1.5 h-1.5 rounded-full bg-amber-400";
+        text.textContent = detail || "Mode Lokal (Offline)";
+      }
+    }
+
+    async function handleCloudRefreshTenants(options = {}) {
+      const silent = Boolean(options && options.silent);
+      const btn = document.getElementById("btnCloudRefreshTenants");
+      if (btn) btn.disabled = true;
+      updateCloudSyncBadge("syncing", "Menyinkronkan Cloud...");
+
+      try {
+        if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
+          const res = await RestoSync.syncTenantsFromCloud({ mode: "admin" });
+          if (res && res.success) {
+            const count = res.count !== undefined ? res.count : getAllTenantsSafe().length;
+            updateCloudSyncBadge("synced", `Cloud Tersinkron (${count} Klien)`);
+            renderAllTenants();
+            updateKpis();
+            if (!silent) {
+              showToast(`☁️ Direktori klien berhasil disinkronkan (${count} klien).`, "success");
+            }
+            return res;
+          }
+          if (res && res.unauthorized) {
+            updateCloudSyncBadge("error", "API Key Cloud Ditolak");
+            if (!silent) showToast("⚠️ Sinkron Cloud ditolak: periksa API_SECRET_KEY.", "info");
+            return res;
+          }
+        }
+        updateCloudSyncBadge("offline", "Mode Lokal (Offline)");
+        if (!silent) showToast("☁️ Cloud tidak terjangkau, menampilkan cache lokal.", "info");
+        return { success: false, offline: true };
+      } catch (err) {
+        updateCloudSyncBadge("offline", "Mode Lokal (Offline)");
+        if (!silent) showToast("☁️ Gagal terhubung ke Cloud, menampilkan cache lokal.", "info");
+        return { success: false, offline: true };
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
     function unlockPortal() {
       isUnlocked = true;
+      bindRestoSyncEvents();
       const lock = document.getElementById("pinLockScreen");
       const main = document.getElementById("mainPortalContent");
 
@@ -732,9 +994,14 @@
       } catch (err) {
         console.warn("updateKpis threw:", err);
       }
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
+        handleCloudRefreshTenants({ silent: true });
+      }
     }
 
     function lockPortal() {
+      isUnlocked = false;
       try {
         sessionStorage.removeItem("resto_pro_super_admin_unlocked");
       } catch (e) {}
@@ -755,27 +1022,86 @@
     }
 
     // -------------------------------------------------------------------------
-    // FAIL-SAFE TENANT HELPERS (Bebas Masalah Cache Browser)
+    // FAIL-SAFE TENANT HELPERS & FORMATTERS
     // -------------------------------------------------------------------------
     const TENANTS_STORAGE_KEY = "resto_pro_super_admin_tenants_v1";
+    const TENANTS_INIT_FLAG_KEY = (typeof RestoSync !== "undefined" && RestoSync.TENANTS_INIT_FLAG_KEY)
+      ? RestoSync.TENANTS_INIT_FLAG_KEY
+      : "resto_pro_tenants_initialized_v1";
 
-    function getAllTenantsSafe() {
-      if (typeof RestoSync !== "undefined" && typeof RestoSync.getAllTenants === "function") {
-        try {
-          const list = RestoSync.getAllTenants();
-          if (Array.isArray(list) && list.length > 0) return list;
-        } catch (e) {}
-      }
+    function escapeHtml(str) {
+      return String(str === undefined || str === null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function escapeOnclickArg(val) {
+      return escapeHtml(
+        JSON.stringify(String(val === undefined || val === null ? "" : val))
+          .replace(/\u2028/g, "\\u2028")
+          .replace(/\u2029/g, "\\u2029")
+      );
+    }
+
+    function formatRupiah(amount) {
+      const num = Math.round(Number(amount) || 0);
+      return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function formatDateIndo(dateLike) {
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+        "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+      ];
       try {
-        const raw = localStorage.getItem(TENANTS_STORAGE_KEY);
-        if (raw) {
-          const list = JSON.parse(raw);
-          if (Array.isArray(list) && list.length > 0) return list;
-        }
-      } catch (e) {}
+        const d = new Date(dateLike);
+        if (Number.isNaN(d.getTime())) return "-";
+        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      } catch (e) {
+        return "-";
+      }
+    }
 
-      // Default demo tenants jika kosong
-      const defaultTenants = [
+    function toLocalDateInputValue(dateLike) {
+      if (!dateLike) return "";
+      const d = new Date(dateLike);
+      if (Number.isNaN(d.getTime())) return "";
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function parseExpiryInputSafe(val) {
+      if (val === null || val === undefined || val === "") return null;
+      const str = String(val).trim();
+      if (!str) return null;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+        const parts = str.split("-").map(Number);
+        return new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999).toISOString();
+      }
+      return str;
+    }
+
+    function getPlanFallbackConfig(planId) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.getSaasPlanConfig === "function") {
+        return RestoSync.getSaasPlanConfig(planId);
+      }
+      const key = String(planId || "monthly").toLowerCase().trim();
+      if (key === "trial") {
+        return { id: "trial", name: "Free Trial (14 Hari)", price: 0, originalPrice: 0, durationDays: 14, billingCycle: "trial", isLifetime: false, maxTables: 4, isPaidPlan: false };
+      }
+      if (key === "lifetime") {
+        return { id: "lifetime", name: "Paket Lifetime", price: 2999000, originalPrice: 3500000, durationDays: null, billingCycle: "lifetime", isLifetime: true, maxTables: 999, isPaidPlan: true };
+      }
+      return { id: "monthly", name: "Paket Bulanan", price: 199000, originalPrice: 199000, durationDays: 30, billingCycle: "monthly", isLifetime: false, maxTables: 999, isPaidPlan: true };
+    }
+
+    function buildDefaultDemoTenantsSafe() {
+      return [
         {
           id: "harapan-corner",
           name: "Harapan Corner Resto & Coffee",
@@ -785,21 +1111,124 @@
           cashierPin: "1234",
           ownerPin: "1234",
           city: "Kab Bogor, Jawa Barat",
-          plan: "pro",
-          planName: "Paket Pro (Multi-Stasiun + GrabFood/GoFood)",
+          plan: "monthly",
+          planName: "Paket Bulanan",
           price: 199000,
+          originalPrice: 199000,
           billingCycle: "monthly",
           tablesCount: 12,
           status: "active",
+          isLifetime: false,
           createdAt: "2026-11-01T08:00:00Z",
           expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
           gasUrl: "",
           apiKey: "",
-          licenseKey: "RASH-RESTO-PRO-HARAPAN-2027-99A1"
+          licenseKey: "RP-MTH-HARAPAN-CORNER-L9X4K2"
+        },
+        {
+          id: "kopi-senja",
+          name: "Kopi Senja Heritage",
+          pic: "Ibu Rahmawati S.",
+          phone: "081198765432",
+          cashierPhone: "",
+          cashierPin: "1234",
+          ownerPin: "1234",
+          city: "Jakarta Selatan",
+          plan: "trial",
+          planName: "Free Trial (14 Hari)",
+          price: 0,
+          originalPrice: 0,
+          billingCycle: "trial",
+          tablesCount: 4,
+          status: "trial",
+          isLifetime: false,
+          createdAt: "2026-11-05T10:30:00Z",
+          expiresAt: new Date(Date.now() + 10 * 86400000).toISOString(),
+          gasUrl: "",
+          apiKey: "",
+          licenseKey: "RP-TRL-KOPI-SENJA-88A92F"
+        },
+        {
+          id: "warung-bu-siti",
+          name: "Warung Sate Khas Madura Bu Siti",
+          pic: "Cak H. Imron",
+          phone: "081388776655",
+          cashierPhone: "",
+          cashierPin: "1234",
+          ownerPin: "1234",
+          city: "Surabaya",
+          plan: "lifetime",
+          planName: "Paket Lifetime",
+          price: 2999000,
+          originalPrice: 3500000,
+          billingCycle: "lifetime",
+          tablesCount: 10,
+          status: "active",
+          isLifetime: true,
+          createdAt: "2026-10-20T09:00:00Z",
+          expiresAt: null,
+          gasUrl: "",
+          apiKey: "",
+          licenseKey: "RP-LIFE-WARUNG-BU-SITI-33C14E"
         }
       ];
-      try { localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(defaultTenants)); } catch (e) {}
+    }
+
+    function getAllTenantsSafe() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.getAllTenants === "function") {
+        try {
+          const list = RestoSync.getAllTenants();
+          if (Array.isArray(list)) return list;
+        } catch (e) {}
+      }
+      try {
+        const raw = localStorage.getItem(TENANTS_STORAGE_KEY);
+        if (raw !== null && raw !== undefined) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list)) {
+            if (localStorage.getItem(TENANTS_INIT_FLAG_KEY) !== "true") {
+              localStorage.setItem(TENANTS_INIT_FLAG_KEY, "true");
+            }
+            return list;
+          }
+        }
+        if (localStorage.getItem(TENANTS_INIT_FLAG_KEY) === "true") {
+          return [];
+        }
+      } catch (e) {}
+
+      const defaultTenants = buildDefaultDemoTenantsSafe();
+      try {
+        localStorage.setItem(TENANTS_INIT_FLAG_KEY, "true");
+        localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(defaultTenants));
+      } catch (e) {}
       return defaultTenants;
+    }
+
+    function handleLoadDemoTenants() {
+      const searchEl = document.getElementById("tenantSearchInput");
+      const filterEl = document.getElementById("tenantStatusFilter");
+      if (searchEl) searchEl.value = "";
+      if (filterEl) filterEl.value = "all";
+
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.seedDemoTenants === "function") {
+        RestoSync.seedDemoTenants();
+      } else {
+        const demos = buildDefaultDemoTenantsSafe();
+        const existing = getAllTenantsSafe();
+        const ids = new Set(existing.map(t => t.id));
+        const merged = existing.slice();
+        demos.forEach(d => {
+          if (!ids.has(d.id)) merged.push(d);
+        });
+        try {
+          localStorage.setItem(TENANTS_INIT_FLAG_KEY, "true");
+          localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(merged));
+        } catch (e) {}
+      }
+      renderAllTenants();
+      updateKpis();
+      showToast("✨ Contoh data demo berhasil dimuat!", "success");
     }
 
     function registerTenantSafe(data) {
@@ -813,12 +1242,16 @@
 
       const rawName = (data.name || "").trim();
       const slug = (data.id || rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")) || ("resto-" + Date.now().toString().slice(-4));
-      let durationDays = 30;
-      if (data.plan === "trial") durationDays = 14;
-      else if (data.billingCycle === "yearly" || data.plan === "enterprise") durationDays = 365;
-
-      const expiresAt = new Date(Date.now() + durationDays * 86400000).toISOString();
-      const licenseKey = `RASH-RESTO-PRO-${slug.toUpperCase()}-${new Date(expiresAt).getFullYear()}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
+      const planId = String(data.plan || "monthly").toLowerCase().trim();
+      const cfg = getPlanFallbackConfig(planId);
+      const isLifetime = data.isLifetime !== undefined ? Boolean(data.isLifetime) : Boolean(cfg.isLifetime);
+      const expiresAt = isLifetime
+        ? null
+        : (data.expiresAt !== undefined ? parseExpiryInputSafe(data.expiresAt) : new Date(Date.now() + (cfg.durationDays || 30) * 86400000).toISOString());
+      const parsedTables = Number(data.tablesCount);
+      const tablesCount = Number.isFinite(parsedTables) && parsedTables >= 1 ? Math.min(50, Math.round(parsedTables)) : 12;
+      const yearTag = isLifetime ? "LIFE" : new Date(expiresAt).getFullYear();
+      const licenseKey = `RASH-RESTO-PRO-${slug.toUpperCase()}-${yearTag}-${Math.random().toString(36).substring(2,6).toUpperCase()}`;
 
       const newTenant = {
         id: slug,
@@ -827,14 +1260,16 @@
         phone: data.phone || "",
         cashierPhone: data.cashierPhone || "",
         cashierPin: String(data.cashierPin || "1234").trim(),
-        ownerPin: String(data.ownerPin || "1234").trim(),
+        ownerPin: String(data.ownerPin || data.cashierPin || "1234").trim(),
         city: data.city || "-",
-        plan: data.plan || "pro",
-        planName: data.plan === "trial" ? "Trial (14 Hari Gratis)" : (data.plan === "basic" ? "Paket Basic" : "Paket Pro"),
-        price: Number(data.price || (data.plan === "trial" ? 0 : (data.plan === "basic" ? 99000 : 199000))),
-        billingCycle: data.billingCycle || (data.plan === "trial" ? "trial" : "monthly"),
-        tablesCount: Number(data.tablesCount || 12),
-        status: data.plan === "trial" ? "trial" : "active",
+        plan: planId,
+        planName: data.planName || cfg.name,
+        price: data.price !== undefined ? Number(data.price) : cfg.price,
+        originalPrice: data.originalPrice !== undefined ? Number(data.originalPrice) : cfg.originalPrice,
+        billingCycle: data.billingCycle || cfg.billingCycle,
+        tablesCount: tablesCount,
+        status: data.status || (planId === "trial" ? "trial" : "active"),
+        isLifetime: isLifetime,
         createdAt: new Date().toISOString(),
         expiresAt: expiresAt,
         gasUrl: (data.gasUrl || "").trim(),
@@ -848,10 +1283,73 @@
       else tenants.unshift(newTenant);
 
       try {
+        localStorage.setItem(TENANTS_INIT_FLAG_KEY, "true");
         localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
       } catch (e) {}
 
       return newTenant;
+    }
+
+    function updateTenantSafe(tenantId, updates = {}) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.updateTenant === "function") {
+        try {
+          return RestoSync.updateTenant(tenantId, updates);
+        } catch (err) {
+          console.warn("RestoSync.updateTenant threw, using fallback:", err);
+        }
+      }
+
+      const tenants = getAllTenantsSafe();
+      const idx = tenants.findIndex(t => t.id === tenantId);
+      if (idx === -1) return { success: false, message: "Klien restoran tidak ditemukan" };
+
+      const t = Object.assign({}, tenants[idx]);
+      if (updates.plan !== undefined) {
+        const nextPlan = String(updates.plan).toLowerCase().trim();
+        const cfg = getPlanFallbackConfig(nextPlan);
+        t.plan = nextPlan;
+        if (updates.planName === undefined) t.planName = cfg.name;
+        if (updates.price === undefined) t.price = cfg.price;
+        if (updates.originalPrice === undefined) t.originalPrice = cfg.originalPrice;
+        if (updates.billingCycle === undefined) t.billingCycle = cfg.billingCycle;
+        if (nextPlan === "lifetime") {
+          t.isLifetime = true;
+          t.expiresAt = null;
+          if (updates.status === undefined) t.status = "active";
+        } else {
+          t.isLifetime = updates.isLifetime !== undefined ? Boolean(updates.isLifetime) : Boolean(cfg.isLifetime);
+          if (updates.expiresAt === undefined) {
+            t.expiresAt = new Date(Date.now() + (cfg.durationDays || 30) * 86400000).toISOString();
+          }
+        }
+      }
+      if (updates.name !== undefined) t.name = String(updates.name).trim() || t.name;
+      if (updates.pic !== undefined) t.pic = String(updates.pic).trim();
+      if (updates.phone !== undefined) t.phone = String(updates.phone).trim();
+      if (updates.cashierPhone !== undefined) t.cashierPhone = String(updates.cashierPhone).trim();
+      if (updates.city !== undefined) t.city = String(updates.city).trim();
+      if (updates.status !== undefined) t.status = String(updates.status).toLowerCase().trim();
+      if (updates.tablesCount !== undefined) {
+        const tc = Number(updates.tablesCount);
+        if (Number.isFinite(tc) && tc >= 1) t.tablesCount = Math.min(50, Math.round(tc));
+      }
+      if (updates.isLifetime !== undefined) t.isLifetime = Boolean(updates.isLifetime);
+      if (updates.expiresAt !== undefined) {
+        t.expiresAt = updates.expiresAt === null ? null : parseExpiryInputSafe(updates.expiresAt);
+      }
+      if (updates.cashierPin !== undefined && String(updates.cashierPin).trim()) {
+        t.cashierPin = String(updates.cashierPin).trim();
+      }
+      if (updates.ownerPin !== undefined && String(updates.ownerPin).trim()) {
+        t.ownerPin = String(updates.ownerPin).trim();
+      }
+      t.updatedAt = new Date().toISOString();
+      tenants[idx] = t;
+      try {
+        localStorage.setItem(TENANTS_INIT_FLAG_KEY, "true");
+        localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+      } catch (e) {}
+      return { success: true, message: `Data ${t.name} berhasil diperbarui`, tenant: t };
     }
 
     function renewTenantSafe(tenantId, addDays = 30) {
@@ -863,15 +1361,18 @@
       const tenants = getAllTenantsSafe();
       const idx = tenants.findIndex(t => t.id === tenantId);
       if (idx === -1) return { success: false, message: "Klien tidak ditemukan" };
-      const t = tenants[idx];
-      const currentExp = new Date(t.expiresAt).getTime();
+      const t = Object.assign({}, tenants[idx]);
+      if (t.isLifetime || t.plan === "lifetime") {
+        return updateTenantSafe(tenantId, { status: "active", isLifetime: true, expiresAt: null });
+      }
+      const currentExp = t.expiresAt ? new Date(t.expiresAt).getTime() : 0;
       const baseTime = currentExp > Date.now() ? currentExp : Date.now();
       const newExp = new Date(baseTime + addDays * 86400000).toISOString();
-      t.expiresAt = newExp;
-      t.status = "active";
-      tenants[idx] = t;
-      localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
-      return { success: true, message: `Langganan ${t.name} berhasil diperpanjang hingga ${new Date(newExp).toLocaleDateString("id-ID")}`, tenant: t };
+      const res = updateTenantSafe(tenantId, { expiresAt: newExp, status: "active", isLifetime: false });
+      if (res.success) {
+        return { success: true, message: `Langganan ${res.tenant.name} berhasil diperpanjang hingga ${formatDateIndo(newExp)}`, tenant: res.tenant };
+      }
+      return res;
     }
 
     function deleteTenantSafe(tenantId) {
@@ -881,19 +1382,56 @@
         } catch (e) {}
       }
       const tenants = getAllTenantsSafe().filter(t => t.id !== tenantId);
-      localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+      try {
+        localStorage.setItem(TENANTS_INIT_FLAG_KEY, "true");
+        localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
+      } catch (e) {}
       return { success: true };
     }
 
     function getTenantInfoSafe(tenantId) {
+      const all = getAllTenantsSafe();
+      const localMatch = all.find(t => t.id === tenantId);
+      if (localMatch) return localMatch;
       if (typeof RestoSync !== "undefined" && typeof RestoSync.getTenantInfo === "function") {
         try {
           const info = RestoSync.getTenantInfo(tenantId);
-          if (info) return info;
+          if (info && !info.notSynced) return info;
         } catch (e) {}
       }
-      const all = getAllTenantsSafe();
-      return all.find(t => t.id === tenantId) || null;
+      return null;
+    }
+
+    function getTenantDisplayState(t) {
+      const planId = String((t && t.plan) || "monthly").toLowerCase().trim();
+      const status = String((t && t.status) || "active").toLowerCase().trim();
+      const cfg = getPlanFallbackConfig(planId);
+      const isLifetime = Boolean(t && (t.isLifetime === true || t.isLifetime === "true" || planId === "lifetime"));
+      const isSuspended = status === "suspended";
+      const expMs = (!isLifetime && t && t.expiresAt) ? new Date(t.expiresAt).getTime() : NaN;
+      const hasValidExp = Number.isFinite(expMs);
+      const isExpired = !isLifetime && !isSuspended && (status === "expired" || (hasValidExp && expMs <= Date.now()));
+      const diffDays = (!isLifetime && hasValidExp) ? Math.ceil((expMs - Date.now()) / 86400000) : 0;
+      const isTrial = !isLifetime && !isSuspended && !isExpired && (status === "trial" || (planId === "trial" && status !== "active"));
+      const isPaidActive = !isSuspended && !isExpired && !isTrial && (isLifetime || status === "active" || Boolean(cfg.isPaidPlan));
+      const price = (t && t.price !== undefined && t.price !== null && t.price !== "") ? Number(t.price) || 0 : cfg.price;
+      const originalPrice = (t && t.originalPrice !== undefined && t.originalPrice !== null && t.originalPrice !== "") ? Number(t.originalPrice) || 0 : cfg.originalPrice;
+      const planLabel = (t && t.planName) ? String(t.planName) : cfg.name;
+      return {
+        planId,
+        planLabel,
+        status,
+        isLifetime,
+        isSuspended,
+        isExpired,
+        isTrial,
+        isPaidActive,
+        hasValidExp,
+        expMs,
+        diffDays,
+        price,
+        originalPrice
+      };
     }
 
     // -------------------------------------------------------------------------
@@ -913,7 +1451,12 @@
                              (t.id || "").toLowerCase().includes(query) ||
                              (t.pic || "").toLowerCase().includes(query) ||
                              (t.phone || "").includes(query);
-        const matchesStatus = (statusFilter === "all") || (t.status === statusFilter);
+        const st = getTenantDisplayState(t);
+        let matchesStatus = true;
+        if (statusFilter === "suspended") matchesStatus = st.isSuspended;
+        else if (statusFilter === "expired") matchesStatus = st.isExpired;
+        else if (statusFilter === "trial") matchesStatus = st.isTrial;
+        else if (statusFilter === "active") matchesStatus = st.isPaidActive;
         return matchesQuery && matchesStatus;
       });
 
@@ -928,65 +1471,95 @@
       empty.classList.add("hidden");
 
       grid.innerHTML = filtered.map(t => {
-        // Hitung sisa hari
-        const expTime = new Date(t.expiresAt).getTime();
-        const diffDays = Math.ceil((expTime - Date.now()) / (1000 * 60 * 60 * 24));
-        const isExpired = diffDays <= 0;
-        
-        let statusBadge = '';
-        if (isExpired) {
+        const st = getTenantDisplayState(t);
+
+        let statusBadge = "";
+        if (st.isSuspended) {
+          statusBadge = '<span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-bold">⛔ Suspended</span>';
+        } else if (st.isExpired) {
           statusBadge = '<span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold">🔴 Expired</span>';
-        } else if (t.status === 'trial') {
-          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">🟡 Trial (${diffDays} Hari)</span>`;
+        } else if (st.isLifetime) {
+          statusBadge = '<span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold">♾️ Lifetime</span>';
+        } else if (st.isTrial) {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">🟡 Trial (${st.diffDays} Hari)</span>`;
         } else {
-          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">🟢 Aktif (${diffDays} Hari)</span>`;
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">🟢 Aktif (${st.hasValidExp ? st.diffDays + ' Hari' : 'Aktif'})</span>`;
         }
 
-        const hubUrl = `${baseUrl}resto_hub.html?tenant=${t.id}`;
-        const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${t.id}`;
-        const emergencyPosUrl = `${baseUrl}cashier_pos_register.html?tenant=${t.id}&emergency_bypass=1`;
-        const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${t.id}&station=kitchen`;
-        const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${t.id}`;
-        const guestSampleUrl = `${baseUrl}customer_qr_self_order.html?tenant=${t.id}&table=T01`;
-        const ownerUrl = `${baseUrl}owner_settings_saas.html?tenant=${t.id}`;
-        const clientPin = t.cashierPin || "1234";
+        const expiryDisplay = st.isLifetime
+          ? "♾️ Aktif Selamanya"
+          : (st.isSuspended
+              ? "⛔ Ditangguhkan"
+              : (st.hasValidExp ? `${formatDateIndo(t.expiresAt)}${st.isExpired ? " (Expired)" : ""}` : "-"));
 
-        // Format Pesan WhatsApp Khusus Pemilik (Owner) - Mengirim 1-Link Resto Hub
+        const expiryWaText = st.isLifetime
+          ? "Aktif Selamanya (Lifetime)"
+          : (st.hasValidExp ? `s/d ${formatDateIndo(t.expiresAt)}` : "-");
+
+        let priceHtml = "";
+        if (st.isLifetime || (st.originalPrice > st.price && st.price > 0)) {
+          priceHtml = `<span class="text-[10px] text-slate-500 line-through mr-1">${formatRupiah(st.originalPrice || 3500000)}</span><span class="font-extrabold text-emerald-300">${formatRupiah(st.price)}</span>`;
+        } else if (st.price > 0) {
+          priceHtml = `<span class="font-bold text-slate-200">${formatRupiah(st.price)}/bln</span>`;
+        } else {
+          priceHtml = '<span class="font-bold text-amber-300">Rp 0 (Gratis)</span>';
+        }
+
+        const safeTenantSlug = encodeURIComponent(String(t.id || ""));
+        const hubUrl = `${baseUrl}resto_hub.html?tenant=${safeTenantSlug}`;
+        const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${safeTenantSlug}`;
+        const emergencyPosUrl = `${baseUrl}cashier_pos_register.html?tenant=${safeTenantSlug}&emergency_bypass=1`;
+        const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${safeTenantSlug}`;
+        const ownerUrl = `${baseUrl}owner_settings_saas.html?tenant=${safeTenantSlug}`;
+        const clientPin = t.cashierPin || (t.cashierPinHash ? "••••" : "1234");
+        const waPinNote = t.cashierPin ? clientPin : "(Sesuai PIN Tersimpan)";
+
         const waMsgOwner = encodeURIComponent(
           `Halo ${t.pic || 'Bpk/Ibu'} (${t.name}),\n\n` +
           `Selamat! Akun aplikasi kasir & pemesanan Resto Pro Anda telah AKTIF dan siap digunakan:\n\n` +
           `🌐 *1-LINK PUSAT RESTO HUB ANDA:*\n` +
           `👉 ${hubUrl}\n\n` +
-          `🔑 *PIN LOGIN KASIR & OWNER:* ${clientPin}\n\n` +
+          `🔑 *PIN LOGIN KASIR & OWNER:* ${waPinNote}\n\n` +
           `Di dalam 1-Link Hub di atas, Anda dan staf dapat langsung mengakses:\n` +
           `1. 💻 Layar Kasir POS Tablet\n` +
           `2. 🍳 Layar Monitor Dapur (KDS)\n` +
           `3. 🖨️ Lembaran Cetak QR Meja (PDF)\n` +
           `4. ⚙️ Panel Kelola Menu, Harga & Omzet (Owner)\n\n` +
-          `Paket: ${t.planName}\n` +
-          `Masa Aktif: s/d ${new Date(t.expiresAt).toLocaleDateString('id-ID')}\n\n` +
+          `Paket: ${st.planLabel}\n` +
+          `Masa Aktif: ${expiryWaText}\n\n` +
           `Cukup buka link Hub di atas di browser tablet/laptop Anda. Selamat berjualan! 🚀`
         );
         const waOwnerClean = (t.phone || '').replace(/[^0-9]/g, '');
         const waOwnerFinal = waOwnerClean.startsWith('0') ? '62' + waOwnerClean.substring(1) : waOwnerClean;
         const waOwnerLink = `https://wa.me/${waOwnerFinal}?text=${waMsgOwner}`;
 
-        // Format Pesan WhatsApp Khusus Tim Kasir Toko
         const waMsgCashier = encodeURIComponent(
           `Halo Tim Kasir ${t.name},\n\n` +
           `Berikut adalah link aplikasi Kasir POS Tablet Anda:\n` +
           `🔗 ${posUrl}\n\n` +
-          `🔑 *PIN LOGIN KASIR:* ${clientPin}\n\n` +
+          `🔑 *PIN LOGIN KASIR:* ${waPinNote}\n\n` +
           `*Instruksi Penggunaan Cepat di Tablet Kasir:*\n` +
           `1. Buka link di atas di browser Google Chrome / Safari tablet\n` +
           `2. Tekan menu browser -> Pilih "Tambahkan ke Layar Utama" (Add to Home Screen)\n` +
-          `3. Masukkan PIN ${clientPin} untuk mulai melayani transaksi meja & takeaway.\n\n` +
+          `3. Masukkan PIN ${waPinNote} untuk mulai melayani transaksi meja & takeaway.\n\n` +
           `🚨 *Pintu Darurat Master PIN:* 9999\n\n` +
           `Selamat bertugas & sukses selalu! 🚀`
         );
         const waCashierClean = (t.cashierPhone || t.phone || '').replace(/[^0-9]/g, '');
         const waCashierFinal = waCashierClean.startsWith('0') ? '62' + waCashierClean.substring(1) : waCashierClean;
         const waCashierLink = `https://wa.me/${waCashierFinal}?text=${waMsgCashier}`;
+
+        const safeName = escapeHtml(t.name || "");
+        const initials = escapeHtml((t.name || "RP").substring(0, 2).toUpperCase());
+        const safeId = escapeHtml(t.id || "");
+        const safePic = escapeHtml(t.pic || "-");
+        const safePhone = escapeHtml(t.phone || "-");
+        const safeCashierPhone = escapeHtml(t.cashierPhone || "(Sama dg Owner)");
+        const safePinDisplay = escapeHtml(clientPin);
+        const safePlanLabel = escapeHtml(st.planLabel);
+        const tableCapText = st.isPaidActive ? `${t.tablesCount || 12} Meja` : `${t.tablesCount || 4} Meja (Maks. 4 Aktif)`;
+        const idArg = escapeOnclickArg(t.id);
+        const nameArg = escapeOnclickArg(t.name || t.id);
 
         return `
           <div class="glass-card rounded-2xl p-5 border border-slate-800 hover:border-brand-500/40 transition-all flex flex-col justify-between space-y-4">
@@ -996,13 +1569,13 @@
               <div class="flex items-start justify-between gap-2 mb-1.5">
                 <div class="flex items-center gap-2 min-w-0">
                   <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white font-extrabold text-xs flex items-center justify-center shrink-0">
-                    ${t.name.substring(0, 2).toUpperCase()}
+                    ${initials}
                   </div>
                   <div class="min-w-0">
-                    <h3 class="font-heading font-extrabold text-sm text-white truncate" title="${t.name}">
-                      ${t.name}
+                    <h3 class="font-heading font-extrabold text-sm text-white truncate" title="${safeName}">
+                      ${safeName}
                     </h3>
-                    <span class="font-mono text-[10px] text-brand-300">tenant: ${t.id}</span>
+                    <span class="font-mono text-[10px] text-brand-300">tenant: ${safeId}</span>
                   </div>
                 </div>
                 ${statusBadge}
@@ -1012,33 +1585,41 @@
               <div class="mt-2.5 pt-2.5 border-t border-slate-800/80 space-y-1 text-xs text-slate-400">
                 <div class="flex items-center justify-between">
                   <span>PIC / Pemilik:</span>
-                  <span class="font-semibold text-slate-200">${t.pic || '-'}</span>
+                  <span class="font-semibold text-slate-200">${safePic}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span>WA Pemilik:</span>
                   <a href="${waOwnerLink}" target="_blank" class="font-mono text-emerald-400 hover:underline flex items-center gap-1">
-                    <span>${t.phone || '-'}</span>
+                    <span>${safePhone}</span>
                     <span class="material-symbols-outlined text-xs">open_in_new</span>
                   </a>
                 </div>
                 <div class="flex items-center justify-between">
                   <span>WA Kasir:</span>
                   <a href="${waCashierLink}" target="_blank" class="font-mono text-amber-400 hover:underline flex items-center gap-1">
-                    <span>${t.cashierPhone || '(Sama dg Owner)'}</span>
+                    <span>${safeCashierPhone}</span>
                     <span class="material-symbols-outlined text-xs">open_in_new</span>
                   </a>
                 </div>
                 <div class="flex items-center justify-between">
-                  <span>PIN Kasir & Owner:</span>
-                  <span class="font-mono font-bold text-amber-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">${clientPin}</span>
+                  <span>PIN Kasir &amp; Owner:</span>
+                  <span class="font-mono font-bold text-amber-300 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">${safePinDisplay}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span>Paket:</span>
-                  <span class="font-semibold text-indigo-300">${t.planName}</span>
+                  <span class="font-semibold text-indigo-300">${safePlanLabel}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Harga:</span>
+                  <span>${priceHtml}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Masa Aktif:</span>
+                  <span class="${st.isExpired || st.isSuspended ? 'text-rose-300 font-semibold' : 'text-slate-200'}">${expiryDisplay}</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span>Kapasitas:</span>
-                  <span class="text-slate-300">${t.tablesCount || 12} Meja</span>
+                  <span class="text-slate-300">${escapeHtml(tableCapText)}</span>
                 </div>
               </div>
             </div>
@@ -1064,17 +1645,29 @@
               </div>
 
               <div class="flex items-center gap-1.5 flex-wrap">
+                <button type="button" onclick="openEditTenantModal(${idArg})" class="touch-btn flex-1 py-2 px-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-200 border border-indigo-500/40 text-xs font-bold flex items-center justify-center gap-1" title="Edit Data, Paket, Status & Masa Aktif">
+                  <span class="material-symbols-outlined text-base">edit_calendar</span>
+                  <span>✏️ Edit / Masa Aktif</span>
+                </button>
+
+                <button type="button" onclick="handleRenewTenant(${idArg})" class="touch-btn py-2 px-2 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-bold flex items-center gap-1" title="Perpanjang Lisensi +30 Hari">
+                  <span class="material-symbols-outlined text-base">autorenew</span>
+                  <span>+30H</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <a href="${emergencyPosUrl}" target="_blank" class="touch-btn flex-1 py-2 px-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center justify-center gap-1" title="Buka Kasir Langsung (Bypass PIN Darurat)">
                   <span class="material-symbols-outlined text-base">emergency_home</span>
                   <span>🚨 Darurat</span>
                 </a>
 
-                <a href="${ownerUrl}" target="_blank" class="touch-btn py-2 px-2.5 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold flex items-center gap-1" title="Buka Panel Pengaturan Menu & Resto Klien">
+                <a href="${ownerUrl}" target="_blank" class="touch-btn py-2 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 text-xs font-bold flex items-center gap-1" title="Buka Panel Pengaturan Menu & Resto Klien">
                   <span class="material-symbols-outlined text-base">tune</span>
                   <span>Kelola</span>
                 </a>
 
-                <button onclick="handleResetTenantPin('${t.id}', '${t.name}')" class="touch-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-bold flex items-center gap-1" title="Reset PIN Kasir & Owner ke 1234">
+                <button type="button" onclick="handleResetTenantPin(${idArg}, ${nameArg})" class="touch-btn py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-bold flex items-center gap-1" title="Reset PIN Kasir & Owner ke 1234">
                   <span class="material-symbols-outlined text-base">lock_reset</span>
                   <span>Reset</span>
                 </button>
@@ -1083,22 +1676,13 @@
                   <span class="material-symbols-outlined text-base">print</span>
                   <span>QR</span>
                 </a>
-
-                <button onclick="handleRenewTenant('${t.id}')" class="touch-btn py-2 px-2 rounded-xl bg-brand-600/20 hover:bg-brand-600/30 text-brand-300 border border-brand-500/30 text-xs font-bold flex items-center gap-1" title="Perpanjang Lisensi +30 Hari">
-                  <span class="material-symbols-outlined text-base">autorenew</span>
-                  <span>+30H</span>
-                </button>
               </div>
 
               <div class="flex items-center justify-between pt-1 text-[11px] text-slate-500">
-                <button onclick="openTenantLinksModal('${t.id}')" class="text-slate-400 hover:text-white underline">
+                <button type="button" onclick="openTenantLinksModal(${idArg})" class="text-slate-400 hover:text-white underline">
                   Tampilkan Semua Tautan
                 </button>
-                <button onclick="confirmDeleteTenant('${t.id}', '${t.name}')" class="text-rose-400 hover:text-rose-300">
-                  Hapus Klien
-                </button>
-              </div>
-            </div>
+                <button type="button" onclick="confirmDeleteTenant(${idArg}, ${nameArg})" class="text-rose-400 hover:text-rose-300">
                   Hapus Klien
                 </button>
               </div>
@@ -1121,31 +1705,56 @@
       let mrr = 0;
 
       tenants.forEach(t => {
-        const expTime = new Date(t.expiresAt).getTime();
-        const isExpired = expTime <= Date.now();
-
-        if (!isExpired) {
-          if (t.status === "trial" || t.plan === "trial") {
-            trial++;
-          } else {
-            active++;
-            mrr += (Number(t.price) || 0);
-          }
+        const st = getTenantDisplayState(t);
+        if (st.isSuspended || st.isExpired) return;
+        if (st.isTrial) {
+          trial++;
+        } else if (st.isPaidActive) {
+          active++;
+          mrr += st.price;
         }
       });
 
       document.getElementById("statTotalTenants").textContent = total;
       document.getElementById("statActiveTenants").textContent = active;
       document.getElementById("statTrialTenants").textContent = trial;
-      document.getElementById("statMrr").textContent = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(mrr);
+      document.getElementById("statMrr").textContent = formatRupiah(mrr);
     }
 
     // -------------------------------------------------------------------------
     // TENANT CREATION WIZARD
     // -------------------------------------------------------------------------
+    function handleNewPlanChange() {
+      const checked = document.querySelector('input[name="planChoice"]:checked');
+      const plan = checked ? checked.value : "trial";
+      const tablesInput = document.getElementById("inputTenantTables");
+      const hintEl = document.getElementById("newTenantTableHint");
+
+      if (plan === "trial") {
+        if (tablesInput && (tablesInput.value === "12" || !tablesInput.value)) {
+          tablesInput.value = "4";
+        }
+        if (hintEl) {
+          hintEl.className = "text-[10px] text-amber-400 mt-1 block";
+          hintEl.textContent = "⚠️ Trial/Belum Bayar dibatasi maksimal 4 meja aktif (Meja 01–04).";
+        }
+      } else {
+        if (tablesInput && (tablesInput.value === "4" || !tablesInput.value)) {
+          tablesInput.value = "12";
+        }
+        if (hintEl) {
+          hintEl.className = "text-[10px] text-emerald-400 mt-1 block";
+          hintEl.textContent = "✅ Unlimited Meja — jumlah meja awal mengikuti isian di atas.";
+        }
+      }
+    }
+
     function openNewTenantModal() {
       document.getElementById("newTenantForm").reset();
-      document.getElementById("inputTenantTables").value = 12;
+      const trialRadio = document.querySelector('input[name="planChoice"][value="trial"]');
+      if (trialRadio) trialRadio.checked = true;
+      document.getElementById("inputTenantTables").value = "4";
+      handleNewPlanChange();
       document.getElementById("newTenantModal").classList.remove("hidden");
       document.getElementById("inputTenantName").focus();
     }
@@ -1170,7 +1779,8 @@
       const cashierPin = (document.getElementById("inputTenantCashierPin").value || "1234").trim();
       const city = document.getElementById("inputTenantCity").value.trim();
       const tables = document.getElementById("inputTenantTables").value;
-      const plan = document.querySelector('input[name="planChoice"]:checked').value;
+      const checkedPlan = document.querySelector('input[name="planChoice"]:checked');
+      const plan = checkedPlan ? checkedPlan.value : "trial";
       const gasUrl = document.getElementById("inputTenantGasUrl").value.trim();
       const apiKey = document.getElementById("inputTenantApiKey").value.trim();
 
@@ -1180,6 +1790,7 @@
       }
 
       try {
+        const isLifetime = plan === "lifetime";
         const newTenant = registerTenantSafe({
           id: slug,
           name: name,
@@ -1190,6 +1801,8 @@
           ownerPin: cashierPin,
           city: city,
           plan: plan,
+          isLifetime: isLifetime,
+          expiresAt: isLifetime ? null : undefined,
           tablesCount: tables,
           gasUrl: gasUrl,
           apiKey: apiKey
@@ -1205,14 +1818,215 @@
       }
     }
 
+    // -------------------------------------------------------------------------
+    // EDIT TENANT & EXPIRY EDITOR MODAL
+    // -------------------------------------------------------------------------
+    function handleEditPlanChange() {
+      const checked = document.querySelector('input[name="editPlanChoice"]:checked');
+      const plan = checked ? checked.value : "monthly";
+      const expInput = document.getElementById("editTenantExpiresAt");
+      const statusSel = document.getElementById("editTenantStatus");
+      const expHint = document.getElementById("editTenantExpiryHint");
+      const tableHint = document.getElementById("editTenantTableHint");
+
+      if (plan === "lifetime") {
+        if (expInput) {
+          expInput.value = "";
+          expInput.disabled = true;
+        }
+        if (statusSel && statusSel.value === "trial") {
+          statusSel.value = "active";
+        }
+        if (expHint) expHint.textContent = "♾️ Paket Lifetime aktif selamanya (tanpa tanggal kedaluwarsa).";
+        if (tableHint) tableHint.textContent = "✅ Unlimited Meja (Aktif Selamanya).";
+      } else {
+        if (expInput) {
+          expInput.disabled = false;
+          if (!expInput.value) {
+            const days = plan === "trial" ? 14 : 30;
+            expInput.value = toLocalDateInputValue(Date.now() + days * 86400000);
+          }
+        }
+        if (statusSel && plan === "monthly" && statusSel.value === "trial") {
+          statusSel.value = "active";
+        }
+        if (expHint) expHint.textContent = "Berlaku hingga 23:59 waktu lokal pada tanggal dipilih.";
+        if (tableHint) {
+          tableHint.textContent = plan === "trial"
+            ? "⚠️ Trial/Belum Bayar dibatasi maksimal 4 meja aktif (Meja 01–04)."
+            : "✅ Unlimited Meja saat status Active & belum expired.";
+        }
+      }
+    }
+
+    function openEditTenantModal(tenantId) {
+      const t = getTenantInfoSafe(tenantId);
+      if (!t) {
+        showToast("Klien restoran tidak ditemukan.", "info");
+        return;
+      }
+
+      const st = getTenantDisplayState(t);
+      document.getElementById("editTenantId").value = t.id;
+      const slugBadge = document.getElementById("editTenantSlugBadge");
+      if (slugBadge) slugBadge.textContent = t.id;
+
+      document.getElementById("editTenantName").value = t.name || "";
+      document.getElementById("editTenantCity").value = t.city || "";
+      document.getElementById("editTenantPic").value = t.pic || "";
+      document.getElementById("editTenantPhone").value = t.phone || "";
+      document.getElementById("editTenantCashierPhone").value = t.cashierPhone || "";
+      document.getElementById("editTenantCashierPin").value = t.cashierPin || "";
+      document.getElementById("editTenantOwnerPin").value = t.ownerPin || "";
+      document.getElementById("editTenantTables").value = t.tablesCount || 12;
+
+      let mappedPlan = st.planId;
+      if (st.isLifetime || mappedPlan === "lifetime") mappedPlan = "lifetime";
+      else if (mappedPlan !== "trial") mappedPlan = "monthly";
+
+      const radio = document.querySelector(`input[name="editPlanChoice"][value="${mappedPlan}"]`);
+      if (radio) radio.checked = true;
+
+      const statusSel = document.getElementById("editTenantStatus");
+      if (statusSel) {
+        if (st.isSuspended) statusSel.value = "suspended";
+        else if (mappedPlan === "trial" && st.status === "trial") statusSel.value = "trial";
+        else statusSel.value = "active";
+      }
+
+      const expInput = document.getElementById("editTenantExpiresAt");
+      if (expInput) {
+        expInput.value = st.isLifetime ? "" : (t.expiresAt ? toLocalDateInputValue(t.expiresAt) : "");
+      }
+
+      handleEditPlanChange();
+      document.getElementById("editTenantModal").classList.remove("hidden");
+    }
+
+    function closeEditTenantModal() {
+      document.getElementById("editTenantModal").classList.add("hidden");
+    }
+
+    function quickAdjustEditExpiry(mode) {
+      const expInput = document.getElementById("editTenantExpiresAt");
+      const statusSel = document.getElementById("editTenantStatus");
+      const checkedPlan = document.querySelector('input[name="editPlanChoice"]:checked');
+      const currentPlan = checkedPlan ? checkedPlan.value : "monthly";
+
+      if (mode === "lifetime") {
+        const lifeRadio = document.querySelector('input[name="editPlanChoice"][value="lifetime"]');
+        if (lifeRadio) lifeRadio.checked = true;
+        if (statusSel) statusSel.value = "active";
+        handleEditPlanChange();
+        return;
+      }
+
+      if (mode === "expired") {
+        if (currentPlan === "lifetime") {
+          const monthlyRadio = document.querySelector('input[name="editPlanChoice"][value="monthly"]');
+          if (monthlyRadio) monthlyRadio.checked = true;
+        }
+        if (expInput) {
+          expInput.disabled = false;
+          expInput.value = toLocalDateInputValue(Date.now() - 86400000);
+        }
+        handleEditPlanChange();
+        return;
+      }
+
+      const addDays = mode === "+14" ? 14 : 30;
+      if (currentPlan === "lifetime") {
+        const nextPlan = addDays === 14 ? "trial" : "monthly";
+        const targetRadio = document.querySelector(`input[name="editPlanChoice"][value="${nextPlan}"]`);
+        if (targetRadio) targetRadio.checked = true;
+      }
+
+      let baseMs = Date.now();
+      if (expInput && /^\d{4}-\d{2}-\d{2}$/.test(expInput.value)) {
+        const parts = expInput.value.split("-").map(Number);
+        const parsedMs = new Date(parts[0], parts[1] - 1, parts[2], 23, 59, 59, 999).getTime();
+        if (parsedMs > baseMs) baseMs = parsedMs;
+      }
+      if (expInput) {
+        expInput.disabled = false;
+        expInput.value = toLocalDateInputValue(baseMs + addDays * 86400000);
+      }
+      if (statusSel && statusSel.value !== "suspended") {
+        const finalPlan = (document.querySelector('input[name="editPlanChoice"]:checked') || {}).value;
+        statusSel.value = finalPlan === "trial" ? "trial" : "active";
+      }
+      handleEditPlanChange();
+    }
+
+    function handleEditTenantSubmit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const tenantId = document.getElementById("editTenantId").value.trim();
+      const name = document.getElementById("editTenantName").value.trim();
+      const city = document.getElementById("editTenantCity").value.trim();
+      const pic = document.getElementById("editTenantPic").value.trim();
+      const phone = document.getElementById("editTenantPhone").value.trim();
+      const cashierPhone = document.getElementById("editTenantCashierPhone").value.trim();
+      const cashierPin = document.getElementById("editTenantCashierPin").value.trim();
+      const ownerPin = document.getElementById("editTenantOwnerPin").value.trim();
+      const tablesCount = Number(document.getElementById("editTenantTables").value) || 12;
+      const checkedPlan = document.querySelector('input[name="editPlanChoice"]:checked');
+      const plan = checkedPlan ? checkedPlan.value : "monthly";
+      const status = document.getElementById("editTenantStatus").value;
+      const expiresAtVal = (document.getElementById("editTenantExpiresAt").value || "").trim();
+
+      if (!tenantId || !name) {
+        alert("ID dan Nama restoran wajib diisi!");
+        return;
+      }
+
+      const updates = {
+        name: name,
+        city: city,
+        pic: pic,
+        phone: phone,
+        cashierPhone: cashierPhone,
+        tablesCount: tablesCount,
+        plan: plan,
+        status: status
+      };
+
+      if (plan === "lifetime") {
+        updates.isLifetime = true;
+        updates.expiresAt = null;
+      } else {
+        updates.isLifetime = false;
+        if (expiresAtVal) {
+          updates.expiresAt = expiresAtVal;
+        } else {
+          const days = plan === "trial" ? 14 : 30;
+          updates.expiresAt = new Date(Date.now() + days * 86400000).toISOString();
+        }
+      }
+
+      if (cashierPin) updates.cashierPin = cashierPin;
+      if (ownerPin) updates.ownerPin = ownerPin;
+
+      const res = updateTenantSafe(tenantId, updates);
+      if (res && res.success) {
+        closeEditTenantModal();
+        renderAllTenants();
+        updateKpis();
+        showToast(res.message || `✅ Data "${name}" berhasil diperbarui!`, "success");
+      } else {
+        alert((res && res.message) || "Gagal memperbarui data klien.");
+      }
+    }
+
     function showTenantSuccessModal(tenant) {
       const baseUrl = getBaseUrl();
-      const hubUrl = `${baseUrl}resto_hub.html?tenant=${tenant.id}`;
-      const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${tenant.id}`;
-      const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${tenant.id}&station=kitchen`;
-      const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${tenant.id}`;
-      const sampleGuest = `${baseUrl}customer_qr_self_order.html?tenant=${tenant.id}&table=T01`;
-      const ownerUrl = `${baseUrl}owner_settings_saas.html?tenant=${tenant.id}`;
+      const st = getTenantDisplayState(tenant);
+      const safeSlug = encodeURIComponent(String(tenant.id || ""));
+      const hubUrl = `${baseUrl}resto_hub.html?tenant=${safeSlug}`;
+      const posUrl = `${baseUrl}cashier_pos_register.html?tenant=${safeSlug}`;
+      const kdsUrl = `${baseUrl}kitchen_display_kds.html?tenant=${safeSlug}&station=kitchen`;
+      const qrSheetUrl = `${baseUrl}table_qr_print_sheet.html?tenant=${safeSlug}`;
+      const sampleGuest = `${baseUrl}customer_qr_self_order.html?tenant=${safeSlug}&table=T01`;
+      const ownerUrl = `${baseUrl}owner_settings_saas.html?tenant=${safeSlug}`;
       const clientPin = tenant.cashierPin || "1234";
 
       currentSuccessLinks = {
@@ -1238,6 +2052,10 @@
       // Link Cetak QR Meja
       document.getElementById("btnOpenQrSheet").href = qrSheetUrl;
 
+      const expiryText = st.isLifetime
+        ? "Aktif Selamanya (Lifetime)"
+        : (st.hasValidExp ? `s/d ${formatDateIndo(tenant.expiresAt)}` : "-");
+
       // Format Pesan WhatsApp Pemilik (Owner) - Mengirim 1-Link Hub Sederhana & Lengkap
       const waMsgOwner = encodeURIComponent(
         `Halo ${tenant.pic || 'Bpk/Ibu'} (${tenant.name}),\n\n` +
@@ -1250,8 +2068,8 @@
         `2. 🍳 Layar Monitor Dapur (KDS)\n` +
         `3. 🖨️ Lembaran Cetak QR Meja (PDF)\n` +
         `4. ⚙️ Panel Kelola Menu & Laporan (Owner)\n\n` +
-        `Paket: ${tenant.planName}\n` +
-        `Masa Berlaku: s/d ${new Date(tenant.expiresAt).toLocaleDateString('id-ID')}\n\n` +
+        `Paket: ${st.planLabel}\n` +
+        `Masa Berlaku: ${expiryText}\n\n` +
         `Cukup buka link Hub di atas di browser tablet/laptop Anda. Selamat berjualan! 🚀`
       );
       const cleanPhone = (tenant.phone || '').replace(/[^0-9]/g, '');
@@ -1280,19 +2098,14 @@
     }
 
     function handleResetTenantPin(tenantId, name) {
-      if (!confirm(`⚠️ Konfirmasi Reset PIN:\nApakah Anda yakin ingin me-reset PIN Kasir dan PIN Owner untuk "${name}" kembali ke default 1234?`)) return;
+      const targetName = name || (getTenantInfoSafe(tenantId) && getTenantInfoSafe(tenantId).name) || tenantId;
+      if (!confirm(`⚠️ Konfirmasi Reset PIN:\nApakah Anda yakin ingin me-reset PIN Kasir dan PIN Owner untuk "${targetName}" kembali ke default 1234?`)) return;
       if (typeof RestoSync !== "undefined" && typeof RestoSync.resetTenantPins === "function") {
         const res = RestoSync.resetTenantPins(tenantId, "1234");
         showToast(res.message || "PIN berhasil di-reset ke 1234", "success");
       } else {
-        const tenants = getAllTenantsSafe();
-        const idx = tenants.findIndex(t => t.id === tenantId);
-        if (idx >= 0) {
-          tenants[idx].cashierPin = "1234";
-          tenants[idx].ownerPin = "1234";
-          localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
-          showToast(`✅ PIN untuk ${name} berhasil di-reset ke 1234`, "success");
-        }
+        updateTenantSafe(tenantId, { cashierPin: "1234", ownerPin: "1234" });
+        showToast(`✅ PIN untuk ${targetName} berhasil di-reset ke 1234`, "success");
       }
       renderAllTenants();
     }
@@ -1302,6 +2115,11 @@
     }
 
     function handleRenewTenant(tenantId) {
+      const t = getTenantInfoSafe(tenantId);
+      if (t && (t.isLifetime || t.plan === "lifetime")) {
+        showToast(`♾️ ${t.name} sudah menggunakan Paket Lifetime (Aktif Selamanya).`, "info");
+        return;
+      }
       if (!confirm("Perpanjang masa aktif lisensi restoran ini selama 30 Hari?")) return;
       const res = renewTenantSafe(tenantId, 30);
       if (res.success) {
@@ -1312,11 +2130,12 @@
     }
 
     function confirmDeleteTenant(tenantId, name) {
-      if (!confirm(`Apakah Anda yakin ingin menghapus klien "${name}" (${tenantId}) dari sistem?`)) return;
+      const targetName = name || (getTenantInfoSafe(tenantId) && getTenantInfoSafe(tenantId).name) || tenantId;
+      if (!confirm(`Apakah Anda yakin ingin menghapus klien "${targetName}" (${tenantId}) dari sistem?`)) return;
       deleteTenantSafe(tenantId);
       renderAllTenants();
       updateKpis();
-      showToast(`Klien "${name}" telah dihapus.`, "info");
+      showToast(`Klien "${targetName}" telah dihapus.`, "info");
     }
 
     function openTenantLinksModal(tenantId) {
@@ -1334,6 +2153,7 @@
 
     function showToast(message, type = "info") {
       const c = document.getElementById("toastContainer");
+      if (!c) return;
       const el = document.createElement("div");
       el.className = "py-3 px-4 rounded-xl text-xs font-bold shadow-xl border flex items-center gap-2 pointer-events-auto transition-all animate-bounce bg-slate-900 text-white border-slate-700";
       
@@ -1345,7 +2165,7 @@
 
       el.innerHTML = `
         <span class="material-symbols-outlined text-base">${icon}</span>
-        <span>${message}</span>
+        <span>${escapeHtml(message)}</span>
       `;
       c.appendChild(el);
       setTimeout(() => {
@@ -1355,6 +2175,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      bindRestoSyncEvents();
       checkSessionAuth();
     });
   </script>

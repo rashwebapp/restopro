@@ -606,14 +606,14 @@
         <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
           <span class="material-symbols-outlined text-[18px] text-emerald-500 shrink-0 mt-0.5">verified_user</span>
           <div>
-            <span class="font-bold">Termasuk dalam Paket Uji Coba:</span>
-            <p class="text-[11px] mt-0.5 text-stone-600 dark:text-stone-400">Kasir POS Tablet • Monitor Dapur (KDS) • 12 Barcode Meja QR Siap Cetak • Panel Owner & Omzet • PIN Default 1234.</p>
+            <span class="font-bold">Termasuk dalam Paket Uji Coba (Free Trial 14 Hari):</span>
+            <p class="text-[11px] mt-0.5 text-stone-600 dark:text-stone-400">Kasir POS Tablet • Monitor Dapur (KDS) • Maks. 4 Meja Uji Coba (QR Meja Siap Cetak) • Panel Owner &amp; Omzet • PIN Default 1234.</p>
           </div>
         </div>
 
-        <button type="submit" class="touch-btn mt-2 w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all">
+        <button id="selfServeSubmitBtn" type="submit" class="touch-btn mt-2 w-full h-12 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-heading font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-98 transition-all">
           <span class="material-symbols-outlined text-[20px]">flash_on</span>
-          <span>🚀 Buka Akun Resto & Masuk Hub Sekarang</span>
+          <span id="selfServeSubmitLabel">🚀 Buka Akun Resto &amp; Masuk Hub Sekarang</span>
         </button>
       </form>
     </div>
@@ -797,8 +797,8 @@
       }
     }
 
-    function handleSelfServeRegister(e) {
-      e.preventDefault();
+    async function handleSelfServeRegister(e) {
+      if (e && e.preventDefault) e.preventDefault();
       const name = document.getElementById("selfServeName").value.trim();
       const pic = document.getElementById("selfServePic").value.trim();
       const phone = document.getElementById("selfServePhone").value.trim();
@@ -808,13 +808,33 @@
         return;
       }
 
-      const slug = name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || ("resto-" + Date.now().toString().slice(-4));
+      const submitBtn = document.getElementById("selfServeSubmitBtn");
+      const submitLabel = document.getElementById("selfServeSubmitLabel");
+      if (submitBtn && submitBtn.disabled) return;
+
+      const originalLabel = submitLabel ? submitLabel.textContent : "";
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitLabel) submitLabel.textContent = "⏳ Menyiapkan Akun Trial...";
+
+      const fallbackSlug = name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || ("resto-" + Date.now().toString().slice(-4));
 
       try {
-        let newTenant = null;
-        if (typeof RestoSync !== "undefined" && typeof RestoSync.registerNewTenant === "function") {
-          newTenant = RestoSync.registerNewTenant({
-            id: slug,
+        let finalSlug = fallbackSlug;
+        if (typeof RestoSync !== "undefined" && typeof RestoSync.registerTrialTenantPublic === "function") {
+          const regRes = await RestoSync.registerTrialTenantPublic({
+            name: name,
+            pic: pic,
+            phone: phone,
+            cashierPin: "1234",
+            ownerPin: "1234",
+            city: "Indonesia"
+          });
+          if (regRes && (regRes.slug || (regRes.tenant && regRes.tenant.id))) {
+            finalSlug = regRes.slug || regRes.tenant.id;
+          }
+        } else if (typeof RestoSync !== "undefined" && typeof RestoSync.registerNewTenant === "function") {
+          const newTenant = RestoSync.registerNewTenant({
+            id: fallbackSlug,
             name: name,
             pic: pic,
             phone: phone,
@@ -822,16 +842,19 @@
             ownerPin: "1234",
             city: "Indonesia",
             plan: "trial",
-            planName: "Trial (14 Hari Gratis)",
-            tablesCount: 12
+            tablesCount: 4
           });
+          if (newTenant && newTenant.id) finalSlug = newTenant.id;
         }
 
         closeSelfServeModal();
-        alert(`🎉 Selamat ${pic}!\nAkun "${name}" telah berhasil dibuat untuk 14 Hari Uji Coba Gratis.\n\nAnda akan dialihkan ke Resto Hub Anda sekarang.`);
-        window.location.href = `resto_hub.html?tenant=${slug}`;
+        alert(`🎉 Selamat ${pic}!\nAkun "${name}" telah berhasil dibuat untuk 14 Hari Uji Coba Gratis (Maks. 4 Meja).\n\nAnda akan dialihkan ke Resto Hub Anda sekarang.`);
+        window.location.href = `resto_hub.html?tenant=${encodeURIComponent(finalSlug)}`;
       } catch (err) {
-        alert("Gagal mendaftarkan tenant: " + err.message);
+        alert("Gagal mendaftarkan tenant: " + (err && err.message ? err.message : String(err)));
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitLabel && originalLabel) submitLabel.textContent = originalLabel;
       }
     }
 
