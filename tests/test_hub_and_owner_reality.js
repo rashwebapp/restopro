@@ -857,6 +857,98 @@ test("8. Master (default) keeps manual token box & simulation toggle visible and
   assertEqual(RestoSync.getTables().length, 8, "Cloud upgrade to 8 tables must sync table list");
 });
 
+test("9. Fix Round 1: unpaid/pending lifetime tenant never renders Aktif Selamanya (Lifetime) or Akun Aktif; paid active lifetime still does", function () {
+  resetAll();
+  RestoSync.saveAllTenants([], { silent: true });
+  RestoSync.registerNewTenant({
+    id: "warung-life-pending",
+    name: "Warung Life Pending",
+    plan: "lifetime",
+    status: "pending",
+    isLifetime: true,
+    tablesCount: 10,
+    expiresAt: null,
+    _skipCloud: true
+  });
+
+  // Hub checks for pending lifetime
+  const hubPending = mountRestoHub({ search: "?tenant=warung-life-pending" });
+  hubPending.doc.dispatchDOMContentLoaded();
+  assertEqual(hubPending.doc.getElementById("tenantExpiryDisplay").textContent.indexOf("Aktif Selamanya"), -1, "Pending lifetime on Hub must NOT show 'Aktif Selamanya'");
+  assertEqual(hubPending.doc.getElementById("tenantStatusText").textContent, "Menunggu Pembayaran", "Pending lifetime on Hub must show 'Menunggu Pembayaran'");
+  assert(hubPending.doc.getElementById("tenantExpiryDisplay").textContent.indexOf("Menunggu Aktivasi") !== -1, "Pending lifetime expiry on Hub should show waiting activation/confirmation");
+  assert(hubPending.doc.getElementById("tenantTablesDisplay").textContent.indexOf("Maks. 4 Meja") !== -1, "Pending lifetime on Hub must stay capped at Maks. 4 Meja");
+
+  // Owner checks for pending lifetime
+  const ownerPending = mountOwnerSettings({ search: "?tenant=warung-life-pending" });
+  ownerPending.doc.dispatchDOMContentLoaded();
+  assertEqual(ownerPending.doc.getElementById("licenseExpiryLabel").textContent.indexOf("Aktif Selamanya"), -1, "Pending lifetime in Owner must NOT show 'Aktif Selamanya'");
+  assert(ownerPending.doc.getElementById("licenseExpiryLabel").textContent.indexOf("Menunggu Aktivasi") !== -1, "Pending lifetime in Owner must show waiting activation");
+  assert(ownerPending.doc.getElementById("licenseTableLimitLabel").textContent.indexOf("Maksimal 4 Meja (Belum Bayar)") !== -1, "Pending lifetime in Owner must show Maksimal 4 Meja (Belum Bayar)");
+  assertEqual(ownerPending.doc.getElementById("btnTenantUpgradeWa").href.indexOf("Lifetime%20Aktif"), -1, "Pending lifetime WhatsApp CTA must NOT claim 'Lifetime Aktif'");
+
+  // Verify paid active lifetime still shows Aktif Selamanya (Lifetime) on both Hub & Owner
+  RestoSync.updateTenant("warung-life-pending", { status: "active", _skipCloud: true });
+  const hubActive = mountRestoHub({ search: "?tenant=warung-life-pending" });
+  hubActive.doc.dispatchDOMContentLoaded();
+  assertEqual(hubActive.doc.getElementById("tenantExpiryDisplay").textContent, "Aktif Selamanya (Lifetime)", "Active lifetime on Hub must still show 'Aktif Selamanya (Lifetime)'");
+  assertEqual(hubActive.doc.getElementById("tenantStatusText").textContent, "Akun Aktif", "Active lifetime on Hub must show 'Akun Aktif'");
+
+  const ownerActive = mountOwnerSettings({ search: "?tenant=warung-life-pending" });
+  ownerActive.doc.dispatchDOMContentLoaded();
+  assertEqual(ownerActive.doc.getElementById("licenseExpiryLabel").textContent, "Aktif Selamanya (Lifetime)", "Active lifetime in Owner must show 'Aktif Selamanya (Lifetime)'");
+  assert(ownerActive.doc.getElementById("licenseTableLimitLabel").textContent.indexOf("Unlimited Tables") !== -1, "Active lifetime in Owner must unlock Unlimited Tables");
+});
+
+test("10. Fix Round 1: deleting early tables on downgraded unpaid tenant unlocks former #5/#6 tables shifted to idx 0..3 even if isLockedByBilling is true", function () {
+  resetAll();
+  RestoSync.saveAllTenants([], { silent: true });
+  RestoSync.registerNewTenant({
+    id: "warung-geser",
+    name: "Warung Geser",
+    plan: "trial",
+    status: "trial",
+    tablesCount: 6,
+    expiresAt: new Date(Date.now() + 10 * 86400000).toISOString(),
+    _skipCloud: true
+  });
+
+  window.location.search = "?tenant=warung-geser";
+  const sixTables = [];
+  for (let i = 1; i <= 6; i++) {
+    const tbl = RestoSync._buildDefaultTableItem(i);
+    if (i >= 5) {
+      tbl.isLockedByBilling = true;
+      tbl.isCustom = true;
+      tbl.name = "Meja VIP 0" + i;
+    }
+    sixTables.push(tbl);
+  }
+  RestoSync.saveTables(sixTables);
+
+  const { doc, api } = mountOwnerSettings({ search: "?tenant=warung-geser" });
+  doc.dispatchDOMContentLoaded();
+
+  // Delete T01 and T02 -> T05 & T06 shift into indices 2 & 3 (now 4 tables total: T03, T04, T05, T06)
+  confirmReturnValue = true;
+  api.handleDeleteOwnerTable("T01");
+  api.handleDeleteOwnerTable("T02");
+
+  const remaining = RestoSync.getTables();
+  assertEqual(remaining.length, 4, "4 tables should remain after deleting T01 and T02");
+  assertEqual(RestoSync.getUsableTables().length, 4, "All 4 remaining tables must be usable via getUsableTables()");
+
+  const gridHtml = doc.getElementById("ownerTablesGrid").innerHTML;
+  assertEqual(gridHtml.indexOf("Terkunci - Belum Bayar"), -1, "No table at idx 0..3 may remain locked after shifting down");
+  assert(gridHtml.indexOf("openEditTableModal('T05')") !== -1, "T05 at idx 2 must have active edit button");
+  assert(gridHtml.indexOf("openEditTableModal('T06')") !== -1, "T06 at idx 3 must have active edit button");
+
+  // Calling openEditTableModal('T05') must open #tableFormModal instead of lock modal
+  api.openEditTableModal("T05");
+  assertEqual(doc.getElementById("tableFormModal").classList.contains("hidden"), false, "openEditTableModal('T05') must open #tableFormModal when T05 is at idx < 4");
+  assertEqual(doc.getElementById("tableFormEditId").value, "T05", "Editing T05 must populate #tableFormEditId");
+});
+
 // -----------------------------------------------------------------------------
 // 5. Execute All Tests
 // -----------------------------------------------------------------------------

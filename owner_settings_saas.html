@@ -2595,7 +2595,7 @@
         badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-600 text-white shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider";
         cloudStatusText = "Masa Aktif Berakhir — Segera Perpanjang";
         cloudStatusCls = "text-[11px] font-bold text-red-600 dark:text-red-400";
-      } else if (lic.isLifetime) {
+      } else if (lic.isLifetime && lic.isPaidActive) {
         tierText = lic.tierLabel || "Paket Lifetime";
         expiryText = "Aktif Selamanya (Lifetime)";
         verifyText = "Lisensi Lifetime Resmi Terverifikasi";
@@ -2625,11 +2625,15 @@
           : "Aktif Berbayar";
       } else {
         tierText = lic.tierLabel || "Belum Aktif";
-        expiryText = lic.expiry || "Menunggu Aktivasi";
+        expiryText = (lic.status === "pending" || lic.isLifetime || !t || !t.expiresAt)
+          ? "Menunggu Aktivasi / Konfirmasi Bayar"
+          : (lic.expiry || "Menunggu Aktivasi / Konfirmasi Bayar");
         verifyText = "Menunggu Pembayaran / Aktivasi Paket";
         verifyCls = "text-amber-600 dark:text-amber-400 font-bold";
         badgeCls = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-xs uppercase tracking-wider";
-        cloudStatusText = "Belum Aktif / Menunggu Pembayaran";
+        cloudStatusText = lic.status === "pending"
+          ? "Menunggu Aktivasi / Konfirmasi Bayar"
+          : "Belum Aktif / Menunggu Pembayaran";
         cloudStatusCls = "text-[11px] font-semibold text-amber-600 dark:text-amber-400";
       }
 
@@ -2675,7 +2679,7 @@
       const planLabelForWa = lic.tierLabel || lic.plan || "Belum Diketahui";
       const statusLabelForWa = lic.notSynced
         ? "Belum Tersinkronisasi"
-        : (lic.isSuspended ? "Suspended" : (lic.isExpired ? "Expired" : (lic.isLifetime ? "Lifetime Aktif" : (lic.status || "trial"))));
+        : (lic.isSuspended ? "Suspended" : (lic.isExpired ? "Expired" : ((lic.isLifetime && lic.isPaidActive) ? "Lifetime Aktif" : (lic.status || "trial"))));
       const waUpgradeMsg = encodeURIComponent(
         `Halo Admin RASH Resto Pro, saya pemilik dari "${resolvedName}" (ID: ${resolvedId}). Paket saat ini: ${planLabelForWa} (Status: ${statusLabelForWa}). Saya ingin perpanjang / upgrade paket berbayar.`
       );
@@ -2957,19 +2961,20 @@
       const maxCap = lic.isPaidActive ? 999 : (Number(lic.maxTables) || 4);
 
       if (badge) {
-        if (!lic.isPaidActive) {
+        if (!lic.isMaster && !lic.isPaidActive) {
           const usableCount = Math.min(tables.length, maxCap);
-          const suffix = lic.isMaster ? "Mode Free" : `Maks. ${maxCap} Belum Bayar`;
           badge.textContent = tables.length > maxCap
-            ? `${usableCount}/${tables.length} Meja Aktif (${suffix})`
-            : `${tables.length} Meja Aktif (${suffix})`;
+            ? `${usableCount}/${tables.length} Meja Aktif (Maks. ${maxCap} Belum Bayar)`
+            : `${tables.length} Meja Aktif (Maks. ${maxCap} Belum Bayar)`;
+        } else if (lic.isMaster && !lic.isPaidActive) {
+          badge.textContent = `${tables.length} Meja Aktif (Mode Free)`;
         } else {
           badge.textContent = `${tables.length} Meja Aktif`;
         }
       }
 
       grid.innerHTML = tables.map((t, idx) => {
-        const isLockedByLimit = (!lic.isPaidActive && idx >= maxCap) || Boolean(t.isLockedByBilling && !lic.isPaidActive);
+        const isLockedByLimit = !lic.isMaster && !lic.isPaidActive && idx >= maxCap;
         const safeId = escapeHtmlSafe(t.id);
         const safeName = escapeHtmlSafe(t.name);
         const safeSection = escapeHtmlSafe(t.section || "Indoor AC");
@@ -3061,10 +3066,8 @@
 
       const lic = RestoSync.getLicenseData();
       const maxCap = lic.isPaidActive ? 999 : (Number(lic.maxTables) || 4);
-      if ((!lic.isPaidActive && idx >= maxCap) || (t.isLockedByBilling && !lic.isPaidActive)) {
-        const msg = lic.isMaster
-          ? `Meja "${t.name}" terkunci pada Mode Simulasi Free (maksimal ${maxCap} meja).`
-          : `Meja "${t.name}" terkunci karena batas maksimal ${maxCap} meja untuk paket belum bayar. Hubungi Admin RASH untuk upgrade ke Paket Bulanan atau Lifetime!`;
+      if (!lic.isMaster && !lic.isPaidActive && idx >= maxCap) {
+        const msg = `Meja "${t.name}" terkunci karena batas maksimal ${maxCap} meja untuk paket belum bayar. Hubungi Admin RASH untuk upgrade ke Paket Bulanan atau Lifetime!`;
         RestoSync.showProFeatureLockedModal("Meja Terkunci - Belum Bayar", msg);
         return;
       }

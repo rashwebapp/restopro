@@ -616,7 +616,7 @@
           const expMsg = encodeURIComponent(`Halo Admin RASH Resto Pro, masa aktif restoran "${name}" (ID: ${t.id}) telah berakhir. Mohon informasi perpanjangan paket.`);
           expiredWaBtn.href = `https://wa.me/${csNumber}?text=${expMsg}`;
         }
-      } else if (lic.isLifetime) {
+      } else if (lic.isLifetime && lic.isPaidActive) {
         if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
         if (statusText) statusText.textContent = "Akun Aktif";
         if (planEl) planEl.textContent = t.planName || lic.tierLabel || "Paket Lifetime";
@@ -647,7 +647,11 @@
         if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1.5";
         if (statusText) statusText.textContent = lic.status === "pending" ? "Menunggu Pembayaran" : "Belum Aktif";
         if (planEl) planEl.textContent = t.planName || lic.tierLabel || "Paket Resto Pro";
-        if (expiryEl) expiryEl.textContent = t.expiresAt ? ("s/d " + RestoSync._formatDateId(t.expiresAt)) : (lic.expiry || "Belum Aktif");
+        if (expiryEl) {
+          expiryEl.textContent = (!lic.isLifetime && lic.status !== "pending" && t.expiresAt)
+            ? ("s/d " + RestoSync._formatDateId(t.expiresAt))
+            : "Menunggu Aktivasi / Konfirmasi Bayar";
+        }
         if (daysEl) {
           daysEl.className = "text-[11px] text-amber-300 font-semibold";
           daysEl.textContent = "Maks. 4 Meja hingga pembayaran aktif";
