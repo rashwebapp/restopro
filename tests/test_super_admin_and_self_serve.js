@@ -392,8 +392,10 @@ function mountSuperAdmin(options = {}) {
       handleCreateTenant: typeof handleCreateTenant === "function" ? handleCreateTenant : undefined,
       openEditTenantModal: typeof openEditTenantModal === "function" ? openEditTenantModal : undefined,
       closeEditTenantModal: typeof closeEditTenantModal === "function" ? closeEditTenantModal : undefined,
+      handleEditPlanChange: typeof handleEditPlanChange === "function" ? handleEditPlanChange : undefined,
       handleEditTenantSubmit: typeof handleEditTenantSubmit === "function" ? handleEditTenantSubmit : undefined,
       quickAdjustEditExpiry: typeof quickAdjustEditExpiry === "function" ? quickAdjustEditExpiry : undefined,
+      getTenantDisplayState: typeof getTenantDisplayState === "function" ? getTenantDisplayState : undefined,
       handleLoadDemoTenants: typeof handleLoadDemoTenants === "function" ? handleLoadDemoTenants : undefined,
       handleCloudRefreshTenants: typeof handleCloudRefreshTenants === "function" ? handleCloudRefreshTenants : undefined,
       confirmDeleteTenant: typeof confirmDeleteTenant === "function" ? confirmDeleteTenant : undefined,
@@ -816,6 +818,82 @@ test("6. renderAllTenants escapes HTML/XSS and quotes in onclick attributes, and
   api.filterTenants();
   assert(doc.getElementById("tenantsGrid").innerHTML.indexOf("Warung Expired") !== -1, "Expired filter matches past-date tenant");
   assertEqual(doc.getElementById("tenantsGrid").innerHTML.indexOf("Warung &#39;Oke&#39;"), -1, "Expired filter excludes active trial");
+});
+
+test("7. Downgrading active monthly tenant to trial switches status to trial, preserves suspended, and treats {plan:'trial', status:'active'} as Trial/unpaid aligned with RestoSync.getLicenseData()", function () {
+  resetAll();
+  const { doc, api } = mountSuperAdmin();
+  api.getAllTenantsSafe().forEach(t => api.deleteTenantSafe(t.id));
+
+  // A) { plan: 'trial', status: 'active' } must be treated as Trial / unpaid (not Paid Active!)
+  api.registerTenantSafe({
+    id: "warung-aneh",
+    name: "Warung Trial Active",
+    plan: "trial",
+    status: "active",
+    tablesCount: 10,
+    _skipCloud: true
+  });
+  // B) Monthly active tenant to be downgraded via #editTenantModal
+  api.registerTenantSafe({
+    id: "warung-bulanan",
+    name: "Warung Bulanan",
+    plan: "monthly",
+    status: "active",
+    tablesCount: 10,
+    _skipCloud: true
+  });
+  // C) Monthly tenant with unexpected non-active status must NOT be isPaidActive
+  api.registerTenantSafe({
+    id: "warung-pending",
+    name: "Warung Pending",
+    plan: "monthly",
+    status: "pending",
+    tablesCount: 8,
+    _skipCloud: true
+  });
+
+  const stateA = api.getTenantDisplayState(api.getTenantInfoSafe("warung-aneh"));
+  assertEqual(stateA.isTrial, true, "{plan:'trial', status:'active'} must have isTrial:true");
+  assertEqual(stateA.isPaidActive, false, "{plan:'trial', status:'active'} must have isPaidActive:false");
+
+  const stateC = api.getTenantDisplayState(api.getTenantInfoSafe("warung-pending"));
+  assertEqual(stateC.isPaidActive, false, "{plan:'monthly', status:'pending'} must have isPaidActive:false");
+
+  api.renderAllTenants();
+  api.updateKpis();
+  assertEqual(doc.getElementById("statActiveTenants").textContent, "1", "Only warung-bulanan counts as active paid");
+  assertEqual(doc.getElementById("statTrialTenants").textContent, "1", "warung-aneh counts as trial");
+  assertEqual(doc.getElementById("statMrr").textContent, "Rp 199.000", "MRR excludes trial/pending");
+
+  // Open Edit Modal on active monthly warung-bulanan & downgrade plan -> trial
+  api.openEditTenantModal("warung-bulanan");
+  assertEqual(doc.getElementById("editTenantStatus").value, "active", "Starts with status active");
+
+  selectRadio(doc, "editPlanChoice", "trial");
+  api.handleEditPlanChange();
+  assertEqual(doc.getElementById("editTenantStatus").value, "trial", "Downgrading monthly -> trial must auto-switch status from active to trial");
+
+  // Ensure suspended status is preserved if admin explicitly chose suspended
+  doc.getElementById("editTenantStatus").value = "suspended";
+  api.handleEditPlanChange();
+  assertEqual(doc.getElementById("editTenantStatus").value, "suspended", "Switching plan to trial must preserve explicit suspended status");
+
+  // Restore to trial & submit downgrade
+  doc.getElementById("editTenantStatus").value = "trial";
+  api.handleEditTenantSubmit({ preventDefault: function () {} });
+
+  const downgraded = api.getTenantInfoSafe("warung-bulanan");
+  assertEqual(downgraded.plan, "trial", "Downgraded tenant plan must be trial");
+  assertEqual(downgraded.status, "trial", "Downgraded tenant status must be trial");
+
+  assertEqual(doc.getElementById("statActiveTenants").textContent, "0", "Downgraded tenant removed from #statActiveTenants");
+  assertEqual(doc.getElementById("statTrialTenants").textContent, "2", "Downgraded tenant moved into #statTrialTenants");
+  assertEqual(doc.getElementById("statMrr").textContent, "Rp 0", "MRR drops to Rp 0");
+
+  const gridHtml = doc.getElementById("tenantsGrid").innerHTML;
+  assert(gridHtml.indexOf("Maks. 4 Aktif") !== -1, "Downgraded trial card must show (Maks. 4 Aktif)");
+  assertEqual(gridHtml.indexOf("🟢 Aktif"), -1, "Neither trial nor pending card may render Paid Active badge");
 });
 
 // -----------------------------------------------------------------------------

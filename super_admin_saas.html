@@ -1412,8 +1412,11 @@
       const hasValidExp = Number.isFinite(expMs);
       const isExpired = !isLifetime && !isSuspended && (status === "expired" || (hasValidExp && expMs <= Date.now()));
       const diffDays = (!isLifetime && hasValidExp) ? Math.ceil((expMs - Date.now()) / 86400000) : 0;
-      const isTrial = !isLifetime && !isSuspended && !isExpired && (status === "trial" || (planId === "trial" && status !== "active"));
-      const isPaidActive = !isSuspended && !isExpired && !isTrial && (isLifetime || status === "active" || Boolean(cfg.isPaidPlan));
+      const isPaidPlan = isLifetime || planId === "monthly" || planId === "pro" || planId === "basic" || planId === "enterprise";
+      const isTrial = !isLifetime && !isSuspended && !isExpired && (status === "trial" || planId === "trial");
+      const isPaidActive = !isSuspended && !isExpired && !isTrial && isPaidPlan && (isLifetime || status === "active");
+      const maxTables = isPaidActive ? 999 : 4;
+      const tableLimitHint = isPaidActive ? "Unlimited Meja" : "Maks. 4 Meja Aktif (Belum Bayar)";
       const price = (t && t.price !== undefined && t.price !== null && t.price !== "") ? Number(t.price) || 0 : cfg.price;
       const originalPrice = (t && t.originalPrice !== undefined && t.originalPrice !== null && t.originalPrice !== "") ? Number(t.originalPrice) || 0 : cfg.originalPrice;
       const planLabel = (t && t.planName) ? String(t.planName) : cfg.name;
@@ -1425,7 +1428,10 @@
         isSuspended,
         isExpired,
         isTrial,
+        isPaidPlan,
         isPaidActive,
+        maxTables,
+        tableLimitHint,
         hasValidExp,
         expMs,
         diffDays,
@@ -1482,8 +1488,10 @@
           statusBadge = '<span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] font-bold">♾️ Lifetime</span>';
         } else if (st.isTrial) {
           statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">🟡 Trial (${st.diffDays} Hari)</span>`;
-        } else {
+        } else if (st.isPaidActive) {
           statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">🟢 Aktif (${st.hasValidExp ? st.diffDays + ' Hari' : 'Aktif'})</span>`;
+        } else {
+          statusBadge = '<span class="px-2.5 py-0.5 rounded-full bg-slate-700/60 text-slate-300 border border-slate-600 text-[10px] font-bold">⚪ Non-Aktif</span>';
         }
 
         const expiryDisplay = st.isLifetime
@@ -1557,7 +1565,7 @@
         const safeCashierPhone = escapeHtml(t.cashierPhone || "(Sama dg Owner)");
         const safePinDisplay = escapeHtml(clientPin);
         const safePlanLabel = escapeHtml(st.planLabel);
-        const tableCapText = st.isPaidActive ? `${t.tablesCount || 12} Meja` : `${t.tablesCount || 4} Meja (Maks. 4 Aktif)`;
+        const tableCapText = st.isPaidActive ? `${t.tablesCount || 12} Meja` : `${t.tablesCount || 4} Meja (Maks. ${st.maxTables} Aktif)`;
         const idArg = escapeOnclickArg(t.id);
         const nameArg = escapeOnclickArg(t.name || t.id);
 
@@ -1847,8 +1855,12 @@
             expInput.value = toLocalDateInputValue(Date.now() + days * 86400000);
           }
         }
-        if (statusSel && plan === "monthly" && statusSel.value === "trial") {
-          statusSel.value = "active";
+        if (statusSel) {
+          if (plan === "trial" && statusSel.value === "active") {
+            statusSel.value = "trial";
+          } else if (plan === "monthly" && statusSel.value === "trial") {
+            statusSel.value = "active";
+          }
         }
         if (expHint) expHint.textContent = "Berlaku hingga 23:59 waktu lokal pada tanggal dipilih.";
         if (tableHint) {
@@ -1890,7 +1902,7 @@
       const statusSel = document.getElementById("editTenantStatus");
       if (statusSel) {
         if (st.isSuspended) statusSel.value = "suspended";
-        else if (mappedPlan === "trial" && st.status === "trial") statusSel.value = "trial";
+        else if (mappedPlan === "trial") statusSel.value = "trial";
         else statusSel.value = "active";
       }
 
