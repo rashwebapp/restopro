@@ -218,6 +218,10 @@
             <div id="tenantCloudTableQuota" class="text-[10px] text-[#78716C] dark:text-[#94A3B8]">Kuota Meja: Memuat...</div>
           </div>
           <div class="space-y-2">
+            <button id="btnOwnerOpenPaymentModal" type="button" onclick="openPaymentCheckoutModal()" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-heading font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[16px]">verified</span>
+              <span>Upgrade / Bayar Paket Pro</span>
+            </button>
             <a id="btnTenantUpgradeWa" href="https://wa.me/6282286452105" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
               <span class="material-symbols-outlined text-[16px]">chat</span>
               <span id="btnTenantUpgradeWaLabel">Perpanjang / Hubungi Admin RASH</span>
@@ -251,6 +255,29 @@
         <span class="material-symbols-outlined text-[16px]">chat</span>
         <span>Perpanjang Paket via WhatsApp</span>
       </a>
+    </section>
+
+    <!-- BANNER STATUS PEMBAYARAN TENANT (TAHAP 2) -->
+    <section id="paymentStatusBanner" class="hidden rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border transition-all">
+      <div class="flex items-start sm:items-center gap-3">
+        <div id="paymentStatusIconContainer" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+          <span id="paymentStatusIcon" class="material-symbols-outlined text-2xl">hourglass_top</span>
+        </div>
+        <div>
+          <h3 id="paymentStatusTitle" class="font-heading font-extrabold text-sm">
+            Status Pembayaran
+          </h3>
+          <p id="paymentStatusDesc" class="text-xs mt-0.5">
+            Keterangan status pembayaran.
+          </p>
+        </div>
+      </div>
+      <div id="paymentStatusActionContainer" class="flex items-center gap-2 shrink-0">
+        <button id="btnReuploadPaymentProof" type="button" onclick="openPaymentCheckoutModal()" class="touch-btn px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm">
+          <span class="material-symbols-outlined text-[16px]">upload_file</span>
+          <span>Unggah Ulang Bukti Transfer</span>
+        </button>
+      </div>
     </section>
 
 
@@ -1667,6 +1694,147 @@
     </div>
   </div>
 
+  <!-- MODAL CHECKOUT PEMBAYARAN & UPLOAD BUKTI (TAHAP 2) -->
+  <div id="paymentCheckoutModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-white dark:bg-[#1E293B] rounded-3xl max-w-lg w-full border border-stone-200 dark:border-stone-700 shadow-2xl overflow-hidden my-8">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+            <span class="material-symbols-outlined text-xl">payments</span>
+          </div>
+          <div>
+            <h3 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white">
+              Pembayaran & Upgrade Resto Pro
+            </h3>
+            <p class="text-xs text-stone-500 dark:text-stone-400">Buka seluruh fitur premium & meja tanpa batas</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePaymentCheckoutModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-800 dark:hover:text-white flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        
+        <!-- Pilihan Paket -->
+        <div>
+          <label class="block text-xs font-heading font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2">
+            Pilih Paket Langganan:
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Bulanan -->
+            <label class="relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all border-amber-500 bg-amber-50/30 dark:bg-amber-950/20" id="planCardMonthly">
+              <div class="flex items-center justify-between">
+                <span class="font-heading font-extrabold text-sm text-stone-900 dark:text-white">Paket Bulanan</span>
+                <input type="radio" id="planMonthly" name="paymentPlanRadio" value="monthly" checked onchange="setPaymentPlan('monthly')" class="text-amber-500 focus:ring-amber-500" />
+              </div>
+              <div class="mt-1">
+                <span class="text-xs font-bold text-amber-600 dark:text-amber-400">Rp 199.000</span>
+                <span class="text-[10px] text-stone-500"> / bulan</span>
+              </div>
+              <p class="text-[10px] text-stone-500 dark:text-stone-400 mt-1">Fitur Pro Lengkap + Meja Unlimited (+30 Hari)</p>
+            </label>
+
+            <!-- Lifetime -->
+            <label class="relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all border-stone-200 dark:border-stone-700 hover:border-amber-400" id="planCardLifetime">
+              <div class="flex items-center justify-between">
+                <span class="font-heading font-extrabold text-sm text-stone-900 dark:text-white">Paket Lifetime</span>
+                <input type="radio" id="planLifetime" name="paymentPlanRadio" value="lifetime" onchange="setPaymentPlan('lifetime')" class="text-amber-500 focus:ring-amber-500" />
+              </div>
+              <div class="mt-1 flex items-baseline gap-1.5">
+                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Rp 2.999.000</span>
+                <span class="text-[10px] text-stone-400 line-through">Rp 3.500.000</span>
+              </div>
+              <p class="text-[10px] text-stone-500 dark:text-stone-400 mt-1">Sekali Bayar Selamanya + Bebas Update</p>
+            </label>
+          </div>
+        </div>
+
+        <!-- Total Tagihan Display -->
+        <div class="p-3 rounded-2xl bg-stone-100 dark:bg-stone-800/80 flex items-center justify-between">
+          <span class="text-xs font-heading font-bold text-stone-600 dark:text-stone-300">Total Pembayaran:</span>
+          <span id="paymentPlanPrice" class="font-heading font-black text-base text-amber-600 dark:text-amber-400">Rp 199.000</span>
+        </div>
+
+        <!-- Rekening Resmi RASH -->
+        <div class="p-4 rounded-2xl bg-amber-500/5 dark:bg-amber-950/20 border border-amber-500/20 space-y-3">
+          <div class="flex items-center gap-1.5 text-xs font-heading font-extrabold text-amber-700 dark:text-amber-400">
+            <span class="material-symbols-outlined text-[16px]">account_balance</span>
+            <span>Rekening Resmi Pembayaran RASH:</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-stone-800 border border-amber-500/10">
+              <div>
+                <span class="font-bold text-stone-800 dark:text-white">BCA:</span>
+                <span class="font-mono ml-1 font-extrabold text-amber-600 dark:text-amber-400">123-456-7890</span>
+                <div class="text-[10px] text-stone-500">a.n RASH WebApp Builder</div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-stone-800 border border-amber-500/10">
+              <div>
+                <span class="font-bold text-stone-800 dark:text-white">Mandiri:</span>
+                <span class="font-mono ml-1 font-extrabold text-amber-600 dark:text-amber-400">137-00-1234567-8</span>
+                <div class="text-[10px] text-stone-500">a.n RASH WebApp Builder</div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-stone-800 border border-amber-500/10">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-stone-800 dark:text-white">QRIS:</span>
+                <span class="text-xs text-stone-600 dark:text-stone-300">QRIS Statis RASH</span>
+                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-100 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded">Semua E-Wallet / Bank</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Konfirmasi Transfer -->
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-heading font-bold text-stone-700 dark:text-stone-300 mb-1">
+              Nama Pengirim (Pemilik Rekening / Akun) <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="paymentSenderName" placeholder="Contoh: Budi Hartono" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white text-xs focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-heading font-bold text-stone-700 dark:text-stone-300 mb-1">
+              Bank / E-Wallet Pengirim <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="paymentSenderBank" placeholder="Contoh: BCA, Mandiri, BRI, GoPay, Dana" class="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white text-xs focus:ring-2 focus:ring-amber-500 focus:outline-hidden" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-heading font-bold text-stone-700 dark:text-stone-300 mb-1">
+              Unggah Foto Bukti Transfer / Struk <span class="text-red-500">*</span>
+            </label>
+            <input type="file" id="paymentProofFile" accept="image/*" onchange="handlePaymentProofFileSelect(event)" class="w-full text-xs text-stone-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 dark:file:bg-amber-950/50 dark:file:text-amber-400" />
+            
+            <!-- Image Preview Box -->
+            <div id="paymentProofPreview" class="mt-2 min-h-[60px] p-2 rounded-xl border border-dashed border-stone-300 dark:border-stone-700 flex items-center justify-center text-[11px] text-stone-400">
+              Belum ada foto bukti yang dipilih
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50">
+        <button type="button" onclick="closePaymentCheckoutModal()" class="touch-btn px-4 py-2.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-heading font-bold text-xs">
+          Batal
+        </button>
+        <button type="button" id="btnSubmitPaymentProof" onclick="submitPaymentProofForm()" class="touch-btn px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-heading font-black text-xs shadow-md flex items-center gap-2 transition-all">
+          <span class="material-symbols-outlined text-[18px]">send</span>
+          <span id="btnSubmitPaymentLabel">Kirim Bukti Pembayaran</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Shared Data & Logic Scripts -->
   <script src="assets/js/resto-data.js?v=2.7.0"></script>
   <script src="assets/js/resto-config.js?v=2.7.0"></script>
@@ -1753,6 +1921,7 @@
       renderOwnerTables();
       updateLicenseBannerUI();
       updateProFeatureLockUI();
+      checkTenantPaymentStatus();
 
       // Listen to real-time events across windows
       RestoSync.on("ORDER_PAID", () => {
@@ -1769,6 +1938,7 @@
         updateLicenseBannerUI();
         renderOwnerTables();
         updateProFeatureLockUI();
+        checkTenantPaymentStatus();
       });
 
       RestoSync.on("TENANTS_UPDATED", () => {
@@ -1779,6 +1949,11 @@
         updateLicenseBannerUI();
         renderOwnerTables();
         updateProFeatureLockUI();
+        checkTenantPaymentStatus();
+      });
+
+      RestoSync.on("OPEN_PAYMENT_MODAL", (data) => {
+        openPaymentCheckoutModal(data && data.plan ? data.plan : "monthly");
       });
 
       RestoSync.on("TRANSACTION_SAVED", () => {
@@ -3707,6 +3882,250 @@ BEGIN
 END $$;
 `;
       downloadTextFile(sql, "SETUP_SUPABASE_RESTO_PRO.sql", "application/sql");
+    }
+
+    // ============================================================
+    // MODAL CHECKOUT PEMBAYARAN & UPLOAD BUKTI (TAHAP 2)
+    // ============================================================
+    let _selectedPaymentPlan = "monthly";
+    let _currentPaymentProofBase64 = "";
+    let _currentPaymentProofMimeType = "image/jpeg";
+    let _currentPaymentProofFileName = "";
+
+    function setPaymentPlan(plan) {
+      _selectedPaymentPlan = plan === "lifetime" ? "lifetime" : "monthly";
+      const monthlyRadio = document.getElementById("planMonthly");
+      const lifetimeRadio = document.getElementById("planLifetime");
+      const priceDisplay = document.getElementById("paymentPlanPrice");
+
+      if (monthlyRadio) monthlyRadio.checked = (_selectedPaymentPlan === "monthly");
+      if (lifetimeRadio) lifetimeRadio.checked = (_selectedPaymentPlan === "lifetime");
+
+      const cardMonthly = document.getElementById("planCardMonthly");
+      const cardLifetime = document.getElementById("planCardLifetime");
+
+      if (cardMonthly) {
+        if (_selectedPaymentPlan === "monthly") {
+          cardMonthly.className = "relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all border-amber-500 bg-amber-50/30 dark:bg-amber-950/20";
+        } else {
+          cardMonthly.className = "relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all border-stone-200 dark:border-stone-700 hover:border-amber-400";
+        }
+      }
+
+      if (cardLifetime) {
+        if (_selectedPaymentPlan === "lifetime") {
+          cardLifetime.className = "relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all border-amber-500 bg-amber-50/30 dark:bg-amber-950/20";
+        } else {
+          cardLifetime.className = "relative flex flex-col p-3.5 rounded-2xl border-2 cursor-pointer transition-all border-stone-200 dark:border-stone-700 hover:border-amber-400";
+        }
+      }
+
+      if (priceDisplay) {
+        priceDisplay.textContent = _selectedPaymentPlan === "lifetime" ? "Rp 2.999.000" : "Rp 199.000";
+      }
+    }
+
+    function openPaymentCheckoutModal(defaultPlan = "monthly") {
+      const modal = document.getElementById("paymentCheckoutModal");
+      if (!modal) return;
+      setPaymentPlan(defaultPlan || "monthly");
+      modal.classList.remove("hidden");
+    }
+
+    function closePaymentCheckoutModal() {
+      const modal = document.getElementById("paymentCheckoutModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function handlePaymentProofFileSelect(event) {
+      const file = (event && event.target && event.target.files && event.target.files[0]) ? event.target.files[0] : null;
+      if (!file) return;
+
+      _currentPaymentProofFileName = file.name || "bukti_transfer.jpg";
+      _currentPaymentProofMimeType = file.type || "image/jpeg";
+
+      const preview = document.getElementById("paymentProofPreview");
+
+      if (file._base64Mock) {
+        _currentPaymentProofBase64 = file._base64Mock;
+        if (preview) {
+          preview.innerHTML = `<img src="${_currentPaymentProofBase64}" class="max-h-36 rounded-lg mx-auto shadow-xs" alt="Preview Bukti" />`;
+        }
+        return;
+      }
+
+      if (typeof FileReader !== "undefined") {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const rawDataUrl = e.target.result;
+          if (typeof Image !== "undefined" && typeof document.createElement === "function") {
+            const img = new Image();
+            img.onload = function() {
+              try {
+                const canvas = document.createElement("canvas");
+                let width = img.width || 800;
+                let height = img.height || 600;
+                const maxDim = 1280;
+                if (width > maxDim || height > maxDim) {
+                  if (width > height) {
+                    height = Math.round((height * maxDim) / width);
+                    width = maxDim;
+                  } else {
+                    width = Math.round((width * maxDim) / height);
+                    height = maxDim;
+                  }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (ctx && typeof ctx.drawImage === "function") {
+                  ctx.drawImage(img, 0, 0, width, height);
+                  const compressedUrl = canvas.toDataURL("image/jpeg", 0.85);
+                  _currentPaymentProofBase64 = compressedUrl;
+                  if (preview) {
+                    preview.innerHTML = `<img src="${compressedUrl}" class="max-h-36 rounded-lg mx-auto shadow-xs" alt="Preview Bukti" />`;
+                  }
+                  return;
+                }
+              } catch (err) {}
+              _currentPaymentProofBase64 = rawDataUrl;
+              if (preview) {
+                preview.innerHTML = `<img src="${rawDataUrl}" class="max-h-36 rounded-lg mx-auto shadow-xs" alt="Preview Bukti" />`;
+              }
+            };
+            img.src = rawDataUrl;
+          } else {
+            _currentPaymentProofBase64 = rawDataUrl;
+            if (preview) {
+              preview.innerHTML = `<img src="${rawDataUrl}" class="max-h-36 rounded-lg mx-auto shadow-xs" alt="Preview Bukti" />`;
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function submitPaymentProofForm() {
+      const senderName = (document.getElementById("paymentSenderName")?.value || "").trim();
+      const senderBank = (document.getElementById("paymentSenderBank")?.value || "").trim();
+      const lic = (typeof RestoSync !== "undefined" && typeof RestoSync.getLicenseData === "function")
+        ? RestoSync.getLicenseData()
+        : { tenantId: "default" };
+
+      const tenantId = (lic && lic.tenantId) ? lic.tenantId : (localStorage.getItem("resto_current_tenant_id") || "default");
+
+      if (!senderName) {
+        alert("Mohon masukkan nama pengirim transfer!");
+        return;
+      }
+      if (!senderBank) {
+        alert("Mohon masukkan bank atau e-wallet pengirim!");
+        return;
+      }
+      if (!_currentPaymentProofBase64) {
+        alert("Mohon unggah foto bukti transfer terlebih dahulu!");
+        return;
+      }
+
+      const amount = _selectedPaymentPlan === "lifetime" ? 2999000 : 199000;
+      const payload = {
+        tenantId: tenantId,
+        plan: _selectedPaymentPlan,
+        amount: amount,
+        senderName: senderName,
+        senderBank: senderBank,
+        bankTarget: "BCA",
+        imageBase64: _currentPaymentProofBase64,
+        imageMimeType: _currentPaymentProofMimeType,
+        fileName: _currentPaymentProofFileName
+      };
+
+      const submitBtn = document.getElementById("btnSubmitPaymentProof");
+      const submitLabel = document.getElementById("btnSubmitPaymentLabel");
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitLabel) submitLabel.textContent = "Mengunggah Bukti...";
+
+      return RestoSync.submitPaymentProof(payload)
+        .then(res => {
+          if (res && res.success) {
+            closePaymentCheckoutModal();
+            alert("Bukti transfer berhasil dikirim! Tim Admin RASH akan segera memverifikasi pembayaran Anda.");
+            renderPaymentStatusUI({
+              status: "pending",
+              plan: _selectedPaymentPlan,
+              amount: amount
+            });
+          } else {
+            alert("Gagal mengunggah bukti: " + ((res && res.message) || "Terjadi kesalahan sistem."));
+          }
+          return res;
+        })
+        .catch(err => {
+          alert("Terjadi kendala jaringan saat mengunggah bukti transfer. Silakan periksa koneksi internet Anda.");
+          throw err;
+        })
+        .finally(() => {
+          if (submitBtn) submitBtn.disabled = false;
+          if (submitLabel) submitLabel.textContent = "Kirim Bukti Pembayaran";
+        });
+    }
+
+    function renderPaymentStatusUI(payment) {
+      const banner = document.getElementById("paymentStatusBanner");
+      if (!banner) return;
+
+      if (!payment || !payment.status || payment.status === "verified" || payment.status === "approved") {
+        banner.classList.add("hidden");
+        return;
+      }
+
+      const iconContainer = document.getElementById("paymentStatusIconContainer");
+      const icon = document.getElementById("paymentStatusIcon");
+      const title = document.getElementById("paymentStatusTitle");
+      const desc = document.getElementById("paymentStatusDesc");
+      const reuploadBtn = document.getElementById("btnReuploadPaymentProof");
+
+      if (payment.status === "pending") {
+        banner.className = "rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border bg-amber-500/10 dark:bg-amber-950/40 border-amber-500/30 text-amber-900 dark:text-amber-200";
+        if (iconContainer) iconContainer.className = "w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0";
+        if (icon) icon.textContent = "hourglass_top";
+        if (title) title.textContent = "Menunggu Verifikasi Pembayaran";
+        if (desc) desc.textContent = "Bukti transfer Anda sedang diverifikasi oleh Tim Admin RASH. Mohon tunggu konfirmasi.";
+        if (reuploadBtn) reuploadBtn.classList.add("hidden");
+        banner.classList.remove("hidden");
+      } else if (payment.status === "rejected") {
+        banner.className = "rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border bg-red-500/10 dark:bg-red-950/40 border-red-500/40 text-red-900 dark:text-red-200";
+        if (iconContainer) iconContainer.className = "w-10 h-10 rounded-xl bg-red-500/20 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0";
+        if (icon) icon.textContent = "cancel";
+        if (title) title.textContent = "Pembayaran Ditolak";
+        const reason = payment.rejectReason ? `: ${payment.rejectReason}` : "";
+        if (desc) desc.textContent = `Bukti transfer sebelumnya ditolak${reason}. Silakan periksa kembali dan unggah bukti yang valid.`;
+        if (reuploadBtn) reuploadBtn.classList.remove("hidden");
+        banner.classList.remove("hidden");
+      }
+    }
+
+    function checkTenantPaymentStatus() {
+      const lic = (typeof RestoSync !== "undefined" && typeof RestoSync.getLicenseData === "function")
+        ? RestoSync.getLicenseData()
+        : { tenantId: "default" };
+      const tenantId = (lic && lic.tenantId) ? lic.tenantId : (localStorage.getItem("resto_current_tenant_id") || "default");
+
+      if (!tenantId || tenantId === "default" || (lic && lic.isMaster)) {
+        return Promise.resolve(null);
+      }
+
+      return RestoSync.getTenantPaymentStatus(tenantId)
+        .then(res => {
+          if (res && res.success && res.latestPayment) {
+            renderPaymentStatusUI(res.latestPayment);
+            return res.latestPayment;
+          } else {
+            renderPaymentStatusUI(null);
+            return null;
+          }
+        })
+        .catch(() => null);
     }
   </script>
 </body>
