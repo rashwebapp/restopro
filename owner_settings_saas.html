@@ -49,6 +49,17 @@
 
   <!-- Resto Pro Shared Design Styles -->
   <link rel="stylesheet" href="assets/css/resto-theme.css">
+  <style>
+    /* Pro Feature Locked Overlay styling */
+    .pro-feature-locked-overlay {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    .dark .pro-feature-locked-overlay {
+      background: rgba(15, 23, 42, 0.90);
+    }
+  </style>
 </head>
 <body class="bg-[#FAF7F2] dark:bg-[#0F172A] text-[#1C1917] dark:text-[#F8FAFC] min-h-screen flex flex-col font-body antialiased transition-colors duration-200">
 
@@ -553,9 +564,10 @@
           </div>
 
           <!-- Export CSV Button -->
-          <button onclick="exportActiveLedgerCSV()" class="touch-btn px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center gap-1.5 shadow-sm">
+          <button id="btnExportCsvLedger" onclick="exportActiveLedgerCSV()" class="touch-btn px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center gap-1.5 shadow-sm">
             <span class="material-symbols-outlined text-[16px]">download</span>
             <span>Export Excel / CSV</span>
+            <span id="badgeExportCsvPro" class="hidden bg-amber-400 text-stone-900 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider ml-1 shadow-xs">PRO</span>
           </button>
         </div>
       </div>
@@ -959,7 +971,7 @@
               Ekspor seluruh data transaksi kasir, katalog hidangan dinamis, data pelanggan CRM, dan reservasi meja ke file JSON aman.
             </p>
           </div>
-          <button onclick="RestoSync.backupFullDatabaseJSON()" class="touch-btn w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+          <button onclick="handleBackupFullDatabase()" class="touch-btn w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
             <span class="material-symbols-outlined text-[16px]">file_download</span>
             <span>Unduh Cadangan JSON</span>
           </button>
@@ -1740,6 +1752,7 @@
       renderOwnerReservationsTable();
       renderOwnerTables();
       updateLicenseBannerUI();
+      updateProFeatureLockUI();
 
       // Listen to real-time events across windows
       RestoSync.on("ORDER_PAID", () => {
@@ -1755,6 +1768,7 @@
       RestoSync.on("LICENSE_STATUS_CHANGED", () => {
         updateLicenseBannerUI();
         renderOwnerTables();
+        updateProFeatureLockUI();
       });
 
       RestoSync.on("TENANTS_UPDATED", () => {
@@ -1764,6 +1778,7 @@
         applyOwnerTenantBranding();
         updateLicenseBannerUI();
         renderOwnerTables();
+        updateProFeatureLockUI();
       });
 
       RestoSync.on("TRANSACTION_SAVED", () => {
@@ -1896,6 +1911,12 @@
     }
 
     function exportActiveLedgerCSV() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.isFeatureAllowed === "function") {
+        if (!RestoSync.isFeatureAllowed("export_ledger")) {
+          RestoSync.showProFeatureLockedModal("Ekspor Pembukuan Keuangan");
+          return;
+        }
+      }
       const payFilter = document.getElementById("ledgerPaymentSelect") ? document.getElementById("ledgerPaymentSelect").value : "all";
       const filterOptions = {
         preset: activeDatePreset,
@@ -2428,6 +2449,12 @@
     }
 
     function openMemberModal(memberId = null) {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.isFeatureAllowed === "function") {
+        if (!RestoSync.isFeatureAllowed("crm_members")) {
+          RestoSync.showProFeatureLockedModal("CRM Pelanggan & Loyalty Points");
+          return;
+        }
+      }
       const modal = document.getElementById("memberModal");
       const title = document.getElementById("memberModalTitle");
       const form = document.getElementById("memberForm");
@@ -2698,6 +2725,158 @@
         );
         conciergeWaBtn.href = `https://wa.me/${adminWaNumber}?text=${conciergeMsg}`;
       }
+
+      updateProFeatureLockUI();
+    }
+
+    function updateProFeatureLockUI() {
+      if (typeof RestoSync === "undefined") return;
+
+      const PRO_MODULES = [
+        {
+          id: "sectionAnalyticsBI",
+          featureId: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.ANALYTICS_BI && RestoSync.RESTO_PRO_FEATURES.ANALYTICS_BI.id) || "analytics_bi",
+          featureName: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.ANALYTICS_BI && RestoSync.RESTO_PRO_FEATURES.ANALYTICS_BI.name) || "Analitik Bisnis & Margin Laba"
+        },
+        {
+          id: "sectionCrmMembers",
+          featureId: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.CRM_MEMBERS && RestoSync.RESTO_PRO_FEATURES.CRM_MEMBERS.id) || "crm_members",
+          featureName: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.CRM_MEMBERS && RestoSync.RESTO_PRO_FEATURES.CRM_MEMBERS.name) || "CRM Pelanggan & Loyalty Points"
+        },
+        {
+          id: "sectionReservations",
+          featureId: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.RESERVATIONS && RestoSync.RESTO_PRO_FEATURES.RESERVATIONS.id) || "reservations",
+          featureName: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.RESERVATIONS && RestoSync.RESTO_PRO_FEATURES.RESERVATIONS.name) || "Manajemen Reservasi Meja Restoran"
+        },
+        {
+          id: "sectionBackupRestore",
+          featureId: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.BACKUP_RESTORE && RestoSync.RESTO_PRO_FEATURES.BACKUP_RESTORE.id) || "backup_restore",
+          featureName: (RestoSync.RESTO_PRO_FEATURES && RestoSync.RESTO_PRO_FEATURES.BACKUP_RESTORE && RestoSync.RESTO_PRO_FEATURES.BACKUP_RESTORE.name) || "Backup & Restore Database Penuh"
+        }
+      ];
+
+      PRO_MODULES.forEach(mod => {
+        const section = document.getElementById(mod.id);
+        if (!section) return;
+
+        const isAllowed = typeof RestoSync.isFeatureAllowed === "function" ? RestoSync.isFeatureAllowed(mod.featureId) : true;
+
+        if (!isAllowed) {
+          section.setAttribute("data-pro-locked", "true");
+          section.classList.add("relative");
+          section.classList.add("overflow-hidden");
+
+          // Find or create overlay
+          let overlay = null;
+          if (typeof section.querySelector === "function") {
+            overlay = section.querySelector(".pro-feature-locked-overlay");
+          }
+          if (!overlay) {
+            overlay = document.getElementById("overlay-" + mod.id);
+          }
+
+          if (!overlay) {
+            overlay = document.createElement("div");
+            overlay.id = "overlay-" + mod.id;
+            overlay.className = "pro-feature-locked-overlay absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-white/85 dark:bg-[#0F172A]/90 backdrop-blur-sm rounded-3xl text-center space-y-3 transition-all";
+            const safeName = typeof escapeHtmlSafe === "function" ? escapeHtmlSafe(mod.featureName) : mod.featureName;
+            overlay.innerHTML = `
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-500 flex items-center justify-center shadow-inner">
+                <span class="material-symbols-outlined text-[28px]">lock</span>
+              </div>
+              <h3 class="font-heading font-extrabold text-base sm:text-lg text-[#1C1917] dark:text-white">
+                Fitur Khusus Resto Pro Berbayar
+              </h3>
+              <p class="text-xs text-stone-600 dark:text-stone-300 max-w-md leading-relaxed">
+                Modul <span class="font-bold text-amber-600 dark:text-amber-400">${safeName}</span> tersedia eksklusif untuk paket Bulanan & Lifetime.
+              </p>
+              <button type="button" id="btn-unlock-${mod.id}" onclick="RestoSync.showProFeatureLockedModal('${safeName}')" class="btn-unlock-pro px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md transition-all cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">verified</span>
+                <span>Buka Akses Pro Sekarang</span>
+              </button>
+            `;
+            section.appendChild(overlay);
+
+            const unlockBtn = document.getElementById("btn-unlock-" + mod.id) || (typeof overlay.querySelector === "function" && overlay.querySelector(".btn-unlock-pro"));
+            if (unlockBtn) {
+              unlockBtn.onclick = function(e) {
+                if (e && e.preventDefault) e.preventDefault();
+                if (e && e.stopPropagation) e.stopPropagation();
+                if (typeof RestoSync.showProFeatureLockedModal === "function") {
+                  RestoSync.showProFeatureLockedModal(mod.featureName);
+                }
+              };
+            }
+          } else {
+            if (overlay.classList) overlay.classList.remove("hidden");
+          }
+
+          // Disable buttons and interactive inputs inside the locked section (except unlock buttons)
+          let controls = [];
+          if (typeof section.querySelectorAll === "function") {
+            controls = section.querySelectorAll("button, input, select, textarea");
+          }
+          for (let i = 0; i < controls.length; i++) {
+            const ctrl = controls[i];
+            if (ctrl.classList && ctrl.classList.contains("btn-unlock-pro")) continue;
+            if (ctrl.id && ctrl.id.indexOf("btn-unlock-") === 0) continue;
+            ctrl.disabled = true;
+            ctrl.setAttribute("disabled", "true");
+          }
+        } else {
+          section.setAttribute("data-pro-locked", "false");
+          let overlay = null;
+          if (typeof section.querySelector === "function") {
+            overlay = section.querySelector(".pro-feature-locked-overlay");
+          }
+          if (!overlay) {
+            overlay = document.getElementById("overlay-" + mod.id);
+          }
+          if (overlay) {
+            if (typeof overlay.remove === "function") {
+              overlay.remove();
+            } else if (overlay.parentNode && typeof overlay.parentNode.removeChild === "function") {
+              overlay.parentNode.removeChild(overlay);
+            }
+          }
+
+          // Re-enable controls inside section
+          let controls = [];
+          if (typeof section.querySelectorAll === "function") {
+            controls = section.querySelectorAll("button, input, select, textarea");
+          }
+          for (let i = 0; i < controls.length; i++) {
+            const ctrl = controls[i];
+            ctrl.disabled = false;
+            ctrl.removeAttribute("disabled");
+          }
+        }
+      });
+
+      // Partial section: #sectionLedger
+      const secLedger = document.getElementById("sectionLedger");
+      if (secLedger) {
+        secLedger.setAttribute("data-pro-locked", "false");
+        let overlayLedger = null;
+        if (typeof secLedger.querySelector === "function") {
+          overlayLedger = secLedger.querySelector(".pro-feature-locked-overlay");
+        }
+        if (overlayLedger) {
+          if (typeof overlayLedger.remove === "function") overlayLedger.remove();
+          else if (overlayLedger.parentNode) overlayLedger.parentNode.removeChild(overlayLedger);
+        }
+      }
+
+      // Export CSV Button gating
+      const exportAllowed = typeof RestoSync.isFeatureAllowed === "function" ? RestoSync.isFeatureAllowed("export_ledger") : true;
+      const proBadge = document.getElementById("badgeExportCsvPro");
+      if (proBadge) {
+        if (!exportAllowed) {
+          proBadge.classList.remove("hidden");
+        } else {
+          proBadge.classList.add("hidden");
+        }
+      }
     }
 
     function handleActivateToken() {
@@ -2717,6 +2896,7 @@
         if (feedback) feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✅ ${escapeHtmlSafe(res.message)}</span>`;
         updateLicenseBannerUI();
         renderOwnerTables();
+        updateProFeatureLockUI();
         alert(res.message);
       } else {
         if (feedback) feedback.innerHTML = `<span class="text-red-500 font-bold">❌ ${escapeHtmlSafe(res.message)}</span>`;
@@ -2737,6 +2917,7 @@
       }
       updateLicenseBannerUI();
       renderOwnerTables();
+      updateProFeatureLockUI();
     }
 
     function saveFinancialSettings() {
@@ -2877,6 +3058,12 @@
     }
 
     function openOwnerAddReservationModal() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.isFeatureAllowed === "function") {
+        if (!RestoSync.isFeatureAllowed("reservations")) {
+          RestoSync.showProFeatureLockedModal("Manajemen Reservasi Meja Restoran");
+          return;
+        }
+      }
       const modal = document.getElementById("ownerReservationModal");
       const dateInput = document.getElementById("ownerResDate");
       if (dateInput && !dateInput.value) {
@@ -3123,7 +3310,23 @@
     // ============================================================
     // 6. BACKUP & RESTORE DATABASE JSON
     // ============================================================
+    function handleBackupFullDatabase() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.isFeatureAllowed === "function") {
+        if (!RestoSync.isFeatureAllowed("backup_restore")) {
+          RestoSync.showProFeatureLockedModal("Backup & Restore Database Penuh");
+          return;
+        }
+      }
+      RestoSync.backupFullDatabaseJSON();
+    }
+
     function triggerRestoreFileInput() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.isFeatureAllowed === "function") {
+        if (!RestoSync.isFeatureAllowed("backup_restore")) {
+          RestoSync.showProFeatureLockedModal("Backup & Restore Database Penuh");
+          return;
+        }
+      }
       const input = document.getElementById("restoreFileInput");
       if (input) input.click();
     }
