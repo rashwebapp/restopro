@@ -44,6 +44,15 @@ const RestoSync = {
     }
   },
 
+  RESTO_PRO_FEATURES: {
+    ANALYTICS_BI: { id: "analytics_bi", name: "Analitik Bisnis & Margin Laba" },
+    CRM_MEMBERS: { id: "crm_members", name: "CRM Pelanggan & Loyalty Points" },
+    RESERVATIONS: { id: "reservations", name: "Manajemen Reservasi Meja Restoran" },
+    EXPORT_LEDGER: { id: "export_ledger", name: "Ekspor Pembukuan Keuangan CSV/Excel" },
+    BACKUP_RESTORE: { id: "backup_restore", name: "Backup & Restore Database Penuh" },
+    TABLES_EXPANSION: { id: "tables_expansion", name: "Kapasitas Meja > 4 Meja Aktif" }
+  },
+
   _safeWarn(msg, err) {
     try {
       if (typeof console !== "undefined" && typeof console.warn === "function") {
@@ -2952,6 +2961,24 @@ const RestoSync = {
     return Boolean(this.getLicenseData().isPro);
   },
 
+  isFeatureAllowed(featureId) {
+    const lic = this.getLicenseData();
+    // Fitur pro hanya terbuka jika Master akun atau Tenant berstatus Paid Active (Bulanan / Lifetime)
+    const hasProAccess = Boolean(lic && (lic.isMaster === true || lic.isPaidActive === true));
+    if (!hasProAccess) {
+      return false;
+    }
+
+    const cleanId = (typeof featureId === "object" && featureId !== null && featureId.id)
+      ? String(featureId.id).toLowerCase().trim()
+      : String(featureId || "").toLowerCase().trim();
+
+    if (cleanId === "tables_expansion") {
+      return this.canAddTable();
+    }
+    return true;
+  },
+
   canAddTable() {
     const lic = this.getLicenseData();
     const tables = this.getTables();
@@ -3015,8 +3042,28 @@ const RestoSync = {
     return freeLic;
   },
 
-  showProFeatureLockedModal(featureName, description) {
+  triggerProUpgrade(featureName, options = {}) {
+    const modal = (typeof document !== "undefined") ? document.getElementById("proFeatureLockModal") : null;
+    if (modal && modal.classList) {
+      modal.classList.add("hidden");
+    }
+    const payload = Object.assign({ feature: featureName || "Resto Pro" }, typeof options === "object" ? options : {});
+    this.emit("OPEN_PAYMENT_MODAL", payload);
+    if (typeof window !== "undefined" && typeof window.openPaymentCheckoutModal === "function") {
+      try {
+        window.openPaymentCheckoutModal(payload);
+      } catch (e) {
+        this._safeWarn("Gagal memanggil openPaymentCheckoutModal:", e);
+      }
+    }
+  },
+
+  showProFeatureLockedModal(featureName, options) {
     if (typeof document === "undefined" || !document.body) return;
+    const opts = typeof options === "string" ? { description: options } : (options || {});
+    const descText = opts.description || "Fitur bernilai tinggi ini khusus untuk restoran berlisensi Resto Pro Berbayar (Paket Bulanan atau Lifetime).";
+    const titleText = featureName || "Fitur Resto Pro Premium";
+
     let modal = document.getElementById("proFeatureLockModal");
     if (!modal) {
       const div = document.createElement("div");
@@ -3029,36 +3076,38 @@ const RestoSync = {
               <span class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-bold">
                 <span class="material-symbols-outlined text-[20px]">lock</span>
               </span>
-              <h3 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white" id="proModalFeatureTitle">Fitur Resto Pro Enterprise</h3>
+              <h3 class="font-heading font-extrabold text-base text-[#1C1917] dark:text-white" id="proModalFeatureTitle">Fitur Resto Pro Premium</h3>
             </div>
             <button onclick="document.getElementById('proFeatureLockModal').classList.add('hidden')" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
               <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
           </div>
           <p class="text-xs text-stone-600 dark:text-stone-300 leading-relaxed" id="proModalFeatureDesc">
-            Fitur ini khusus untuk restoran berlisensi Resto Pro Enterprise.
+            Fitur ini khusus untuk restoran berlisensi Resto Pro Berbayar (Bulanan / Lifetime).
           </p>
-          <div class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+          <div class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 text-xs text-amber-800 dark:text-amber-300 space-y-1.5">
             <span class="font-heading font-bold block flex items-center gap-1">
               <span class="material-symbols-outlined text-[16px]">verified</span>
-              Keuntungan Paket Berbayar (Bulanan / Lifetime):
+              Keuntungan Paket Berbayar Resto Pro:
             </span>
             <ul class="list-disc list-inside space-y-0.5 text-[11px] text-stone-600 dark:text-stone-300">
-              <li>Kelola Meja Tanpa Batas (Unlimited Tables)</li>
-              <li>Analitik Jam Sibuk Heatmap & AI Smart Insights</li>
-              <li>Struk Belanja Digital Otomatis via WhatsApp</li>
-              <li>Database Cloud Google Sheets Tanpa Batas</li>
+              <li>Kapasitas Meja Tanpa Batas (Unlimited Tables)</li>
+              <li>Analitik Bisnis BI, Jam Sibuk & Margin Laba Harian</li>
+              <li>CRM Pelanggan & Loyalty Points Member Terpadu</li>
+              <li>Manajemen Reservasi Meja Restoran Terintegrasi</li>
+              <li>Ekspor Pembukuan Keuangan CSV / Excel Lengkap</li>
+              <li>Backup & Restore Database Cloud Google Sheets Penuh</li>
             </ul>
           </div>
-          <div class="space-y-2 pt-1">
-            <a href="https://wa.me/6282286452105?text=Halo%20Admin%20RASH%20Resto%20Pro%2C%20saya%20ingin%20upgrade%20ke%20Paket%20Berbayar%20(Bulanan%20%2F%20Lifetime)" target="_blank" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md">
+          <div class="space-y-2 pt-2">
+            <button id="btnProModalUpgrade" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md transition-all">
+              <span class="material-symbols-outlined text-[18px]">verified</span>
+              <span>Langganan / Upgrade ke Resto Pro</span>
+            </button>
+            <a id="btnProModalWhatsApp" href="https://wa.me/6285174273313?text=Halo%20Admin%20RASH%20Resto%20Pro%2C%20saya%20ingin%20konsultasi%20upgrade%20ke%20Paket%20Resto%20Pro%20(Bulanan%20%2F%20Lifetime)" target="_blank" class="w-full py-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-700 dark:text-stone-200 hover:text-amber-500 font-heading font-bold text-xs flex items-center justify-center gap-1.5 transition-all">
               <span class="material-symbols-outlined text-[18px]">chat</span>
               <span>Hubungi Admin RASH via WhatsApp</span>
             </a>
-            <div class="flex items-center gap-1.5 pt-2 border-t border-stone-200 dark:border-stone-800">
-              <input type="text" id="proModalTokenInput" placeholder="Punya Token? Masukkan di sini..." class="flex-1 px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono text-[#1C1917] dark:text-white outline-none" />
-              <button onclick="RestoSync.verifyFromModal()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs whitespace-nowrap">Aktifkan</button>
-            </div>
           </div>
         </div>
       `;
@@ -3068,22 +3117,32 @@ const RestoSync = {
 
     const titleEl = document.getElementById("proModalFeatureTitle");
     const descEl = document.getElementById("proModalFeatureDesc");
-    if (titleEl) titleEl.textContent = featureName || "Fitur Resto Pro Enterprise";
-    if (descEl) descEl.textContent = description || "Fitur ini khusus untuk pengguna berlisensi Resto Pro Enterprise.";
+    if (titleEl) titleEl.textContent = titleText;
+    if (descEl) descEl.textContent = descText;
+
+    const upgradeBtn = document.getElementById("btnProModalUpgrade");
+    if (upgradeBtn) {
+      upgradeBtn.onclick = (e) => {
+        if (e && typeof e.preventDefault === "function") e.preventDefault();
+        this.triggerProUpgrade(titleText, opts);
+      };
+    }
+
     if (modal.classList) modal.classList.remove("hidden");
   },
 
   verifyFromModal() {
-    const input = document.getElementById("proModalTokenInput");
+    const input = (typeof document !== "undefined") ? document.getElementById("proModalTokenInput") : null;
     if (!input || !input.value.trim()) {
-      alert("Silakan masukkan token lisensi terlebih dahulu!");
+      this.triggerProUpgrade();
       return;
     }
     const res = this.verifyLicenseToken(input.value.trim());
-    alert(res.message);
+    if (typeof alert === "function") alert(res.message);
     if (res.success) {
-      document.getElementById("proFeatureLockModal").classList.add("hidden");
-      location.reload();
+      const modal = document.getElementById("proFeatureLockModal");
+      if (modal && modal.classList) modal.classList.add("hidden");
+      if (typeof location !== "undefined" && typeof location.reload === "function") location.reload();
     }
   },
 
@@ -3873,6 +3932,214 @@ const RestoSync = {
 
     clearOverlay();
     return { blocked: false, isMaster: false, reason: null, tenantId: tenantId };
+  },
+
+  // ============================================================
+  // CLIENT REST API PEMBAYARAN SAAS (TAHAP 2)
+  // ============================================================
+
+  _getCloudEndpoint() {
+    const master = this.getMasterCloudConfig();
+    const gasUrl = (master && master.gasUrl) ? master.gasUrl : (typeof this.getGasUrl === "function" ? this.getGasUrl() : "");
+    const apiKey = (master && master.apiKey) ? master.apiKey : (typeof this.getGasApiKey === "function" ? this.getGasApiKey() : "");
+    return { gasUrl, apiKey };
+  },
+
+  async submitPaymentProof(payload = {}) {
+    try {
+      const { gasUrl } = this._getCloudEndpoint();
+      if (!gasUrl || typeof fetch !== "function") {
+        return {
+          success: false,
+          offline: true,
+          error: "URL cloud backend Google Apps Script belum dikonfigurasi atau sedang offline."
+        };
+      }
+
+      const tenantId = (payload && payload.tenantId) ? payload.tenantId : this.getTenantId();
+      const bodyPayload = {
+        action: "submitPaymentProof",
+        tenantId: tenantId,
+        plan: (payload && payload.plan) || "monthly",
+        amount: Number(payload && payload.amount) || 0,
+        bankTarget: (payload && payload.bankTarget) || "",
+        senderName: (payload && payload.senderName) || "",
+        senderBank: (payload && payload.senderBank) || "",
+        imageBase64: (payload && payload.imageBase64) || "",
+        imageMimeType: (payload && payload.imageMimeType) || "image/jpeg",
+        fileName: (payload && payload.fileName) || `bukti_${tenantId}_${Date.now()}.jpg`,
+        data: Object.assign({}, payload, { tenantId: tenantId }),
+        timestamp: Date.now()
+      };
+
+      const res = await fetch(gasUrl, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(bodyPayload)
+      });
+
+      if (!res || !res.ok) {
+        return {
+          success: false,
+          offline: true,
+          status: res ? res.status : 0,
+          error: "Server pembayaran tidak merespons (HTTP " + (res ? res.status : 0) + ")"
+        };
+      }
+
+      const json = await res.json();
+      return json || { success: false, error: "Respons server kosong" };
+    } catch (e) {
+      this._safeWarn("Gagal mengirim bukti pembayaran:", e);
+      return {
+        success: false,
+        offline: true,
+        error: e && e.message ? e.message : String(e)
+      };
+    }
+  },
+
+  async getTenantPaymentStatus(tenantId) {
+    try {
+      const { gasUrl } = this._getCloudEndpoint();
+      if (!gasUrl || typeof fetch !== "function") {
+        return {
+          success: false,
+          offline: true,
+          latestPayment: null,
+          error: "Cloud offline"
+        };
+      }
+
+      const targetId = tenantId || this.getTenantId();
+      const sep = gasUrl.includes("?") ? "&" : "?";
+      const fetchUrl = `${gasUrl}${sep}action=getTenantPaymentStatus&tenantId=${encodeURIComponent(targetId)}&_t=${Date.now()}`;
+
+      const res = await fetch(fetchUrl, {
+        method: "GET",
+        mode: "cors"
+      });
+
+      if (!res || !res.ok) {
+        return {
+          success: false,
+          offline: true,
+          latestPayment: null,
+          status: res ? res.status : 0
+        };
+      }
+
+      const json = await res.json();
+      return json || { success: false, latestPayment: null };
+    } catch (e) {
+      this._safeWarn("Gagal mengambil status pembayaran tenant:", e);
+      return {
+        success: false,
+        offline: true,
+        latestPayment: null,
+        error: e && e.message ? e.message : String(e)
+      };
+    }
+  },
+
+  async getPaymentsAdmin(statusFilter = "all") {
+    try {
+      const { gasUrl, apiKey } = this._getCloudEndpoint();
+      if (!gasUrl || typeof fetch !== "function") {
+        return {
+          success: false,
+          offline: true,
+          payments: [],
+          error: "Cloud offline"
+        };
+      }
+
+      const sep = gasUrl.includes("?") ? "&" : "?";
+      let fetchUrl = `${gasUrl}${sep}action=getPayments&apiKey=${encodeURIComponent(apiKey)}&_t=${Date.now()}`;
+      if (statusFilter && statusFilter !== "all") {
+        fetchUrl += `&statusFilter=${encodeURIComponent(statusFilter)}`;
+      }
+
+      const res = await fetch(fetchUrl, {
+        method: "GET",
+        mode: "cors"
+      });
+
+      if (!res || !res.ok) {
+        return {
+          success: false,
+          offline: true,
+          payments: [],
+          status: res ? res.status : 0
+        };
+      }
+
+      const json = await res.json();
+      return json || { success: false, payments: [] };
+    } catch (e) {
+      this._safeWarn("Gagal mengambil data pembayaran admin:", e);
+      return {
+        success: false,
+        offline: true,
+        payments: [],
+        error: e && e.message ? e.message : String(e)
+      };
+    }
+  },
+
+  async verifyPaymentAdmin(paymentId, action = "approve", rejectReason = "") {
+    try {
+      const { gasUrl, apiKey } = this._getCloudEndpoint();
+      if (!gasUrl || typeof fetch !== "function") {
+        return {
+          success: false,
+          offline: true,
+          error: "Cloud offline"
+        };
+      }
+
+      const bodyPayload = {
+        action: "verifyPayment",
+        apiKey: apiKey,
+        paymentId: paymentId,
+        verifyAction: action,
+        decision: action,
+        rejectReason: rejectReason || "",
+        data: {
+          paymentId: paymentId,
+          action: action,
+          rejectReason: rejectReason || ""
+        },
+        timestamp: Date.now()
+      };
+
+      const res = await fetch(gasUrl, {
+        method: "POST",
+        mode: "cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(bodyPayload)
+      });
+
+      if (!res || !res.ok) {
+        return {
+          success: false,
+          offline: true,
+          status: res ? res.status : 0,
+          error: "Server pembayaran tidak merespons (HTTP " + (res ? res.status : 0) + ")"
+        };
+      }
+
+      const json = await res.json();
+      return json || { success: false, error: "Respons server kosong" };
+    } catch (e) {
+      this._safeWarn("Gagal memverifikasi pembayaran admin:", e);
+      return {
+        success: false,
+        offline: true,
+        error: e && e.message ? e.message : String(e)
+      };
+    }
   },
 
   getGasUrl() {
