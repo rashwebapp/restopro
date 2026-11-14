@@ -35,7 +35,8 @@ const CONFIG = {
     MEMBERS: 'Members',
     RESERVATIONS: 'Reservations',
     KDS: 'KdsTickets',
-    TENANTS: 'Tenants'
+    TENANTS: 'Tenants',
+    PAYMENTS: 'Payments'
   }
 };
 
@@ -46,6 +47,15 @@ const TENANT_HEADERS = [
   'id', 'name', 'pic', 'phone', 'cashierPhone', 'cashierPinHash', 'ownerPinHash',
   'city', 'plan', 'planName', 'price', 'originalPrice', 'billingCycle', 'tablesCount',
   'status', 'isLifetime', 'createdAt', 'expiresAt', 'updatedAt', 'gasUrl', 'apiKey', 'licenseKey'
+];
+
+/**
+ * Header Kolom Resmi Sheet 'Payments' (Direktori Pembayaran & Verifikasi Transfer)
+ */
+const PAYMENT_HEADERS = [
+  'id', 'tenantId', 'tenantName', 'plan', 'amount', 'bankTarget',
+  'proofFileId', 'proofUrl', 'senderName', 'senderBank', 'status',
+  'rejectReason', 'createdAt', 'verifiedAt', 'verifiedBy'
 ];
 
 /**
@@ -194,7 +204,12 @@ function doGet(e) {
     const providedApiKey = params.apiKey || params.key || '';
 
     // Pembagian Hak Akses: Aksi publik vs Aksi terproteksi
-    const isPublicAction = (action === 'ping' || action === 'getMenuCatalog' || action === 'getTenantPublicInfo');
+    const isPublicAction = (
+      action === 'ping' ||
+      action === 'getMenuCatalog' ||
+      action === 'getTenantPublicInfo' ||
+      action === 'getTenantPaymentStatus'
+    );
 
     if (!isPublicAction && !verifyAuthKey_(providedApiKey)) {
       return buildResponse({
@@ -240,6 +255,14 @@ function doGet(e) {
         result = handleGetAllTenants();
         break;
 
+      case 'getPayments':
+        result = handleGetPayments(params.statusFilter);
+        break;
+
+      case 'getTenantPaymentStatus':
+        result = handleGetTenantPaymentStatus(params.tenantId || params.id || '');
+        break;
+
       case 'getTransactions':
         result = { success: true, data: getRowsAsObjects(CONFIG.SHEET_NAMES.TRANSACTIONS) };
         break;
@@ -283,9 +306,13 @@ function doPost(e) {
     const providedApiKey = payload.apiKey || payload.key || '';
 
     // Pembagian Hak Akses POST:
-    // 'placeOrder' dan 'registerTrialTenant' adalah aksi publik
-    // Seluruh aksi mutasi lainnya (CRUD menu, hapus data, omset, CRM, simpan tenant) WAJIB API Secret Key!
-    const isPublicPost = (action === 'placeOrder' || action === 'registerTrialTenant');
+    // 'placeOrder', 'registerTrialTenant', dan 'submitPaymentProof' adalah aksi publik
+    // Seluruh aksi mutasi lainnya (CRUD menu, hapus data, omset, CRM, simpan tenant, verifikasi pembayaran) WAJIB API Secret Key!
+    const isPublicPost = (
+      action === 'placeOrder' ||
+      action === 'registerTrialTenant' ||
+      action === 'submitPaymentProof'
+    );
 
     if (!isPublicPost && !verifyAuthKey_(providedApiKey)) {
       return buildResponse({
@@ -312,6 +339,23 @@ function doPost(e) {
 
       case 'registerTrialTenant':
         result = handleRegisterTrialTenant(payload.data || payload);
+        break;
+
+      case 'submitPaymentProof':
+        result = handleSubmitPaymentProof(payload.data || payload);
+        break;
+
+      case 'verifyPayment':
+      case 'approve':
+      case 'reject':
+        if (action === 'approve' || action === 'reject') {
+          if (payload.data && typeof payload.data === 'object') {
+            payload.data.actionType = action;
+          } else {
+            payload.actionType = action;
+          }
+        }
+        result = handleVerifyPayment(payload.data || payload);
         break;
 
       case 'saveTransaction':
@@ -1047,6 +1091,417 @@ function handleRegisterTrialTenant(data) {
   };
 }
 
+// ------------------------------------------------------------------------------
+// PAYMENTS & BUKTI TRANSFER HANDLERS (TAHAP 2)
+// ------------------------------------------------------------------------------
+
+/**
+ * Helper Google Drive: Menyimpan file Base64 bukti pembayaran ke Google Drive
+ */
+function savePaymentProofToDrive_(imageBase64, imageMimeType, tenantId, customFileName) {
+  if (!imageBase64 || typeof imageBase64 !== 'string') {
+    throw new Error('Data gambar bukti pembayaran Base64 tidak ditemukan atau kosong');
+  }
+
+  let cleanBase64 = imageBase64;
+  if (cleanBase64.indexOf(',') !== -1) {
+    cleanBase64 = cleanBase64.split(',')[1];
+  }
+  cleanBase64 = cleanBase64.trim();
+
+  let mimeType = imageMimeType || 'image/jpeg';
+  let ext = 'jpg';
+  if (mimeType.indexOf('png') !== -1) {
+    ext = 'png';
+  } else if (mimeType.indexOf('webp') !== -1) {
+    ext = 'webp';
+  } else if (customFileName && customFileName.indexOf('.') !== -1) {
+    ext = customFileName.split('.').pop().toLowerCase();
+  }
+
+  const safeTenantId = String(tenantId || 'tenant').toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+  const fileName = 'BUKTI_' + safeTenantId + '_' + Date.now() + '.' + ext;
+
+  const decodedBytes = Utilities.base64Decode(cleanBase64);
+  const blob = Utilities.newBlob(decodedBytes, mimeType, fileName);
+
+  const folderId = CONFIG.ROOT_FOLDER_ID;
+  let targetFolder = null;
+  if (folderId) {
+    try {
+      targetFolder = DriveApp.getFolderById(folderId);
+    } catch (e) {
+      targetFolder = null;
+    }
+  }
+
+  const file = targetFolder ? targetFolder.createFile(blob) : DriveApp.createFile(blob);
+  return {
+    fileId: file.getId(),
+    fileUrl: (typeof file.getUrl === 'function') ? file.getUrl() : ('https://drive.google.com/file/d/' + file.getId() + '/view')
+  };
+}
+
+/**
+ * Submit Bukti Pembayaran Tenant (Public Endpoint)
+ */
+function handleSubmitPaymentProof(data) {
+  if (!data || !data.tenantId || String(data.tenantId).trim() === '') {
+    throw new Error('Tenant ID wajib diisi untuk upload bukti pembayaran');
+  }
+
+  const cleanTenantId = String(data.tenantId).trim().toLowerCase();
+  const rawAmount = Number(data.amount);
+  if (isNaN(rawAmount) || rawAmount <= 0) {
+    throw new Error('Nominal pembayaran harus berupa angka valid lebih dari 0');
+  }
+
+  if (!data.imageBase64 || String(data.imageBase64).trim() === '') {
+    throw new Error('File gambar bukti transfer (Base64) wajib diunggah');
+  }
+
+  // 1. Dapatkan nama tenant dari sheet Tenants jika ada
+  let tenantName = cleanTenantId;
+  try {
+    const rawTenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
+    const tenantRecord = rawTenants.find(t => String(t.id || '').trim().toLowerCase() === cleanTenantId);
+    if (tenantRecord && tenantRecord.name) {
+      tenantName = tenantRecord.name;
+    } else if (data.tenantName) {
+      tenantName = String(data.tenantName).trim();
+    }
+  } catch (e) {}
+
+  // 2. Upload file gambar ke Google Drive TERLEBIH DAHULU (Review Focus #3)
+  // Tangani kegagalan Drive secara anggun tanpa merusak baris sheet
+  let driveResult;
+  try {
+    driveResult = savePaymentProofToDrive_(data.imageBase64, data.imageMimeType, cleanTenantId, data.fileName);
+  } catch (err) {
+    return {
+      success: false,
+      error: 'Gagal mengunggah bukti pembayaran ke Google Drive: ' + err.message
+    };
+  }
+
+  const sheet = getOrCreatePaymentsSheet_();
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+  const idIdx = headers.indexOf('id');
+  const tenantIdIdx = headers.indexOf('tenantId');
+  const statusIdx = headers.indexOf('status');
+
+  // 3. Periksa apakah sudah ada pembayaran dengan status 'pending' untuk tenant ini (Review Focus #2)
+  let existingPendingRow = -1;
+  let existingPaymentId = null;
+
+  for (let r = 1; r < values.length; r++) {
+    const rTenantId = String(values[r][tenantIdIdx] || '').trim().toLowerCase();
+    const rStatus = String(values[r][statusIdx] || '').trim().toLowerCase();
+    if (rTenantId === cleanTenantId && rStatus === 'pending') {
+      existingPendingRow = r + 1; // 1-based index
+      existingPaymentId = String(values[r][idIdx] || '').trim();
+      break;
+    }
+  }
+
+  const plan = (data.plan && String(data.plan).trim().toLowerCase() === 'lifetime') ? 'lifetime' : 'monthly';
+  const nowIso = new Date().toISOString();
+
+  let paymentId = existingPaymentId;
+  if (existingPendingRow > 0) {
+    // Update existing pending row
+    const record = {
+      id: existingPaymentId,
+      tenantId: cleanTenantId,
+      tenantName: tenantName,
+      plan: plan,
+      amount: rawAmount,
+      bankTarget: String(data.bankTarget || '').trim(),
+      proofFileId: driveResult.fileId,
+      proofUrl: driveResult.fileUrl,
+      senderName: String(data.senderName || '').trim(),
+      senderBank: String(data.senderBank || '').trim(),
+      status: 'pending',
+      rejectReason: '',
+      createdAt: nowIso,
+      verifiedAt: '',
+      verifiedBy: ''
+    };
+
+    const rowValues = headers.map(h => {
+      let val = record[h];
+      if (val === undefined || val === null) return '';
+      return val;
+    });
+
+    const range = sheet.getRange(existingPendingRow, 1, 1, rowValues.length);
+    try {
+      if (typeof range.setNumberFormat === 'function') range.setNumberFormat('@');
+    } catch (e) {}
+    range.setValues([rowValues]);
+  } else {
+    // Buat baris baru
+    paymentId = 'PAY-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const record = {
+      id: paymentId,
+      tenantId: cleanTenantId,
+      tenantName: tenantName,
+      plan: plan,
+      amount: rawAmount,
+      bankTarget: String(data.bankTarget || '').trim(),
+      proofFileId: driveResult.fileId,
+      proofUrl: driveResult.fileUrl,
+      senderName: String(data.senderName || '').trim(),
+      senderBank: String(data.senderBank || '').trim(),
+      status: 'pending',
+      rejectReason: '',
+      createdAt: nowIso,
+      verifiedAt: '',
+      verifiedBy: ''
+    };
+
+    const rowValues = headers.map(h => {
+      let val = record[h];
+      if (val === undefined || val === null) return '';
+      return val;
+    });
+
+    sheet.appendRow(rowValues);
+    try {
+      const lastR = sheet.getLastRow();
+      const range = sheet.getRange(lastR, 1, 1, rowValues.length);
+      if (typeof range.setNumberFormat === 'function') range.setNumberFormat('@');
+    } catch (e) {}
+  }
+
+  // CATATAN PENTING: Status tenant di sheet Tenants TIDAK DIUBAH di sini!
+  invalidateCache();
+
+  return {
+    success: true,
+    paymentId: paymentId,
+    status: 'pending',
+    message: 'Bukti pembayaran berhasil diunggah. Menunggu verifikasi Admin RASH.'
+  };
+}
+
+/**
+ * Mengambil daftar seluruh pembayaran (Khusus Super Admin)
+ */
+function handleGetPayments(statusFilter) {
+  const rawPayments = getRowsAsObjects(CONFIG.SHEET_NAMES.PAYMENTS);
+  let payments = rawPayments.map(p => {
+    return {
+      id: String(p.id || '').trim(),
+      tenantId: String(p.tenantId || '').trim(),
+      tenantName: String(p.tenantName || '').trim(),
+      plan: String(p.plan || 'monthly').trim(),
+      amount: Number(p.amount) || 0,
+      bankTarget: String(p.bankTarget || '').trim(),
+      proofFileId: String(p.proofFileId || '').trim(),
+      proofUrl: String(p.proofUrl || '').trim(),
+      senderName: String(p.senderName || '').trim(),
+      senderBank: String(p.senderBank || '').trim(),
+      status: String(p.status || 'pending').trim().toLowerCase(),
+      rejectReason: String(p.rejectReason || '').trim(),
+      createdAt: String(p.createdAt || '').trim(),
+      verifiedAt: String(p.verifiedAt || '').trim(),
+      verifiedBy: String(p.verifiedBy || '').trim()
+    };
+  });
+
+  if (statusFilter && String(statusFilter).trim() !== '') {
+    const filter = String(statusFilter).trim().toLowerCase();
+    payments = payments.filter(p => p.status === filter);
+  }
+
+  return {
+    success: true,
+    payments: payments,
+    data: payments
+  };
+}
+
+/**
+ * Mengambil status pembayaran terakhir untuk tenant tertentu (Public Endpoint)
+ */
+function handleGetTenantPaymentStatus(tenantId) {
+  if (!tenantId || String(tenantId).trim() === '') {
+    return { success: true, latestPayment: null };
+  }
+
+  const cleanId = String(tenantId).trim().toLowerCase();
+  const rawPayments = getRowsAsObjects(CONFIG.SHEET_NAMES.PAYMENTS);
+  const tenantPayments = rawPayments.filter(p => String(p.tenantId || '').trim().toLowerCase() === cleanId);
+
+  if (tenantPayments.length === 0) {
+    return { success: true, latestPayment: null };
+  }
+
+  const latest = tenantPayments[tenantPayments.length - 1];
+  const latestPayment = {
+    id: String(latest.id || '').trim(),
+    plan: String(latest.plan || 'monthly').trim(),
+    amount: Number(latest.amount) || 0,
+    bankTarget: String(latest.bankTarget || '').trim(),
+    senderName: String(latest.senderName || '').trim(),
+    senderBank: String(latest.senderBank || '').trim(),
+    status: String(latest.status || 'pending').trim().toLowerCase(),
+    rejectReason: String(latest.rejectReason || '').trim(),
+    createdAt: String(latest.createdAt || '').trim(),
+    proofUrl: String(latest.proofUrl || '').trim()
+  };
+
+  return {
+    success: true,
+    latestPayment: latestPayment,
+    data: latestPayment
+  };
+}
+
+/**
+ * Verifikasi Pembayaran (Approve / Reject) oleh Super Admin
+ */
+function handleVerifyPayment(data) {
+  if (!data || !data.paymentId || String(data.paymentId).trim() === '') {
+    throw new Error('Payment ID wajib diisi untuk verifikasi pembayaran');
+  }
+
+  const paymentId = String(data.paymentId).trim();
+  let rawAction = '';
+  if (data.action && String(data.action).trim() !== 'verifyPayment') {
+    rawAction = String(data.action).trim().toLowerCase();
+  } else if (data.actionType) {
+    rawAction = String(data.actionType).trim().toLowerCase();
+  } else if (data.decision) {
+    rawAction = String(data.decision).trim().toLowerCase();
+  } else if (data.verificationAction) {
+    rawAction = String(data.verificationAction).trim().toLowerCase();
+  } else if (data.status) {
+    rawAction = String(data.status).trim().toLowerCase();
+  }
+
+  if (rawAction === 'verified' || rawAction === 'approved') rawAction = 'approve';
+  if (rawAction === 'rejected') rawAction = 'reject';
+
+  if (rawAction !== 'approve' && rawAction !== 'reject') {
+    throw new Error('Action verifikasi pembayaran tidak valid: ' + (data.action || data.actionType || rawAction));
+  }
+
+  const paySheet = getOrCreatePaymentsSheet_();
+  const payValues = paySheet.getDataRange().getValues();
+  const payHeaders = payValues[0];
+  const idIdx = payHeaders.indexOf('id');
+  const tenantIdIdx = payHeaders.indexOf('tenantId');
+  const planIdx = payHeaders.indexOf('plan');
+  const statusIdx = payHeaders.indexOf('status');
+  const rejectReasonIdx = payHeaders.indexOf('rejectReason');
+  const verifiedAtIdx = payHeaders.indexOf('verifiedAt');
+  const verifiedByIdx = payHeaders.indexOf('verifiedBy');
+
+  let payRowIdx = -1;
+  let targetPayment = null;
+
+  for (let r = 1; r < payValues.length; r++) {
+    if (String(payValues[r][idIdx] || '').trim() === paymentId) {
+      payRowIdx = r + 1; // 1-based index
+      targetPayment = {};
+      payHeaders.forEach((h, i) => {
+        targetPayment[h] = payValues[r][i];
+      });
+      break;
+    }
+  }
+
+  if (payRowIdx === -1 || !targetPayment) {
+    return {
+      success: false,
+      notFound: true,
+      message: 'Data pembayaran dengan ID ' + paymentId + ' tidak ditemukan'
+    };
+  }
+
+  const nowIso = new Date().toISOString();
+
+  if (rawAction === 'approve') {
+    // 1. Update baris pembayaran di sheet Payments
+    paySheet.getRange(payRowIdx, statusIdx + 1).setValue('verified');
+    paySheet.getRange(payRowIdx, verifiedAtIdx + 1).setValue(nowIso);
+    paySheet.getRange(payRowIdx, verifiedByIdx + 1).setValue('admin');
+    if (rejectReasonIdx !== -1) {
+      paySheet.getRange(payRowIdx, rejectReasonIdx + 1).setValue('');
+    }
+
+    // 2. Cari tenant di sheet Tenants
+    const tenantId = String(targetPayment.tenantId || '').trim().toLowerCase();
+    const rawTenants = getRowsAsObjects(CONFIG.SHEET_NAMES.TENANTS);
+    const tenantObj = rawTenants.find(t => String(t.id || '').trim().toLowerCase() === tenantId);
+
+    let updatedTenant = null;
+    if (tenantObj) {
+      const plan = String(targetPayment.plan || 'monthly').trim().toLowerCase();
+      tenantObj.plan = plan;
+
+      if (plan === 'lifetime') {
+        tenantObj.isLifetime = true;
+        tenantObj.expiresAt = '';
+        tenantObj.status = 'active';
+      } else {
+        // Plan monthly:
+        // Review Focus #1: Akumulasi hari jika masa aktif masih tersisa (> now)
+        tenantObj.isLifetime = false;
+        tenantObj.status = 'active';
+
+        const now = new Date();
+        let baseDate = now;
+        if (tenantObj.expiresAt) {
+          const currentExpiry = new Date(tenantObj.expiresAt);
+          if (!isNaN(currentExpiry.getTime()) && currentExpiry.getTime() > now.getTime()) {
+            baseDate = currentExpiry;
+          }
+        }
+        const newExpiry = new Date(baseDate.getTime() + 30 * 86400000);
+        tenantObj.expiresAt = newExpiry.toISOString();
+      }
+
+      // Preservasi kuota meja kustom jika sebelumnya sudah > 12
+      tenantObj.tablesCount = Math.max(Number(tenantObj.tablesCount) || 12, 12);
+
+      // Simpan perubahan tenant via handleSaveTenant
+      const saveRes = handleSaveTenant(tenantObj);
+      updatedTenant = saveRes.tenant || tenantObj;
+    }
+
+    invalidateCache();
+    return {
+      success: true,
+      paymentStatus: 'verified',
+      updatedTenant: updatedTenant
+    };
+  } else {
+    // rawAction === 'reject'
+    // Review Focus #4: Fallback default alasan penolakan jika kosong
+    const cleanReason = String(data.rejectReason || '').trim() ||
+      'Bukti pembayaran belum dapat diverifikasi. Silakan periksa nominal/rekening dan unggah ulang.';
+
+    paySheet.getRange(payRowIdx, statusIdx + 1).setValue('rejected');
+    if (rejectReasonIdx !== -1) {
+      paySheet.getRange(payRowIdx, rejectReasonIdx + 1).setValue(cleanReason);
+    }
+    paySheet.getRange(payRowIdx, verifiedAtIdx + 1).setValue(nowIso);
+    paySheet.getRange(payRowIdx, verifiedByIdx + 1).setValue('admin');
+
+    // CATATAN PENTING: Sheet Tenants TETAP TIDAK TERSENTUH
+    invalidateCache();
+    return {
+      success: true,
+      paymentStatus: 'rejected',
+      rejectReason: cleanReason
+    };
+  }
+}
+
 // ==============================================================================
 // 4. UTILITIES & HELPER DATABASE
 // ==============================================================================
@@ -1079,12 +1534,26 @@ function getOrCreateTenantsSheet_() {
   return sheet;
 }
 
+function getOrCreatePaymentsSheet_() {
+  const ss = getSpreadsheet_();
+  let sheet = ss.getSheetByName(CONFIG.SHEET_NAMES.PAYMENTS);
+  if (!sheet) {
+    sheet = ss.insertSheet(CONFIG.SHEET_NAMES.PAYMENTS);
+    sheet.appendRow(PAYMENT_HEADERS);
+    styleHeader(sheet, '#059669');
+  }
+  return sheet;
+}
+
 function getSheet(sheetName) {
   const ss = getSpreadsheet_();
   let sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     if (sheetName === CONFIG.SHEET_NAMES.TENANTS) {
       return getOrCreateTenantsSheet_();
+    }
+    if (sheetName === CONFIG.SHEET_NAMES.PAYMENTS) {
+      return getOrCreatePaymentsSheet_();
     }
     throw new Error('Sheet ' + sheetName + ' tidak ditemukan di Spreadsheet');
   }
@@ -1317,6 +1786,13 @@ function setupAppEnvironment() {
   const tenantSheet = ss.insertSheet(CONFIG.SHEET_NAMES.TENANTS);
   tenantSheet.appendRow(TENANT_HEADERS);
   styleHeader(tenantSheet, '#0284C7');
+
+  // -------------------------------------------------------------
+  // Sheet 8: Payments (Direktori Pembayaran & Bukti Transfer)
+  // -------------------------------------------------------------
+  const paySheet = ss.insertSheet(CONFIG.SHEET_NAMES.PAYMENTS);
+  paySheet.appendRow(PAYMENT_HEADERS);
+  styleHeader(paySheet, '#059669');
 
   // 3. Simpan ID & Kunci Rahasia ke PropertiesService secara otomatis!
   const props = PropertiesService.getScriptProperties();
