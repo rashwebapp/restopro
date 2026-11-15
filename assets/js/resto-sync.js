@@ -297,8 +297,13 @@ const RestoSync = {
     }
   },
 
-  getStorageKey(baseKey) {
-    const tenant = this.getTenantId();
+  getStorageKey(arg1, arg2) {
+    let baseKey = arg1;
+    let tenant = this.getTenantId();
+    if (arg2 !== undefined) {
+      tenant = arg1;
+      baseKey = arg2;
+    }
     if (tenant && tenant !== "default") {
       return `${baseKey}_tenant_${tenant}`;
     }
@@ -327,6 +332,7 @@ const RestoSync = {
   get GAS_API_KEY_STORAGE_KEY() { return this.getStorageKey("resto_pro_gas_api_key"); },
   get SUPABASE_URL_STORAGE_KEY() { return this.getStorageKey("resto_pro_supabase_url"); },
   get SUPABASE_KEY_STORAGE_KEY() { return this.getStorageKey("resto_pro_supabase_key"); },
+  get QRIS_STATIC_STORAGE_KEY() { return this.getStorageKey("qris_static"); },
 
   _buildDefaultDemoTenants() {
     return [
@@ -4365,6 +4371,125 @@ const RestoSync = {
       this.emit("DATABASE_RESTORED", { timestamp: Date.now() });
       alert("Database Resto Pro berhasil dikembalikan ke status demo awal pabrik!");
       location.reload();
+    }
+  },
+
+  // ---------------------------------------------------------------------------
+  // EMVCo QRIS Dinamis & CRC16-CCITT (Standar Bank Indonesia)
+  // ---------------------------------------------------------------------------
+  calculateCrc16(payload) {
+    if (typeof payload !== "string") return "0000";
+    let crc = 0xFFFF;
+    for (let i = 0; i < payload.length; i++) {
+      crc ^= (payload.charCodeAt(i) << 8);
+      for (let j = 0; j < 8; j++) {
+        if ((crc & 0x8000) !== 0) {
+          crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+        } else {
+          crc = (crc << 1) & 0xFFFF;
+        }
+      }
+    }
+    return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, "0");
+  },
+
+  convertStaticQrisToDynamic(rawQris, amount, options) {
+    if (!rawQris || typeof rawQris !== "string" || !rawQris.includes("000201") || !rawQris.includes("6304")) {
+      return { success: false, error: "Format QRIS statis tidak valid", reason: "Format QRIS statis tidak valid" };
+    }
+    const numAmount = Math.round(Number(amount));
+    if (amount === undefined || amount === null || isNaN(numAmount) || numAmount <= 0) {
+      return { success: false, error: "Nominal transaksi tidak valid", reason: "Nominal transaksi tidak valid" };
+    }
+
+    const str = rawQris.trim();
+    const crcTagIdx = str.lastIndexOf("6304");
+    if (crcTagIdx === -1) {
+      return { success: false, error: "Format QRIS statis tidak valid", reason: "Format QRIS statis tidak valid" };
+    }
+
+    let base = str.substring(0, crcTagIdx);
+
+    // 1. Ubah Tag 01 dari 11 (Static) ke 12 (Dynamic). Format TLV: ganti 010211 menjadi 010212.
+    if (base.includes("010211")) {
+      base = base.replace("010211", "010212");
+    } else if (!base.includes("010212")) {
+      base = base.replace("000201", "000201010212");
+    }
+
+    // 2. Pastikan Tag 58 bernilai 5802ID dan Tag 53 bernilai 5303360 jika belum ada.
+    if (!base.includes("5802ID")) {
+      const idx59 = base.indexOf("59");
+      if (idx59 !== -1) {
+        base = base.substring(0, idx59) + "5802ID" + base.substring(idx59);
+      } else {
+        base = base + "5802ID";
+      }
+    }
+
+    if (!base.includes("5303360")) {
+      const idx58 = base.indexOf("5802ID");
+      base = base.substring(0, idx58) + "5303360" + base.substring(idx58);
+    }
+
+    // 3. Format Tag 54 baru (Nominal Transaksi): '54' + padStart(2, '0') + amountStr
+    const amountStr = String(numAmount);
+    const tag54 = "54" + String(amountStr.length).padStart(2, "0") + amountStr;
+
+    // 4. Bersihkan Tag 54 lama jika ada, lalu sisipkan Tag 54 baru
+    const idx53 = base.indexOf("5303360");
+    const idx58 = base.indexOf("5802ID", idx53);
+
+    const between = base.substring(idx53 + 7, idx58);
+    const cleanedBetween = between.replace(/54\d{2}[0-9.]+/g, "");
+
+    base = base.substring(0, idx53 + 7) + tag54 + cleanedBetween + base.substring(idx58);
+
+    // 5. Opsi tambahan: billNo di Tag 62 (Additional Data Field) jika disediakan
+    if (options && options.billNo) {
+      const billStr = String(options.billNo).trim();
+      if (billStr) {
+        const subTag01 = "01" + String(billStr.length).padStart(2, "0") + billStr;
+        const tag62 = "62" + String(subTag01.length).padStart(2, "0") + subTag01;
+        base = base + tag62;
+      }
+    }
+
+    // 6. Hapus 4 karakter nilai CRC lama setelah tag 6304, hitung CRC16 baru, gabungkan
+    const payloadWith6304 = base + "6304";
+    const crcHex = this.calculateCrc16(payloadWith6304);
+    const fullDynamicQris = payloadWith6304 + crcHex;
+
+    return {
+      success: true,
+      dynamicQris: fullDynamicQris,
+      amount: numAmount
+    };
+  },
+
+  getTenantQris(tenantId) {
+    const t = (tenantId !== undefined && tenantId !== null && String(tenantId).trim() !== "")
+      ? String(tenantId).trim()
+      : (this.getTenantId() || "default");
+    const key = this.getStorageKey(t, "qris_static");
+    try {
+      return localStorage.getItem(key) || "";
+    } catch (e) {
+      return "";
+    }
+  },
+
+  saveTenantQris(tenantId, qrisString) {
+    const t = (tenantId !== undefined && tenantId !== null && String(tenantId).trim() !== "")
+      ? String(tenantId).trim()
+      : (this.getTenantId() || "default");
+    const key = this.getStorageKey(t, "qris_static");
+    try {
+      localStorage.setItem(key, String(qrisString || "").trim());
+      return true;
+    } catch (e) {
+      console.error("Gagal menyimpan QRIS statis tenant:", e);
+      return false;
     }
   }
 };
