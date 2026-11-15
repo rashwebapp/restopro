@@ -258,6 +258,8 @@
           <button onclick="filterDeliveryOrders('gofood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GoFood</button>
           <button onclick="filterDeliveryOrders('grabfood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GrabFood</button>
           <button onclick="filterDeliveryOrders('shopeefood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">ShopeeFood</button>
+          <button onclick="filterDeliveryOrders('qpon')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">Qpon</button>
+          <button onclick="filterDeliveryOrders('takeaway')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">Takeaway</button>
         </div>
 
         <!-- Online Delivery Cards List (Scrollable) -->
@@ -270,7 +272,7 @@
           <div class="text-[10px] font-bold text-stone-500 uppercase tracking-wider flex items-center justify-between">
             <span>⚡ Simulasi Order Masuk:</span>
           </div>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-4 gap-2">
             <button onclick="triggerQuickOnlineOrder('gofood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#00AA13]/15 hover:bg-[#00AA13]/30 text-[#00AA13] dark:text-emerald-400 font-extrabold text-xs border border-[#00AA13]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari GoFood">
               <span>+ GoFood</span>
             </button>
@@ -279,6 +281,9 @@
             </button>
             <button onclick="triggerQuickOnlineOrder('shopeefood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#EE4D2D]/15 hover:bg-[#EE4D2D]/30 text-[#EE4D2D] dark:text-orange-400 font-extrabold text-xs border border-[#EE4D2D]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari ShopeeFood">
               <span>+ Shopee</span>
+            </button>
+            <button onclick="triggerQuickOnlineOrder('qpon')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#8B5CF6]/15 hover:bg-[#8B5CF6]/30 text-[#8B5CF6] dark:text-purple-400 font-extrabold text-xs border border-[#8B5CF6]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari Qpon Direct">
+              <span>+ Qpon</span>
             </button>
           </div>
         </div>
@@ -624,12 +629,32 @@
 
         <!-- Section B: QRIS Dynamic QR Code -->
         <div id="paySectionQris" class="hidden flex-col items-center justify-center text-center p-4 bg-[#FAF7F2] dark:bg-[#0F172A] rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
-          <div class="w-48 h-48 bg-white p-3 rounded-2xl shadow-md border border-stone-200 flex items-center justify-center">
-            <!-- QRIS QR Mockup -->
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=RESTO_PRO_QRIS_TABLE_03_BILL_185130" alt="QRIS Code" class="w-full h-full object-contain" />
+          <!-- Notice jika QRIS toko belum diset -->
+          <div id="posQrisUnsetNotice" class="hidden mb-3 w-full p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/60 text-amber-800 dark:text-amber-200 text-xs text-left">
+            <div class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-[18px] text-amber-600 shrink-0">info</span>
+              <div>
+                <span class="font-bold">QRIS Toko Belum Dikonfigurasi:</span> Menampilkan QRIS Demo. Silakan atur QRIS statis outlet Anda di 
+                <a id="posQrisSettingsLink" href="owner_settings_saas.html#sectionQrisSettings" target="_blank" class="underline font-bold text-amber-900 dark:text-amber-100 hover:text-amber-600">Pengaturan Owner &rarr;</a>
+              </div>
+            </div>
           </div>
-          <p class="font-heading font-bold text-sm text-[#1C1917] dark:text-white mt-3">Scan via BCA, GoPay, OVO, Dana, ShopeePay</p>
-          <span class="text-xs text-stone-500 mt-0.5">NMID: ID10200392819 • Resto Pro RASH</span>
+
+          <div class="w-48 h-48 bg-white p-3 rounded-2xl shadow-md border border-stone-200 flex items-center justify-center">
+            <!-- QRIS Dynamic QR Image -->
+            <img id="posQrisImage" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=RESTO_PRO_QRIS_DEMO" alt="QRIS Code" class="w-full h-full object-contain" />
+          </div>
+
+          <div id="posQrisAmountBadge" class="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 font-mono font-extrabold text-sm">
+            Rp 0
+          </div>
+
+          <p id="posQrisStatusInfo" class="font-heading font-bold text-sm text-[#1C1917] dark:text-white mt-2">Scan via BCA, GoPay, OVO, Dana, ShopeePay</p>
+          <div class="mt-1 text-xs text-stone-500 flex items-center justify-center gap-1">
+            <span>Kedaluwarsa dalam:</span>
+            <span id="posQrisCountdown" class="font-mono font-bold text-amber-600 dark:text-amber-400">15:00</span>
+          </div>
+
           <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Menunggu scan dari pelanggan...
           </div>
@@ -1316,7 +1341,7 @@
           <span class="material-symbols-outlined text-[14px] text-amber-500">bolt</span>
           <span>Simulasi Instan 1-Klik (Uji Coba Rush Hour):</span>
         </p>
-        <div class="grid grid-cols-3 gap-1.5">
+        <div class="grid grid-cols-4 gap-1.5">
           <button type="button" onclick="quickSimulateAndClose('gofood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#00AA13] text-white font-extrabold text-xs flex items-center justify-center gap-1 shadow-sm hover:opacity-90">
             <span>🛵 GoFood</span>
           </button>
@@ -1324,7 +1349,10 @@
             <span>🛵 GrabFood</span>
           </button>
           <button type="button" onclick="quickSimulateAndClose('shopeefood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#EE4D2D] text-white font-extrabold text-xs flex items-center justify-center gap-1 shadow-sm hover:opacity-90">
-            <span>🛵 ShopeeFood</span>
+            <span>🛵 Shopee</span>
+          </button>
+          <button type="button" onclick="quickSimulateAndClose('qpon')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#8B5CF6] text-white font-extrabold text-xs flex items-center justify-center gap-1 shadow-sm hover:opacity-90">
+            <span>💜 Qpon</span>
           </button>
         </div>
       </div>
@@ -1338,6 +1366,7 @@
               <option value="gofood">🛵 GoFood (Gojek)</option>
               <option value="grabfood">🛵 GrabFood (Grab)</option>
               <option value="shopeefood">🛵 ShopeeFood (Shopee)</option>
+              <option value="qpon">💜 Qpon (Web Order Direct)</option>
               <option value="takeaway">🛍️ Takeaway (Bungkus Sendiri)</option>
             </select>
           </div>
@@ -2049,6 +2078,14 @@
       renderOnlineOrdersList();
 
       // Dengarkan event order online masuk
+      RestoSync.on("ONLINE_ORDER_RECEIVED", (order) => {
+        updateOnlineOrdersBadge();
+        renderOnlineOrdersList();
+        if (order && (order.channelLabel || order.platform)) {
+          showPosNotification(`🛵 Pesanan Baru Masuk dari ${order.channelLabel || order.platform}! #${order.orderRef || order.platformRef || order.id} (${order.customer || order.customerName})`);
+        }
+      });
+
       RestoSync.on("ONLINE_ORDER_PLACED", (order) => {
         updateOnlineOrdersBadge();
         renderOnlineOrdersList();
@@ -2056,6 +2093,11 @@
       });
 
       RestoSync.on("ONLINE_ORDER_UPDATED", () => {
+        updateOnlineOrdersBadge();
+        renderOnlineOrdersList();
+      });
+
+      RestoSync.on("ONLINE_ORDER_STATUS_CHANGED", () => {
         updateOnlineOrdersBadge();
         renderOnlineOrdersList();
       });
@@ -2245,12 +2287,12 @@
       activeDeliveryFilter = platform;
       const pills = document.querySelectorAll("#deliveryFilterPills button");
       pills.forEach(p => {
-        const text = p.textContent.toLowerCase();
+        const text = (p.textContent || "").toLowerCase();
         const isActive = (platform === "all" && text.includes("semua")) || text.includes(platform.toLowerCase());
         if (isActive) {
-          p.className = "delivery-pill px-2 py-0.5 rounded-lg bg-emerald-600 text-white font-bold";
+          p.className = "delivery-pill px-3 py-1 rounded-xl bg-emerald-600 text-white font-bold";
         } else {
-          p.className = "delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold";
+          p.className = "delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold";
         }
       });
       renderOnlineOrdersList();
@@ -2261,12 +2303,13 @@
       if (!container) return;
       updateOnlineOrdersBadge();
 
-      const orders = RestoSync.getOnlineOrders();
-      const kdsTickets = RestoSync.getKdsTickets();
+      const orders = typeof RestoSync !== "undefined" ? RestoSync.getOnlineOrders() : [];
+      const kdsTickets = typeof RestoSync !== "undefined" ? RestoSync.getKdsTickets() : [];
 
       let filtered = orders.filter(o => {
         if (activeDeliveryFilter === "all") return true;
-        return (o.channel || "").toLowerCase() === activeDeliveryFilter.toLowerCase();
+        const ch = (o.channel || o.platform || "").toLowerCase();
+        return ch === activeDeliveryFilter.toLowerCase();
       });
 
       if (filtered.length === 0) {
@@ -2281,48 +2324,67 @@
       }
 
       container.innerHTML = filtered.map(order => {
-        const isSelected = order.id === activeDeliveryOrderId;
-        const isCompleted = order.status === "completed";
+        const orderId = order.id || order.orderId;
+        const isSelected = orderId === activeDeliveryOrderId;
+        const st = (order.status || "cooking").toLowerCase();
+        const isCompleted = st === "completed";
         
         // Periksa status di KDS
-        const kdsTicket = kdsTickets.find(t => t.id === order.id || t.orderRef === order.orderRef);
-        let kdsStatusText = "⏳ Dimasak Dapur/Bar";
+        const kdsTicket = kdsTickets.find(t => t.id === orderId || t.orderRef === order.orderRef || t.orderRef === order.platformRef);
+        const isReadyForDriver = (st === "ready") || (kdsTicket && kdsTicket.status === "ready");
+
+        let kdsStatusText = "Sedang Dimasak";
         let kdsBadgeClass = "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300";
-        let isReadyForDriver = false;
 
         if (isCompleted) {
-          kdsStatusText = "🤝 Selesai Diambil";
+          kdsStatusText = "Selesai";
           kdsBadgeClass = "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400";
-        } else if (order.status === "ready" || (kdsTicket && kdsTicket.status === "ready")) {
-          kdsStatusText = "✅ Siap Diambil Driver";
+        } else if (isReadyForDriver) {
+          kdsStatusText = "Siap Diambil";
           kdsBadgeClass = "bg-emerald-500 text-white font-extrabold shadow-sm animate-pulse";
-          isReadyForDriver = true;
         } else if (kdsTicket && kdsTicket.items) {
           const compCount = kdsTicket.items.filter(i => i.completed).length;
           const totCount = kdsTicket.items.length;
           if (compCount > 0) {
-            kdsStatusText = `🍳 Memasak (${compCount}/${totCount})`;
+            kdsStatusText = `Sedang Dimasak (${compCount}/${totCount})`;
           }
         }
 
+        const ch = (order.channel || order.platform || "gofood").toLowerCase();
         let channelBg = "#00AA13";
-        let channelLabel = "GoFood";
-        if (order.channel === "grabfood") { channelBg = "#00B14F"; channelLabel = "GrabFood"; }
-        else if (order.channel === "shopeefood") { channelBg = "#EE4D2D"; channelLabel = "ShopeeFood"; }
-        else if (order.channel === "takeaway") { channelBg = "#8B5CF6"; channelLabel = "Takeaway"; }
+        let channelLabel = order.channelLabel || "GoFood";
+
+        if (ch === "grabfood") {
+          channelBg = "#00B14F";
+          channelLabel = "GrabFood";
+        } else if (ch === "shopeefood") {
+          channelBg = "#EE4D2D";
+          channelLabel = "ShopeeFood";
+        } else if (ch === "qpon") {
+          channelBg = "#8B5CF6";
+          channelLabel = "Qpon";
+        } else if (ch === "takeaway") {
+          channelBg = "#0284C7";
+          channelLabel = "Takeaway";
+        }
 
         const borderStyle = isSelected 
           ? "border-2 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md" 
           : (isReadyForDriver ? "border-2 border-emerald-500/60 bg-emerald-50/20 dark:bg-emerald-950/20" : "border border-stone-200 dark:border-stone-800");
 
         const itemsSummary = (order.items || []).map(i => `${i.qty}x ${i.name}`).join(", ");
+        const orderRef = order.orderRef || order.platformRef || orderId;
+        const customerName = order.customer || order.customerName || "Pelanggan Online";
+        const driverName = order.driverName || (order.driverInfo && order.driverInfo.name) || "-";
+        const driverPlate = order.driverPlate || (order.driverInfo && order.driverInfo.plate) || "-";
+        const total = order.grandTotal || order.totalAmount || 0;
 
         return `
-          <div onclick="selectDeliveryOrder('${order.id}')" class="touch-btn cursor-pointer p-2.5 rounded-2xl bg-white dark:bg-[#0F172A] ${borderStyle} flex flex-col justify-between transition-all hover:scale-[1.01]">
+          <div onclick="selectDeliveryOrder('${orderId}')" class="touch-btn cursor-pointer p-2.5 rounded-2xl bg-white dark:bg-[#0F172A] ${borderStyle} flex flex-col justify-between transition-all hover:scale-[1.01]">
             <div>
               <div class="flex items-center justify-between gap-1 mb-1">
                 <span class="px-2 py-0.5 rounded-lg text-white font-heading font-extrabold text-[10px]" style="background-color: ${channelBg};">
-                  ${channelLabel} #${order.orderRef}
+                  ${channelLabel} #${orderRef}
                 </span>
                 <span class="text-[9px] px-2 py-0.5 rounded-full font-bold ${kdsBadgeClass}">
                   ${kdsStatusText}
@@ -2330,10 +2392,10 @@
               </div>
 
               <div class="text-xs font-heading font-extrabold text-[#1C1917] dark:text-white mt-1">
-                Tamu: ${order.customer}
+                Tamu: ${customerName}
               </div>
               <div class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold truncate mt-0.5">
-                🛵 Driver: ${order.driverName} (${order.driverPlate})
+                🛵 Driver: ${driverName} (${driverPlate})
               </div>
               <div class="text-[10px] text-stone-500 dark:text-stone-400 line-clamp-1 mt-0.5 font-mono">
                 ${itemsSummary}
@@ -2342,17 +2404,20 @@
 
             <div class="flex items-center justify-between pt-1.5 mt-1.5 border-t border-stone-100 dark:border-stone-800/80 text-xs">
               <span class="font-heading font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
-                ${formatRupiah(order.grandTotal)}
+                ${formatRupiah(total)}
               </span>
               ${isCompleted ? `
                 <span class="text-[10px] text-stone-400 font-bold">Lunas Online</span>
               ` : (isReadyForDriver ? `
-                <button onclick="event.stopPropagation(); handoverDeliveryOrder('${order.id}')" class="touch-btn px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                <button onclick="event.stopPropagation(); handoverDeliveryOrder('${orderId}')" class="touch-btn px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
                   <span class="material-symbols-outlined text-[13px]">handshake</span>
-                  <span>Serahkan Driver</span>
+                  <span>Serahkan ke Driver / Selesai</span>
                 </button>
               ` : `
-                <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sedang Dimasak</span>
+                <button onclick="event.stopPropagation(); updateOrderStatus('${orderId}', 'ready')" class="touch-btn px-2.5 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-heading font-extrabold text-[10px] flex items-center gap-1 shadow-sm">
+                  <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                  <span>Siap Diambil Driver</span>
+                </button>
               `)}
             </div>
           </div>
@@ -2364,14 +2429,23 @@
       activeDeliveryOrderId = orderId;
       renderOnlineOrdersList();
 
-      const orders = RestoSync.getOnlineOrders();
-      const order = orders.find(o => o.id === orderId || o.orderRef === orderId);
+      const orders = typeof RestoSync !== "undefined" ? RestoSync.getOnlineOrders() : [];
+      const order = orders.find(o => o.id === orderId || o.orderId === orderId || o.orderRef === orderId || o.platformRef === orderId);
       if (!order) return;
 
+      const orderRef = String(order.orderRef || order.platformRef || orderId);
+      const chLabel = order.channelLabel || (order.platform ? order.platform.toUpperCase() : "ONLINE");
+      const customerName = order.customer || order.customerName || "Pelanggan";
+      const driverName = order.driverName || (order.driverInfo && order.driverInfo.name) || "-";
+      const driverPlate = order.driverPlate || (order.driverInfo && order.driverInfo.plate) || "-";
+
       // Update Column 3 Header
-      document.getElementById("activeTicketTableNumber").textContent = order.orderRef.slice(-2);
-      document.getElementById("activeTicketTitle").textContent = `${order.channelLabel} #${order.orderRef}`;
-      document.getElementById("activeTicketCustomer").textContent = `Pemesan: ${order.customer} • Driver: ${order.driverName} (${order.driverPlate})`;
+      const numEl = document.getElementById("activeTicketTableNumber");
+      if (numEl) numEl.textContent = orderRef.slice(-2);
+      const titleEl = document.getElementById("activeTicketTitle");
+      if (titleEl) titleEl.textContent = `${chLabel} #${orderRef}`;
+      const custEl = document.getElementById("activeTicketCustomer");
+      if (custEl) custEl.textContent = `Pemesan: ${customerName} • Driver: ${driverName} (${driverPlate})`;
 
       const resBanner = document.getElementById("activeTicketReservationBanner");
       if (resBanner) {
@@ -2382,24 +2456,147 @@
       currentTicketItems = JSON.parse(JSON.stringify(order.items || []));
       renderTicketItemsList();
       calculateTotals();
-      showPosNotification(`🛵 Pesanan online ${order.channelLabel} #${order.orderRef} dipilih.`);
+      showPosNotification(`🛵 Pesanan online ${chLabel} #${orderRef} dipilih.`);
+    }
+
+    function updateOrderStatus(orderId, status) {
+      const cleanStatus = String(status || '').trim().toLowerCase();
+      const res = typeof RestoSync !== "undefined" && RestoSync.updateOnlineOrderStatus
+        ? RestoSync.updateOnlineOrderStatus(orderId, cleanStatus)
+        : null;
+      renderOnlineOrdersList();
+      if (cleanStatus === "ready") {
+        showPosNotification(`✅ Pesanan #${orderId} Siap Diambil Driver!`);
+      } else if (cleanStatus === "completed") {
+        showPosNotification(`🤝 Pesanan #${orderId} Berhasil Diserahkan / Selesai!`);
+      }
+      return res;
     }
 
     function handoverDeliveryOrder(orderId) {
-      const updated = RestoSync.updateOnlineOrderStatus(orderId, "completed");
-      if (updated) {
-        showPosNotification(`🤝 Pesanan #${updated.orderRef} Berhasil Diserahkan ke ${updated.driverName}! Transaksi dicatat ke pembukuan.`);
-        renderOnlineOrdersList();
-        if (activeDeliveryOrderId === orderId) {
-          activeDeliveryOrderId = null;
-        }
+      const updated = typeof RestoSync !== "undefined" && RestoSync.updateOnlineOrderStatus
+        ? RestoSync.updateOnlineOrderStatus(orderId, "completed")
+        : null;
+      const ref = (updated && (updated.orderRef || updated.platformRef)) || orderId;
+      const drv = (updated && updated.driverName) || "Driver";
+      showPosNotification(`🤝 Pesanan #${ref} Berhasil Diserahkan ke ${drv}! Transaksi dicatat ke pembukuan.`);
+      renderOnlineOrdersList();
+      if (activeDeliveryOrderId === orderId) {
+        activeDeliveryOrderId = null;
       }
+      return updated;
     }
 
+    const POS_SIMULATION_SAMPLES = {
+      gofood: {
+        platform: "gofood",
+        channelLabel: "GoFood",
+        customerName: "Dini Rahayu",
+        customerPhone: "0812-9876-5432",
+        driverName: "Pak Budi Santoso",
+        driverPlate: "B 4567 TZR",
+        packagingNotes: "Box tebal pisah kuah, seal cup es, sendok 2 set",
+        items: [
+          { name: "Nasi Mandhi Daging Kambing", qty: 2, price: 65000, station: "arabian", notes: "Pedas Lvl 1" },
+          { name: "Sambosa Daging Keju", qty: 1, price: 25000, station: "arabian", notes: "Saus Harissa" },
+          { name: "Authentic Teh Tarik", qty: 2, price: 18000, station: "drinks", notes: "Es Normal, Seal Cup" }
+        ]
+      },
+      grabfood: {
+        platform: "grabfood",
+        channelLabel: "GrabFood",
+        customerName: "Hendra Wijaya",
+        customerPhone: "0817-4455-6677",
+        driverName: "Pak Agus Pratama",
+        driverPlate: "B 6128 SAK",
+        packagingNotes: "Kuah Tom Yum double plastic heat seal + sendok tisu",
+        items: [
+          { name: "Tom Yum Goong Seafood Kuah Merah", qty: 1, price: 55000, station: "thai", notes: "Pedas Sedang" },
+          { name: "Pad Thai Udang Jumbo", qty: 1, price: 48000, station: "thai", notes: "Extra Kacang" },
+          { name: "Thai Green Tea Susu Asli", qty: 2, price: 22000, station: "drinks", notes: "Manis Sedang" }
+        ]
+      },
+      shopeefood: {
+        platform: "shopeefood",
+        channelLabel: "ShopeeFood",
+        customerName: "Maya Safitri",
+        customerPhone: "0819-2233-4455",
+        driverName: "Pak Irfan Maulana",
+        driverPlate: "B 3891 PKL",
+        packagingNotes: "Pemisahan saus garlic toum, paper bag rapi",
+        items: [
+          { name: "Nasi Lemak Sambal Sotong Special", qty: 2, price: 45000, station: "malaysian", notes: "Sambal Pisah Cup" },
+          { name: "Shawarma Ayam Panggang", qty: 1, price: 35000, station: "arabian", notes: "Extra Toum" },
+          { name: "Jus Kurma Susu Madu Segar", qty: 2, price: 24000, station: "drinks", notes: "Dingin Segar" }
+        ]
+      },
+      qpon: {
+        platform: "qpon",
+        channelLabel: "Qpon",
+        customerName: "Rizky Ramadhan",
+        customerPhone: "0813-8899-7711",
+        driverName: "Kurir Qpon Express",
+        driverPlate: "B 7711 QPN",
+        packagingNotes: "Pesanan Direct Qpon WebApp, packing ramah lingkungan",
+        items: [
+          { name: "Nasi Mandhi Daging Kambing", qty: 1, price: 65000, station: "arabian", notes: "Porsi Jumbo" },
+          { name: "Authentic Teh Tarik", qty: 1, price: 18000, station: "drinks", notes: "Dingin Segar" }
+        ]
+      },
+      takeaway: {
+        platform: "takeaway",
+        channelLabel: "Takeaway",
+        customerName: "Ibu Ratna Dewi",
+        customerPhone: "0856-1122-3344",
+        driverName: "Ambil Sendiri (Takeaway)",
+        driverPlate: "-",
+        packagingNotes: "Pelanggan menunggu di kasir / lobby",
+        items: [
+          { name: "Nasi Lemak Sambal Sotong Special", qty: 1, price: 45000, station: "malaysian", notes: "Bungkus" },
+          { name: "Sambosa Daging Keju", qty: 1, price: 25000, station: "arabian", notes: "Bungkus" }
+        ]
+      }
+    };
+
     function triggerQuickOnlineOrder(channel) {
-      const newOrder = RestoSync.quickSimulateOnlineOrder(channel);
+      const ch = channel || "gofood";
+      const sample = POS_SIMULATION_SAMPLES[ch] || POS_SIMULATION_SAMPLES.gofood;
+      const prefix = (ch === "qpon" ? "QP" : (ch === "takeaway" ? "TK" : ch.slice(0, 2).toUpperCase()));
+      const refCode = prefix + "-" + Math.floor(1000 + Math.random() * 9000);
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+
+      const orderPayload = {
+        tenantId: tenantId,
+        platform: ch,
+        channel: ch,
+        platformRef: refCode,
+        orderRef: refCode,
+        customerName: sample.customerName,
+        customer: sample.customerName,
+        customerPhone: sample.customerPhone,
+        phone: sample.customerPhone,
+        driverName: sample.driverName,
+        driverInfo: {
+          name: sample.driverName,
+          phone: sample.customerPhone,
+          plate: sample.driverPlate
+        },
+        packagingNotes: sample.packagingNotes,
+        specialNotes: sample.packagingNotes,
+        packagingFee: ch === 'takeaway' ? 2000 : 4000,
+        items: sample.items,
+        status: "cooking"
+      };
+
+      const res = typeof RestoSync !== "undefined" && RestoSync.submitOnlineOrder
+        ? RestoSync.submitOnlineOrder(orderPayload)
+        : null;
+      const newOrder = (res && res.order)
+        ? res.order
+        : ((res && typeof res.then !== "function" && (res.orderRef || res.id)) ? res : orderPayload);
       renderOnlineOrdersList();
-      showPosNotification(`🛵 Pesanan Baru Masuk dari ${newOrder.channelLabel}! #${newOrder.orderRef} dikirim ke KDS Dapur & Bar.`);
+      showPosNotification(`🛵 Pesanan Baru Masuk dari ${newOrder.channelLabel || sample.channelLabel || ch}! #${newOrder.orderRef || refCode} dikirim ke KDS Dapur & Bar.`);
+      return newOrder;
     }
 
     function quickSimulateAndClose(channel) {
@@ -2412,7 +2609,8 @@
       const modal = document.getElementById("onlineDeliveryOrderModal");
       const refInput = document.getElementById("modalDeliveryRef");
       const ch = document.getElementById("modalDeliveryChannel").value || "gofood";
-      refInput.value = ch.slice(0, 2).toUpperCase() + "-" + Math.floor(1000 + Math.random() * 9000);
+      const prefix = (ch === "qpon" ? "QP" : (ch === "takeaway" ? "TK" : ch.slice(0, 2).toUpperCase()));
+      refInput.value = prefix + "-" + Math.floor(1000 + Math.random() * 9000);
       modal.classList.remove("hidden");
       modal.classList.add("flex");
     }
@@ -2434,7 +2632,7 @@
       const notes = document.getElementById("modalDeliveryNotes").value;
 
       const checkedCheckboxes = document.querySelectorAll('input[name="deliveryItems"]:checked');
-      const catalog = RestoSync.getMenuCatalog();
+      const catalog = typeof RestoSync !== "undefined" ? RestoSync.getMenuCatalog() : [];
       const selectedItems = [];
 
       checkedCheckboxes.forEach(cb => {
@@ -2467,20 +2665,38 @@
         });
       }
 
-      const newOrder = RestoSync.createOnlineDeliveryOrder({
-        channel,
-        orderRef,
-        customer,
-        phone,
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const orderPayload = {
+        tenantId: tenantId,
+        platform: channel,
+        channel: channel,
+        platformRef: orderRef,
+        orderRef: orderRef,
+        customerName: customer,
+        customer: customer,
+        customerPhone: phone,
+        phone: phone,
         driverName: driver,
+        driverInfo: { name: driver, phone: phone, plate: "B 1234 ABC" },
         packagingNotes: notes,
-        packagingFee,
-        items: selectedItems
-      });
+        specialNotes: notes,
+        packagingFee: packagingFee,
+        items: selectedItems,
+        status: "cooking"
+      };
+
+      const res = typeof RestoSync !== "undefined" && RestoSync.submitOnlineOrder
+        ? RestoSync.submitOnlineOrder(orderPayload)
+        : null;
+      const newOrder = (res && res.order)
+        ? res.order
+        : ((res && typeof res.then !== "function" && (res.orderRef || res.id)) ? res : orderPayload);
 
       closeOnlineDeliveryModal();
       switchPosFloorMode("delivery");
-      showPosNotification(`🛵 Pesanan ${newOrder.channelLabel} #${newOrder.orderRef} berhasil dibuat & diterbitkan ke KDS!`);
+      renderOnlineOrdersList();
+      showPosNotification(`🛵 Pesanan ${newOrder.channelLabel || channel} #${newOrder.orderRef || orderRef} berhasil dibuat & diterbitkan ke KDS!`);
+      return newOrder;
     }
 
     // Helper Notifikasi Toast POS (Non-blocking Floating Banner)
@@ -3148,6 +3364,89 @@
       calculateTicketTotals(subtotal);
     }
 
+    const SAMPLE_STATIC_QRIS = "00020101021126570011ID.CO.QRIS.WWW011893600918000000000002150000000000000000303UME51440014ID.CO.QRIS.WWW02150000000000000000303UME5204581253033605802ID5915WARUNG_CONTOH6007JAKARTA61051234062070703A0163042F91";
+    let posQrisCountdownInterval = null;
+    let posQrisRemainingSeconds = 900;
+
+    function startPosQrisCountdown() {
+      if (posQrisCountdownInterval) {
+        clearInterval(posQrisCountdownInterval);
+        posQrisCountdownInterval = null;
+      }
+      posQrisRemainingSeconds = 900;
+      updatePosQrisCountdownDisplay();
+
+      posQrisCountdownInterval = setInterval(() => {
+        posQrisRemainingSeconds--;
+        if (posQrisRemainingSeconds <= 0) {
+          clearInterval(posQrisCountdownInterval);
+          posQrisCountdownInterval = null;
+          const cdEl = document.getElementById("posQrisCountdown");
+          if (cdEl) cdEl.textContent = "00:00 (Kedaluwarsa)";
+        } else {
+          updatePosQrisCountdownDisplay();
+        }
+      }, 1000);
+    }
+
+    function updatePosQrisCountdownDisplay() {
+      const cdEl = document.getElementById("posQrisCountdown");
+      if (!cdEl) return;
+      const m = Math.floor(posQrisRemainingSeconds / 60);
+      const s = posQrisRemainingSeconds % 60;
+      cdEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function stopPosQrisCountdown() {
+      if (posQrisCountdownInterval) {
+        clearInterval(posQrisCountdownInterval);
+        posQrisCountdownInterval = null;
+      }
+    }
+
+    function renderDynamicQrisTender() {
+      const grandTotal = currentCalculatedTotals.grandTotal;
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      let rawQris = typeof RestoSync !== "undefined" ? RestoSync.getTenantQris(tenantId) : "";
+
+      const unsetNotice = document.getElementById("posQrisUnsetNotice");
+      if (!rawQris || !rawQris.trim()) {
+        rawQris = SAMPLE_STATIC_QRIS;
+        if (unsetNotice) {
+          unsetNotice.classList.remove("hidden");
+          const link = document.getElementById("posQrisSettingsLink") || (unsetNotice.querySelector && unsetNotice.querySelector("a"));
+          if (link) {
+            link.href = (tenantId && tenantId !== "default")
+              ? `owner_settings_saas.html?tenant=${encodeURIComponent(tenantId)}#sectionQrisSettings`
+              : `owner_settings_saas.html#sectionQrisSettings`;
+          }
+        }
+      } else {
+        if (unsetNotice) {
+          unsetNotice.classList.add("hidden");
+        }
+      }
+
+      if (typeof RestoSync !== "undefined" && RestoSync.convertStaticQrisToDynamic) {
+        const res = RestoSync.convertStaticQrisToDynamic(rawQris, grandTotal, { billNo: activeTableId });
+        if (res && res.success) {
+          const qrisImg = document.getElementById("posQrisImage");
+          if (qrisImg) {
+            qrisImg.src = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(res.dynamicQris);
+          }
+          const badge = document.getElementById("posQrisAmountBadge");
+          if (badge) {
+            badge.textContent = formatRupiah(grandTotal);
+          }
+          const info = document.getElementById("posQrisStatusInfo");
+          if (info) {
+            info.textContent = "Scan via BCA, GoPay, OVO, Dana, ShopeePay";
+          }
+          startPosQrisCountdown();
+        }
+      }
+    }
+
     // Modal Pembayaran Kasir
     function openPaymentModal() {
       if (currentCalculatedTotals.grandTotal <= 0) {
@@ -3168,6 +3467,7 @@
     }
 
     function closePaymentModal() {
+      stopPosQrisCountdown();
       const modal = document.getElementById("paymentModal");
       modal.classList.add("hidden");
       modal.classList.remove("flex");
@@ -3197,6 +3497,12 @@
           secEl.classList.remove("flex");
         }
       });
+
+      if (method === "qris") {
+        renderDynamicQrisTender();
+      } else {
+        stopPosQrisCountdown();
+      }
     }
 
     function renderQuickCashButtons(grandTotal) {
