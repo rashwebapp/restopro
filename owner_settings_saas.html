@@ -1263,6 +1263,198 @@
 
 
 
+    <!-- ============================================================
+         8. PENGATURAN QRIS TOKO & GENERATOR DINAMIS (EMVCo)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionQrisSettings">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">qr_code_2</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Pengaturan QRIS Toko & Generator Dinamis (EMVCo)</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                Rp0 Biaya API
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Konfigurasi kode QRIS statis warung untuk otomatis diubah menjadi QRIS dinamis ber-nominal pas pada layar kasir & tamu (Rp0 biaya API).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area & Controls -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">qr_code</span>
+              <span>Payload String QRIS Statis Toko (Standar Bank Indonesia / EMVCo)</span>
+            </label>
+            <button type="button" id="btnLoadSampleQris" onclick="handleLoadSampleQris()" class="text-[11px] font-heading font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">dataset</span>
+              <span>Muat Contoh QRIS Bank Indonesia</span>
+            </button>
+          </div>
+          <textarea 
+            id="qrisStaticInput" 
+            rows="3" 
+            placeholder="00020101021126570011ID.CO.QRIS.WWW011893600918000000000002150000000000000000303UME51440014ID.CO.QRIS.WWW02150000000000000000303UME5204581253033605802ID5915WARUNG_CONTOH6007JAKARTA61051234062070703A016304XXXX" 
+            class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500"
+          ></textarea>
+          <p class="text-[11px] text-stone-500 mt-1">
+            Dapatkan string ini dari gambar QRIS statis warung Anda menggunakan aplikasi pemindai QR / Google Lens.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+          <div id="qrisSaveFeedback" class="hidden text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">check_circle</span>
+            <span>Pengaturan QRIS berhasil disimpan untuk outlet ini!</span>
+          </div>
+          <button id="btnSaveQris" onclick="handleSaveQrisSettings()" class="touch-btn ml-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span>Simpan QRIS Toko</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Area Pratinjau & Simulator Nominal Dinamis -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
+        <h3 class="font-heading font-extrabold text-sm text-[#1C1917] dark:text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">tune</span>
+          <span>Simulator Generator Nominal Pas (Uji Konversi Dinamis)</span>
+        </h3>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+          <div class="flex-1">
+            <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white block mb-1">
+              Nominal Uji Coba Transaksi (Rp)
+            </label>
+            <input 
+              id="qrisTestAmount" 
+              type="number" 
+              min="1000" 
+              step="1000" 
+              value="10000" 
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-semibold text-[#1C1917] dark:text-white outline-none focus:border-emerald-500"
+            />
+          </div>
+          <button id="btnTestQrisConvert" onclick="handleTestQrisConversion()" class="touch-btn px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+            <span>Uji Konversi QRIS</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="md:col-span-2 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">
+                String QRIS Dinamis Hasil Konversi (Tag 54 + CRC16 Otomatis)
+              </label>
+              <span id="qrisTestResultBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
+                Menunggu Uji Coba
+              </span>
+            </div>
+            <textarea 
+              id="qrisDynamicOutput" 
+              readonly 
+              rows="3" 
+              placeholder="Hasil konversi QRIS dinamis akan muncul di sini..." 
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono text-stone-700 dark:text-stone-300 outline-none"
+            ></textarea>
+          </div>
+
+          <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-center min-h-[160px]">
+            <img id="qrisDynamicPreview" src="" alt="Pratinjau QRIS Dinamis" class="w-36 h-36 object-contain rounded-lg border border-stone-200 dark:border-stone-700 hidden" />
+            <div id="qrisDynamicPlaceholder" class="text-stone-400 text-xs flex flex-col items-center gap-1">
+              <span class="material-symbols-outlined text-[32px] text-stone-300 dark:text-stone-600">qr_code</span>
+              <span>Pratinjau QR Code Dinamis</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- ============================================================
+         9. JEMBATAN PESANAN ONLINE LYNK.ID & QPON (WEBHOOK)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionOnlineOrdersWebhook">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">delivery_dining</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Jembatan Pesanan Online (GoFood, GrabFood, ShopeeFood, Lynk.id & Qpon)</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300">
+                Omnichannel Delivery
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Alamat penerima otomatis (Webhook) untuk mengalirkan pesanan dari landing page promosi Lynk.id / Qpon ke dapur KDS & kasir.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Webhook URL Box -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
+        <div>
+          <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white block mb-1">
+            Endpoint Webhook URL Penerima Pesanan Online (action=submitOnlineOrder)
+          </label>
+          <div class="flex flex-col sm:flex-row items-stretch gap-2">
+            <input 
+              id="onlineWebhookUrlInput" 
+              type="text" 
+              readonly 
+              placeholder="Konfigurasikan URL GAS di atas terlebih dahulu" 
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none"
+            />
+            <button id="btnCopyWebhookUrl" onclick="copyOnlineWebhookUrl()" class="touch-btn px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
+              <span class="material-symbols-outlined text-[16px]">content_copy</span>
+              <span>Salin URL Webhook</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-stone-500 mt-1">
+            Tempelkan URL ini di pengaturan Webhook Lynk.id, Qpon, atau middleware kurir delivery untuk memasukkan pesanan online otomatis ke Resto Pro.
+          </p>
+        </div>
+
+        <!-- KPI Ringkasan Statistik Omset Online Delivery -->
+        <div id="onlineOrdersStatsSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <!-- Cards rendered by renderOnlineOrdersStatsSummary() -->
+        </div>
+      </div>
+
+      <!-- Dokumentasi Payload JSON -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
+        <h3 class="font-heading font-extrabold text-xs text-[#1C1917] dark:text-white flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-indigo-500">code</span>
+          <span>Spesifikasi Format Payload JSON Webhook (POST / GET)</span>
+        </h3>
+        <p class="text-[11px] text-stone-500">
+          Setiap platform pengirim (Lynk.id, Qpon, bot WhatsApp, agregator) mengirimkan data pesanan dalam format JSON standar berikut:
+        </p>
+        <pre class="p-4 rounded-xl bg-stone-900 text-stone-200 text-xs font-mono overflow-x-auto leading-relaxed border border-stone-800"><code>{
+  "tenantId": "warung-berkah",
+  "platform": "qpon",
+  "platformRef": "QP-9901",
+  "customerName": "Budi Santoso",
+  "customerPhone": "08123456789",
+  "items": [{"name": "Nasi Mandhi", "qty": 2, "price": 65000}],
+  "packagingFee": 4000,
+  "totalAmount": 134000,
+  "specialNotes": "Sendok 2 set"
+}</code></pre>
+      </div>
+    </section>
+
+
+
   </main>
 
   <!-- ============================================================
@@ -1912,6 +2104,8 @@
       applyOwnerTenantBranding();
 
       initGasSettingsUI();
+      initQrisSettingsUI();
+      initOnlineOrdersUI();
       renderCatalogManager();
       renderMembersTable();
       renderLedgerTable();
@@ -1946,10 +2140,32 @@
           RestoSync.enforceTenantAccessGuard(document);
         }
         applyOwnerTenantBranding();
+        initQrisSettingsUI();
+        initOnlineOrdersUI();
         updateLicenseBannerUI();
         renderOwnerTables();
         updateProFeatureLockUI();
         checkTenantPaymentStatus();
+      });
+
+      RestoSync.on("GAS_CONFIG_CHANGED", () => {
+        initOnlineOrdersUI();
+      });
+
+      RestoSync.on("ONLINE_ORDER_PLACED", () => {
+        renderOnlineOrdersStatsSummary();
+      });
+
+      RestoSync.on("ONLINE_ORDER_RECEIVED", () => {
+        renderOnlineOrdersStatsSummary();
+      });
+
+      RestoSync.on("ONLINE_ORDER_UPDATED", () => {
+        renderOnlineOrdersStatsSummary();
+      });
+
+      RestoSync.on("ONLINE_ORDER_STATUS_CHANGED", () => {
+        renderOnlineOrdersStatsSummary();
       });
 
       RestoSync.on("OPEN_PAYMENT_MODAL", (data) => {
@@ -3606,6 +3822,9 @@
       RestoSync.setGasUrl(url);
       RestoSync.setGasApiKey(apiKey);
       initGasSettingsUI();
+      if (typeof initOnlineOrdersUI === "function") {
+        initOnlineOrdersUI();
+      }
 
       let msg = "Konfigurasi Cloud berhasil disimpan!";
       if (apiKey) {
@@ -4130,6 +4349,196 @@ END $$;
         })
         .catch(() => null);
     }
+
+    // ============================================================
+    // 8. PENGATURAN QRIS TOKO & GENERATOR DINAMIS (EMVCo)
+    // ============================================================
+    const SAMPLE_STATIC_QRIS = "00020101021126570011ID.CO.QRIS.WWW011893600918000000000002150000000000000000303UME51440014ID.CO.QRIS.WWW02150000000000000000303UME5204581253033605802ID5915WARUNG_CONTOH6007JAKARTA61051234062070703A0163042F91";
+
+    function initQrisSettingsUI() {
+      const qrisInput = document.getElementById("qrisStaticInput");
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      if (qrisInput && typeof RestoSync !== "undefined") {
+        const saved = RestoSync.getTenantQris(tenantId);
+        if (saved) {
+          qrisInput.value = saved;
+        }
+      }
+    }
+
+    function handleLoadSampleQris() {
+      const qrisInput = document.getElementById("qrisStaticInput");
+      if (qrisInput) {
+        qrisInput.value = SAMPLE_STATIC_QRIS;
+      }
+    }
+
+    function handleSaveQrisSettings() {
+      const qrisInput = document.getElementById("qrisStaticInput");
+      const feedback = document.getElementById("qrisSaveFeedback");
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const val = qrisInput ? qrisInput.value.trim() : "";
+
+      if (typeof RestoSync !== "undefined") {
+        RestoSync.saveTenantQris(tenantId, val);
+      }
+
+      if (feedback) {
+        feedback.classList.remove("hidden");
+        feedback.className = "text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1";
+        feedback.innerHTML = `<span class="material-symbols-outlined text-[15px]">check_circle</span><span>Pengaturan QRIS berhasil disimpan untuk outlet ini!</span>`;
+      }
+    }
+
+    function handleTestQrisConversion() {
+      const qrisInput = document.getElementById("qrisStaticInput");
+      const testAmount = document.getElementById("qrisTestAmount");
+      const dynamicOutput = document.getElementById("qrisDynamicOutput");
+      const dynamicPreview = document.getElementById("qrisDynamicPreview");
+      const dynamicPlaceholder = document.getElementById("qrisDynamicPlaceholder");
+      const resultBadge = document.getElementById("qrisTestResultBadge");
+
+      const rawQris = qrisInput ? qrisInput.value.trim() : "";
+      const numAmount = testAmount ? Number(testAmount.value) : 10000;
+
+      if (!rawQris) {
+        if (resultBadge) {
+          resultBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300";
+          resultBadge.textContent = "QRIS statis belum diisi";
+        }
+        if (dynamicOutput) {
+          dynamicOutput.value = "";
+          dynamicOutput.textContent = "";
+        }
+        if (dynamicPreview) dynamicPreview.classList.add("hidden");
+        if (dynamicPlaceholder) dynamicPlaceholder.classList.remove("hidden");
+        return;
+      }
+
+      const res = (typeof RestoSync !== "undefined" && typeof RestoSync.convertStaticQrisToDynamic === "function")
+        ? RestoSync.convertStaticQrisToDynamic(rawQris, numAmount)
+        : { success: false, error: "Modul RestoSync tidak tersedia" };
+
+      if (res && res.success) {
+        if (dynamicOutput) {
+          dynamicOutput.value = res.dynamicQris;
+          dynamicOutput.textContent = res.dynamicQris;
+        }
+        if (dynamicPreview) {
+          const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(res.dynamicQris);
+          dynamicPreview.src = qrUrl;
+          dynamicPreview.classList.remove("hidden");
+        }
+        if (dynamicPlaceholder) {
+          dynamicPlaceholder.classList.add("hidden");
+        }
+        if (resultBadge) {
+          resultBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300";
+          resultBadge.textContent = "Valid EMVCo Dynamic QRIS";
+        }
+      } else {
+        const errMsg = (res && res.error) ? res.error : "Format QRIS statis tidak valid";
+        if (dynamicOutput) {
+          dynamicOutput.value = "";
+          dynamicOutput.textContent = "";
+        }
+        if (dynamicPreview) dynamicPreview.classList.add("hidden");
+        if (dynamicPlaceholder) dynamicPlaceholder.classList.remove("hidden");
+        if (resultBadge) {
+          resultBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300";
+          resultBadge.textContent = "Gagal: " + errMsg;
+        }
+      }
+    }
+
+    // ============================================================
+    // 9. JEMBATAN PESANAN ONLINE LYNK.ID & QPON (WEBHOOK)
+    // ============================================================
+    function initOnlineOrdersUI() {
+      const webhookInput = document.getElementById("onlineWebhookUrlInput");
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const gasUrl = typeof RestoSync !== "undefined" ? RestoSync.getGasUrl() : "";
+
+      if (webhookInput) {
+        if (gasUrl) {
+          const sep = gasUrl.includes("?") ? "&" : "?";
+          webhookInput.value = `${gasUrl}${sep}action=submitOnlineOrder&tenantId=${encodeURIComponent(tenantId)}`;
+        } else {
+          webhookInput.value = "";
+          webhookInput.placeholder = "(Konfigurasikan URL GAS di atas terlebih dahulu)";
+        }
+      }
+
+      renderOnlineOrdersStatsSummary();
+    }
+
+    function copyOnlineWebhookUrl() {
+      const webhookInput = document.getElementById("onlineWebhookUrlInput");
+      const url = webhookInput ? webhookInput.value.trim() : "";
+      if (!url) {
+        alert("Konfigurasikan URL Google Apps Script di form atas terlebih dahulu!");
+        return;
+      }
+
+      if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        navigator.clipboard.writeText(url).then(() => {
+          alert("✅ Endpoint Webhook Pesanan Online Berhasil Disalin ke Clipboard!\n\nTempelkan URL ini di pengaturan Webhook Lynk.id / Qpon warung Anda.");
+        }).catch(() => {
+          prompt("Salin endpoint Webhook ini:", url);
+        });
+      } else {
+        prompt("Salin endpoint Webhook ini:", url);
+      }
+    }
+
+    function renderOnlineOrdersStatsSummary() {
+      const container = document.getElementById("onlineOrdersStatsSummary");
+      if (!container) return;
+
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const orders = typeof RestoSync !== "undefined" ? (RestoSync.getOnlineOrders(tenantId) || []) : [];
+
+      const totalOrders = orders.length;
+      let completedOrders = 0;
+      let totalOmset = 0;
+
+      orders.forEach(o => {
+        const amt = Number(o.totalAmount || o.grandTotal || 0);
+        const st = String(o.status || "").toLowerCase();
+        if (st === "completed" || st === "delivered" || st === "selesai") {
+          completedOrders++;
+        }
+        totalOmset += amt;
+      });
+
+      const formattedOmset = typeof formatRupiah === "function" ? formatRupiah(totalOmset) : `Rp ${totalOmset.toLocaleString("id-ID")}`;
+
+      container.innerHTML = `
+        <div class="p-3.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] space-y-1">
+          <div class="text-[10px] font-bold text-stone-500 uppercase tracking-wider">Total Pesanan Online</div>
+          <div class="text-xl font-heading font-extrabold text-[#1C1917] dark:text-white">${totalOrders}</div>
+          <div class="text-[10px] text-stone-400">Dari semua channel delivery</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] space-y-1">
+          <div class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Pesanan Selesai</div>
+          <div class="text-xl font-heading font-extrabold text-emerald-600 dark:text-emerald-400">${completedOrders}</div>
+          <div class="text-[10px] text-stone-400">Status Completed / Delivered</div>
+        </div>
+        <div class="p-3.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] space-y-1">
+          <div class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Total Omset Delivery</div>
+          <div class="text-xl font-heading font-extrabold text-indigo-600 dark:text-indigo-400">${formattedOmset}</div>
+          <div class="text-[10px] text-stone-400">Termasuk biaya kemasan</div>
+        </div>
+      `;
+    }
+
+    window.initQrisSettingsUI = initQrisSettingsUI;
+    window.handleLoadSampleQris = handleLoadSampleQris;
+    window.handleSaveQrisSettings = handleSaveQrisSettings;
+    window.handleTestQrisConversion = handleTestQrisConversion;
+    window.initOnlineOrdersUI = initOnlineOrdersUI;
+    window.copyOnlineWebhookUrl = copyOnlineWebhookUrl;
+    window.renderOnlineOrdersStatsSummary = renderOnlineOrdersStatsSummary;
   </script>
 </body>
 </html>
