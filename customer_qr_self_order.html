@@ -944,32 +944,8 @@
         filterCategory(activeFilter);
       });
 
-      // Isi keranjang dummy awal (opsional) agar terlihat hidup dan siap demo
-      cart = [
-        {
-          id: "nasi-lemak-sotong",
-          name: "Nasi Lemak Sambal Sotong Special",
-          basePrice: 45000,
-          unitPrice: 45000,
-          qty: 1,
-          modifiers: {
-            spiciness: 3,
-            ricePortion: "Regular",
-            notes: "Sambal banyakin ya kak"
-          }
-        },
-        {
-          id: "teh-tarik",
-          name: "Authentic Teh Tarik Buih Melimpah",
-          basePrice: 18000,
-          unitPrice: 18000,
-          qty: 1,
-          modifiers: {
-            drinkTemp: "Normal Ice",
-            notes: ""
-          }
-        }
-      ];
+      // Inisialisasi keranjang bersih (kosong/0) saat tamu membuka QR menu
+      cart = [];
       updateCartUI();
     });
 
