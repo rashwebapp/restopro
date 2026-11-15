@@ -1246,14 +1246,50 @@ const RestoSync = {
   // ============================================================
   // MANAJEMEN PESANAN ONLINE DELIVERY (GOFOOD, GRABFOOD, SHOPEEFOOD)
   // ============================================================
-  getOnlineOrders() {
+  getOnlineOrders(tenantId) {
+    const tid = (tenantId && String(tenantId).trim()) ? String(tenantId).trim() : this.getTenantId();
+    const tenantKey = `online_orders_tenant_${tid}`;
+    let localOrders = [];
     try {
-      const raw = localStorage.getItem(this.ONLINE_ORDERS_STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
+      const rawTenant = localStorage.getItem(tenantKey);
+      if (rawTenant) {
+        localOrders = JSON.parse(rawTenant);
+      } else {
+        const rawGlobal = localStorage.getItem(this.ONLINE_ORDERS_STORAGE_KEY);
+        localOrders = rawGlobal ? JSON.parse(rawGlobal) : [];
+      }
     } catch (e) {
       console.warn("Gagal parse online delivery orders:", e);
-      return [];
+      localOrders = [];
     }
+
+    const fetchPromise = (async () => {
+      try {
+        const { gasUrl } = this._getCloudEndpoint ? this._getCloudEndpoint() : { gasUrl: this.getGasUrl() };
+        if (!gasUrl || typeof fetch !== "function") {
+          return localOrders;
+        }
+        const sep = gasUrl.includes("?") ? "&" : "?";
+        const fetchUrl = `${gasUrl}${sep}action=getOnlineOrders&tenantId=${encodeURIComponent(tid)}&_t=${Date.now()}`;
+        const res = await fetch(fetchUrl, { method: "GET", mode: "cors" });
+        if (res && res.ok) {
+          const json = await res.json();
+          if (json && json.success && Array.isArray(json.orders)) {
+            try {
+              localStorage.setItem(tenantKey, JSON.stringify(json.orders));
+            } catch (e) {}
+            return json.orders;
+          }
+        }
+      } catch (e) {}
+      return localOrders;
+    })();
+
+    const result = Array.isArray(localOrders) ? localOrders.slice() : [];
+    result.then = function (onFulfilled, onRejected) {
+      return fetchPromise.then(onFulfilled, onRejected);
+    };
+    return result;
   },
 
   saveOnlineOrders(orders) {
@@ -1425,55 +1461,349 @@ const RestoSync = {
     return newOrder;
   },
 
-  updateOnlineOrderStatus(orderId, newStatus) {
-    const orders = this.getOnlineOrders();
-    const target = orders.find(o => o.id === orderId || o.orderRef === orderId);
-    if (!target) return null;
+  async submitOnlineOrder(orderData) {
+    const tid = (orderData && orderData.tenantId && String(orderData.tenantId).trim())
+      ? String(orderData.tenantId).trim()
+      : this.getTenantId();
 
-    target.status = newStatus;
-    this.saveOnlineOrders(orders);
+    const channelLabels = {
+      gofood: "GoFood",
+      grabfood: "GrabFood",
+      shopeefood: "ShopeeFood",
+      qpon: "QPON Online",
+      takeaway: "Takeaway"
+    };
 
-    // Sinkronkan status tiket di KDS
-    const tickets = this.getKdsTickets();
-    const kdsTarget = tickets.find(t => t.id === target.id);
-    if (kdsTarget) {
-      if (newStatus === "ready") {
-        kdsTarget.status = "ready";
-        kdsTarget.readyAt = Date.now();
-        (kdsTarget.items || []).forEach(i => i.completed = true);
-        this.saveKdsTickets(tickets);
-        this.emit("ORDER_STATUS_CHANGED", { ticketId: kdsTarget.id, status: "ready", table: kdsTarget.table });
-      } else if (newStatus === "completed") {
-        this.removeTicket(kdsTarget.id);
+    const platform = (orderData && (orderData.platform || orderData.channel))
+      ? String(orderData.platform || orderData.channel).trim().toLowerCase()
+      : "gofood";
+    const chLabel = channelLabels[platform] || "Online Delivery";
+
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const hex = Math.random().toString(16).substring(2, 6).toUpperCase();
+    const platformRef = String((orderData && (orderData.platformRef || orderData.orderRef)) || "").trim();
+    const orderId = (orderData && orderData.orderId)
+      ? String(orderData.orderId).trim()
+      : (orderData && orderData.id)
+        ? String(orderData.id).trim()
+        : `ORD-${platform.toUpperCase()}-${yyyy}${mm}${dd}-${hex}`;
+
+    const items = (orderData && Array.isArray(orderData.items)) ? orderData.items.map(it => {
+      const lowerName = (it.name || "").toLowerCase();
+      const isDrink = it.station === "drinks" || it.category === "drinks" || 
+                      lowerName.includes("teh") || lowerName.includes("tea") || 
+                      lowerName.includes("jus") || lowerName.includes("qahwa") || 
+                      lowerName.includes("kopi");
+      return {
+        name: it.name,
+        qty: Number(it.qty || 1),
+        price: Number(it.price || 0),
+        station: isDrink ? "drinks" : (it.station || "kitchen"),
+        notes: it.notes || "",
+        completed: false
+      };
+    }) : [];
+
+    const subtotal = (orderData && orderData.subtotal !== undefined)
+      ? Number(orderData.subtotal)
+      : items.reduce((sum, i) => sum + (Number(i.price || 0) * Number(i.qty || 1)), 0);
+    const packagingFee = Number(orderData && orderData.packagingFee || 0);
+    const totalAmount = (orderData && (orderData.totalAmount !== undefined || orderData.grandTotal !== undefined))
+      ? Number(orderData.totalAmount !== undefined ? orderData.totalAmount : orderData.grandTotal)
+      : (subtotal + packagingFee);
+
+    const customerName = String((orderData && (orderData.customerName || orderData.customer)) || `Pelanggan ${chLabel}`).trim();
+    const customerPhone = String((orderData && (orderData.customerPhone || orderData.phone)) || "-").trim();
+    const specialNotes = String((orderData && (orderData.specialNotes || orderData.packagingNotes || orderData.notes)) || "").trim();
+    const status = String((orderData && orderData.status) || "cooking").trim().toLowerCase();
+
+    const driverInfo = (orderData && orderData.driverInfo) ? orderData.driverInfo : {
+      name: (orderData && orderData.driverName) || `Driver ${chLabel}`,
+      phone: (orderData && orderData.driverPhone) || "-",
+      plate: (orderData && orderData.driverPlate) || ("B " + Math.floor(1000 + Math.random() * 9000) + " XYZ")
+    };
+
+    const createdOrder = {
+      orderId: orderId,
+      id: orderId,
+      tenantId: tid,
+      platform: platform,
+      channel: platform,
+      channelLabel: chLabel,
+      platformRef: platformRef,
+      orderRef: platformRef || orderId,
+      customerName: customerName,
+      customer: customerName,
+      customerPhone: customerPhone,
+      phone: customerPhone,
+      driverInfo: driverInfo,
+      driverName: (typeof driverInfo === 'object' && driverInfo ? driverInfo.name : '') || (orderData && orderData.driverName) || '',
+      driverPhone: (typeof driverInfo === 'object' && driverInfo ? driverInfo.phone : '') || (orderData && orderData.driverPhone) || '',
+      driverPlate: (typeof driverInfo === 'object' && driverInfo ? driverInfo.plate : '') || (orderData && orderData.driverPlate) || '',
+      packagingNotes: specialNotes,
+      specialNotes: specialNotes,
+      items: items,
+      subtotal: subtotal,
+      packagingFee: packagingFee,
+      totalAmount: totalAmount,
+      grandTotal: totalAmount,
+      status: status,
+      createdAt: (orderData && orderData.createdAt) || now.toISOString(),
+      updatedAt: now.toISOString()
+    };
+
+    // 1. Simpan ke cache LocalStorage tenant: online_orders_tenant_<tenantId>
+    const tenantKey = `online_orders_tenant_${tid}`;
+    let tenantOrders = [];
+    try {
+      const raw = localStorage.getItem(tenantKey);
+      tenantOrders = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      tenantOrders = [];
+    }
+    const existingIdx = tenantOrders.findIndex(o => o.orderId === orderId || (platformRef && o.platformRef === platformRef));
+    if (existingIdx !== -1) {
+      tenantOrders[existingIdx] = { ...tenantOrders[existingIdx], ...createdOrder };
+    } else {
+      tenantOrders.unshift(createdOrder);
+    }
+    try {
+      localStorage.setItem(tenantKey, JSON.stringify(tenantOrders));
+    } catch (e) {}
+
+    // 2. Simpan juga ke storage global ONLINE_ORDERS_STORAGE_KEY
+    try {
+      const globalOrders = this.getOnlineOrders();
+      const gIdx = globalOrders.findIndex(o => o.id === orderId || o.orderId === orderId);
+      if (gIdx !== -1) {
+        globalOrders[gIdx] = createdOrder;
+      } else {
+        globalOrders.unshift(createdOrder);
+      }
+      this.saveOnlineOrders(globalOrders);
+    } catch (e) {}
+
+    // 3. Otomatis terbitkan KDS Ticket untuk Dapur & Bar
+    try {
+      const kdsTicket = {
+        id: orderId,
+        orderType: platform,
+        channel: chLabel,
+        orderRef: createdOrder.orderRef,
+        table: `[${chLabel}] #${createdOrder.orderRef}`,
+        tableId: orderId,
+        customer: `${createdOrder.customer} (Driver: ${createdOrder.driverName})`,
+        phone: createdOrder.phone,
+        driverName: createdOrder.driverName,
+        driverPlate: createdOrder.driverPlate,
+        packagingNotes: createdOrder.specialNotes,
+        createdAt: Date.now(),
+        status: "new",
+        section: `🛵 ${chLabel} • Bungkus 📦`,
+        items: items
+      };
+      const tickets = this.getKdsTickets();
+      tickets.unshift(kdsTicket);
+      this.saveKdsTickets(tickets);
+      this.emit("ORDER_PLACED", kdsTicket);
+    } catch (e) {}
+
+    // 4. Emit event sinkronisasi real-time
+    this.emit("ONLINE_ORDER_RECEIVED", createdOrder);
+    this.emit("ONLINE_ORDER_PLACED", createdOrder);
+    try { this.playKitchenBell(); } catch (e) {}
+
+    // 5. Jika GAS URL tersedia, kirim fetch POST ke backend GAS
+    let gasResult = null;
+    const { gasUrl, apiKey } = this._getCloudEndpoint ? this._getCloudEndpoint() : { gasUrl: this.getGasUrl(), apiKey: this.getGasApiKey() };
+    if (gasUrl && typeof fetch === "function") {
+      try {
+        const res = await fetch(gasUrl, {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "submitOnlineOrder",
+            apiKey: apiKey,
+            tenantId: tid,
+            platform: platform,
+            platformRef: platformRef,
+            customerName: customerName,
+            customerPhone: customerPhone,
+            driverInfo: driverInfo,
+            items: items,
+            subtotal: subtotal,
+            packagingFee: packagingFee,
+            totalAmount: totalAmount,
+            specialNotes: specialNotes,
+            status: status,
+            orderId: orderId,
+            timestamp: Date.now()
+          })
+        });
+        if (res && res.ok) {
+          gasResult = await res.json();
+        }
+      } catch (e) {
+        this._safeWarn("Background submitOnlineOrder GAS POST warning (non-blocking):", e);
       }
     }
 
-    // Jika completed (driver sudah ambil makanan), catat ke pembukuan transaksi
-    if (newStatus === "completed") {
-      this.recordTransaction({
-        billNo: `RP-${target.orderRef}`,
-        table: `[${target.channelLabel}] ${target.orderRef}`,
-        tableId: target.id,
-        customer: `${target.customer} (${target.driverName})`,
-        paymentMethod: target.channel, // gofood, grabfood, shopeefood, takeaway
-        channel: target.channel,
-        orderType: target.channel,
-        driverName: target.driverName,
-        driverPlate: target.driverPlate,
-        orderRef: target.orderRef,
-        items: target.items,
-        subtotal: target.subtotal,
-        discount: 0,
-        tax: 0,
-        grandTotal: target.grandTotal,
-        amountPaid: target.grandTotal,
-        change: 0
-      });
-      this.playKitchenBell();
+    return {
+      success: true,
+      orderId: (gasResult && gasResult.orderId) || orderId,
+      status: (gasResult && gasResult.status) || createdOrder.status,
+      order: createdOrder,
+      gasResult: gasResult
+    };
+  },
+
+  updateOnlineOrderStatus(orderId, status, options) {
+    const cleanStatus = String(status || '').trim().toLowerCase();
+    const opt = (options && typeof options === "object") ? options : {};
+    const tid = (opt && opt.tenantId) ? String(opt.tenantId).trim() : this.getTenantId();
+
+    // 1. Update cache di LocalStorage tenant
+    const tenantKey = `online_orders_tenant_${tid}`;
+    let tenantOrders = [];
+    try {
+      const raw = localStorage.getItem(tenantKey);
+      tenantOrders = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      tenantOrders = [];
+    }
+    const tIdx = tenantOrders.findIndex(o => o.orderId === orderId || o.id === orderId || o.platformRef === orderId || o.orderRef === orderId);
+    let target = null;
+    if (tIdx !== -1) {
+      tenantOrders[tIdx].status = cleanStatus;
+      tenantOrders[tIdx].updatedAt = new Date().toISOString();
+      if (opt.driverInfo) {
+        tenantOrders[tIdx].driverInfo = opt.driverInfo;
+        if (typeof opt.driverInfo === "object") {
+          if (opt.driverInfo.name) tenantOrders[tIdx].driverName = opt.driverInfo.name;
+          if (opt.driverInfo.phone) tenantOrders[tIdx].driverPhone = opt.driverInfo.phone;
+          if (opt.driverInfo.plate) tenantOrders[tIdx].driverPlate = opt.driverInfo.plate;
+        }
+      }
+      target = tenantOrders[tIdx];
+      try { localStorage.setItem(tenantKey, JSON.stringify(tenantOrders)); } catch (e) {}
     }
 
-    this.emit("ONLINE_ORDER_UPDATED", target);
-    return target;
+    // 2. Update cache di storage global
+    const globalOrders = this.getOnlineOrders();
+    const gIdx = globalOrders.findIndex(o => o.id === orderId || o.orderId === orderId || o.orderRef === orderId || o.platformRef === orderId);
+    if (gIdx !== -1) {
+      globalOrders[gIdx].status = cleanStatus;
+      globalOrders[gIdx].updatedAt = new Date().toISOString();
+      if (opt.driverInfo) {
+        globalOrders[gIdx].driverInfo = opt.driverInfo;
+        if (typeof opt.driverInfo === "object") {
+          if (opt.driverInfo.name) globalOrders[gIdx].driverName = opt.driverInfo.name;
+          if (opt.driverInfo.phone) globalOrders[gIdx].driverPhone = opt.driverInfo.phone;
+          if (opt.driverInfo.plate) globalOrders[gIdx].driverPlate = opt.driverInfo.plate;
+        }
+      }
+      if (!target) target = globalOrders[gIdx];
+      this.saveOnlineOrders(globalOrders);
+    }
+
+    // 3. Sinkronkan tiket di KDS
+    try {
+      const tickets = this.getKdsTickets();
+      const kdsTarget = tickets.find(t => t.id === orderId || (target && t.id === target.id));
+      if (kdsTarget) {
+        if (cleanStatus === "ready") {
+          kdsTarget.status = "ready";
+          kdsTarget.readyAt = Date.now();
+          (kdsTarget.items || []).forEach(i => i.completed = true);
+          this.saveKdsTickets(tickets);
+          this.emit("ORDER_STATUS_CHANGED", { ticketId: kdsTarget.id, status: "ready", table: kdsTarget.table });
+        } else if (cleanStatus === "completed") {
+          this.removeTicket(kdsTarget.id);
+        }
+      }
+    } catch (e) {}
+
+    // 4. Catat transaksi jika status completed
+    if (cleanStatus === "completed" && target) {
+      try {
+        this.recordTransaction({
+          billNo: `RP-${target.orderRef || target.id}`,
+          table: `[${target.channelLabel || target.platform}] ${target.orderRef || target.id}`,
+          tableId: target.id || target.orderId,
+          customer: `${target.customer || target.customerName} (${target.driverName || 'Driver'})`,
+          paymentMethod: target.channel || target.platform || 'online',
+          channel: target.channel || target.platform,
+          orderType: target.channel || target.platform,
+          driverName: target.driverName,
+          driverPlate: target.driverPlate,
+          orderRef: target.orderRef || target.platformRef,
+          items: target.items,
+          subtotal: target.subtotal,
+          discount: 0,
+          tax: 0,
+          grandTotal: target.grandTotal || target.totalAmount,
+          amountPaid: target.grandTotal || target.totalAmount,
+          change: 0
+        });
+        this.playKitchenBell();
+      } catch (e) {}
+    }
+
+    // 5. Emit events
+    this.emit("ONLINE_ORDER_STATUS_CHANGED", { orderId, status: cleanStatus, options: opt });
+    if (target) {
+      this.emit("ONLINE_ORDER_UPDATED", target);
+    }
+
+    // 6. GAS fetch promise
+    const gasPromise = (async () => {
+      const { gasUrl, apiKey } = this._getCloudEndpoint ? this._getCloudEndpoint() : { gasUrl: this.getGasUrl(), apiKey: this.getGasApiKey() };
+      if (gasUrl && typeof fetch === "function") {
+        try {
+          const res = await fetch(gasUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "updateOnlineOrderStatus",
+              apiKey: apiKey,
+              orderId: orderId,
+              tenantId: tid,
+              status: cleanStatus,
+              driverInfo: opt.driverInfo,
+              timestamp: Date.now()
+            })
+          });
+          if (res && res.ok) {
+            return await res.json();
+          }
+        } catch (e) {
+          this._safeWarn("Background updateOnlineOrderStatus GAS POST warning (non-blocking):", e);
+        }
+      }
+      return { success: true, orderId: orderId, status: cleanStatus };
+    })();
+
+    // 7. Return synchronous/thenable object
+    const retObj = {
+      success: true,
+      orderId: orderId,
+      status: cleanStatus,
+      orderRef: target ? (target.orderRef || target.platformRef || orderId) : orderId,
+      driverName: target ? (target.driverName || (target.driverInfo && target.driverInfo.name) || '') : '',
+      order: target,
+      then(onFulfilled, onRejected) {
+        return gasPromise.then(res => {
+          return { success: true, orderId: orderId, status: cleanStatus, ...res };
+        }).then(onFulfilled, onRejected);
+      }
+    };
+
+    return retObj;
   },
 
   quickSimulateOnlineOrder(channel = "gofood") {

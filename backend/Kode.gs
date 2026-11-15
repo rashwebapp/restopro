@@ -36,7 +36,8 @@ const CONFIG = {
     RESERVATIONS: 'Reservations',
     KDS: 'KdsTickets',
     TENANTS: 'Tenants',
-    PAYMENTS: 'Payments'
+    PAYMENTS: 'Payments',
+    ONLINE_ORDERS: 'OnlineOrders'
   }
 };
 
@@ -56,6 +57,15 @@ const PAYMENT_HEADERS = [
   'id', 'tenantId', 'tenantName', 'plan', 'amount', 'bankTarget',
   'proofFileId', 'proofUrl', 'senderName', 'senderBank', 'status',
   'rejectReason', 'createdAt', 'verifiedAt', 'verifiedBy'
+];
+
+/**
+ * Header Kolom Resmi Sheet 'OnlineOrders' (Direktori Pesanan Delivery Online)
+ */
+const ONLINE_ORDER_HEADERS = [
+  'orderId', 'tenantId', 'platform', 'platformRef', 'customerName',
+  'customerPhone', 'driverInfo', 'itemsJson', 'subtotal', 'packagingFee',
+  'totalAmount', 'specialNotes', 'status', 'createdAt', 'updatedAt'
 ];
 
 /**
@@ -208,7 +218,8 @@ function doGet(e) {
       action === 'ping' ||
       action === 'getMenuCatalog' ||
       action === 'getTenantPublicInfo' ||
-      action === 'getTenantPaymentStatus'
+      action === 'getTenantPaymentStatus' ||
+      action === 'getOnlineOrders'
     );
 
     if (!isPublicAction && !verifyAuthKey_(providedApiKey)) {
@@ -279,6 +290,10 @@ function doGet(e) {
         result = { success: true, data: getRowsAsObjects(CONFIG.SHEET_NAMES.KDS) };
         break;
 
+      case 'getOnlineOrders':
+        result = handleGetOnlineOrders(params);
+        break;
+
       default:
         result = { success: false, message: 'Action doGet tidak dikenali: ' + action };
     }
@@ -306,12 +321,14 @@ function doPost(e) {
     const providedApiKey = payload.apiKey || payload.key || '';
 
     // Pembagian Hak Akses POST:
-    // 'placeOrder', 'registerTrialTenant', dan 'submitPaymentProof' adalah aksi publik
+    // 'placeOrder', 'registerTrialTenant', 'submitPaymentProof', dan 'submitOnlineOrder'/'updateOnlineOrderStatus' adalah aksi publik/webhook
     // Seluruh aksi mutasi lainnya (CRUD menu, hapus data, omset, CRM, simpan tenant, verifikasi pembayaran) WAJIB API Secret Key!
     const isPublicPost = (
       action === 'placeOrder' ||
       action === 'registerTrialTenant' ||
-      action === 'submitPaymentProof'
+      action === 'submitPaymentProof' ||
+      action === 'submitOnlineOrder' ||
+      action === 'updateOnlineOrderStatus'
     );
 
     if (!isPublicPost && !verifyAuthKey_(providedApiKey)) {
@@ -343,6 +360,14 @@ function doPost(e) {
 
       case 'submitPaymentProof':
         result = handleSubmitPaymentProof(payload.data || payload);
+        break;
+
+      case 'submitOnlineOrder':
+        result = handleSubmitOnlineOrder(payload.data || payload);
+        break;
+
+      case 'updateOnlineOrderStatus':
+        result = handleUpdateOnlineOrderStatus(payload.data || payload);
         break;
 
       case 'verifyPayment':
@@ -1503,6 +1528,282 @@ function handleVerifyPayment(data) {
 }
 
 // ==============================================================================
+// 3.5. MANAJEMEN PESANAN ONLINE DELIVERY (OMNICHANNEL REST API)
+// ==============================================================================
+
+/**
+ * Submit Pesanan Online Delivery (GoFood, GrabFood, ShopeeFood, Qpon, Takeaway)
+ */
+function handleSubmitOnlineOrder(data) {
+  if (!data) {
+    throw new Error('Data pesanan online tidak boleh kosong');
+  }
+
+  const cleanTenantId = (data.tenantId && String(data.tenantId).trim())
+    ? String(data.tenantId).trim().toLowerCase()
+    : 'default';
+
+  const cleanPlatform = String(data.platform || '').trim().toLowerCase();
+  const validPlatforms = ['gofood', 'grabfood', 'shopeefood', 'qpon', 'takeaway'];
+  if (!cleanPlatform || !validPlatforms.includes(cleanPlatform)) {
+    throw new Error('Platform tidak valid. Pilih: gofood, grabfood, shopeefood, qpon, atau takeaway');
+  }
+
+  let items = data.items;
+  if (typeof items === 'string') {
+    try { items = JSON.parse(items); } catch (e) { items = []; }
+  }
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error('Daftar pesanan (items) harus berupa array dan minimal berisi 1 item');
+  }
+
+  const totalAmount = Number(data.totalAmount);
+  if (isNaN(totalAmount) || totalAmount <= 0) {
+    throw new Error('Total pembayaran (totalAmount) harus berupa angka valid lebih dari 0');
+  }
+
+  const subtotal = Number(data.subtotal) || 0;
+  const packagingFee = Number(data.packagingFee) || 0;
+  const cleanPlatformRef = String(data.platformRef || '').trim();
+  const customerName = String(data.customerName || data.customer || '').trim();
+  const customerPhone = String(data.customerPhone || data.phone || '').trim();
+  const specialNotes = String(data.specialNotes || data.packagingNotes || data.notes || '').trim();
+  const status = String(data.status || 'cooking').trim().toLowerCase();
+
+  let driverInfoStr = '';
+  if (data.driverInfo !== undefined && data.driverInfo !== null) {
+    driverInfoStr = typeof data.driverInfo === 'object' ? JSON.stringify(data.driverInfo) : String(data.driverInfo);
+  }
+
+  const sheet = getOrCreateOnlineOrdersSheet_();
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+  const orderIdIdx = headers.indexOf('orderId');
+  const tenantIdIdx = headers.indexOf('tenantId');
+  const platformRefIdx = headers.indexOf('platformRef');
+  const statusIdx = headers.indexOf('status');
+  const updatedAtIdx = headers.indexOf('updatedAt');
+
+  // Mencegah duplikasi: Jika platformRef sudah ada untuk tenantId yang sama dan statusnya bukan 'cancelled'
+  let existingRow = -1;
+  let existingOrderId = null;
+  let existingStatus = null;
+
+  if (cleanPlatformRef) {
+    for (let r = 1; r < values.length; r++) {
+      const rTenantId = String(values[r][tenantIdIdx] || '').trim().toLowerCase();
+      const rPlatformRef = String(values[r][platformRefIdx] || '').trim();
+      const rStatus = String(values[r][statusIdx] || '').trim().toLowerCase();
+
+      if (rTenantId === cleanTenantId && rPlatformRef === cleanPlatformRef && rStatus !== 'cancelled') {
+        existingRow = r + 1; // 1-based index
+        existingOrderId = String(values[r][orderIdIdx] || '').trim();
+        existingStatus = rStatus;
+        break;
+      }
+    }
+  }
+
+  const nowIso = new Date().toISOString();
+
+  if (existingRow > 0 && existingOrderId) {
+    // Order sudah tercatat, kembalikan order existing atau update updatedAt
+    try {
+      if (updatedAtIdx !== -1) {
+        sheet.getRange(existingRow, updatedAtIdx + 1).setValue(nowIso);
+      }
+    } catch (e) {}
+
+    return {
+      success: true,
+      orderId: existingOrderId,
+      status: existingStatus || status,
+      message: 'Pesanan online berhasil dicatat.'
+    };
+  }
+
+  // Generate orderId baru berformat: ORD-<PLATFORM>-<YYYYMMDD>-<HEX4>
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const datePart = `${yyyy}${mm}${dd}`;
+  const hex4 = Math.random().toString(16).substring(2, 6).toUpperCase();
+  const orderId = (data.orderId && String(data.orderId).trim())
+    ? String(data.orderId).trim()
+    : ('ORD-' + cleanPlatform.toUpperCase() + '-' + datePart + '-' + hex4);
+
+  const record = {
+    orderId: orderId,
+    tenantId: cleanTenantId,
+    platform: cleanPlatform,
+    platformRef: cleanPlatformRef,
+    customerName: customerName,
+    customerPhone: customerPhone,
+    driverInfo: driverInfoStr,
+    itemsJson: JSON.stringify(items),
+    subtotal: subtotal,
+    packagingFee: packagingFee,
+    totalAmount: totalAmount,
+    specialNotes: specialNotes,
+    status: status,
+    createdAt: data.createdAt || nowIso,
+    updatedAt: nowIso
+  };
+
+  const rowValues = headers.map(h => {
+    let val = record[h];
+    if (val === undefined || val === null) return '';
+    return val;
+  });
+
+  sheet.appendRow(rowValues);
+
+  return {
+    success: true,
+    orderId: orderId,
+    status: record.status,
+    message: 'Pesanan online berhasil dicatat.'
+  };
+}
+
+/**
+ * Mengambil daftar pesanan online dari sheet OnlineOrders
+ */
+function handleGetOnlineOrders(params) {
+  const p = params || {};
+  const filterTenantId = (p.tenantId || p.id) ? String(p.tenantId || p.id).trim().toLowerCase() : '';
+  const filterStatus = p.status ? String(p.status).trim().toLowerCase() : '';
+  const limit = p.limit ? parseInt(p.limit, 10) : 50;
+
+  const rawOrders = getRowsAsObjects(CONFIG.SHEET_NAMES.ONLINE_ORDERS);
+
+  let orders = rawOrders.map(o => {
+    let items = [];
+    if (Array.isArray(o.items)) {
+      items = o.items;
+    } else if (Array.isArray(o.itemsJson)) {
+      items = o.itemsJson;
+    } else if (typeof o.itemsJson === 'string' && o.itemsJson.trim()) {
+      try { items = JSON.parse(o.itemsJson); } catch (e) { items = []; }
+    }
+
+    let driverInfo = o.driverInfo;
+    if (typeof driverInfo === 'string' && (driverInfo.startsWith('{') || driverInfo.startsWith('['))) {
+      try { driverInfo = JSON.parse(driverInfo); } catch (e) {}
+    }
+
+    return {
+      orderId: String(o.orderId || '').trim(),
+      id: String(o.orderId || '').trim(),
+      tenantId: String(o.tenantId || '').trim(),
+      platform: String(o.platform || '').trim(),
+      channel: String(o.platform || '').trim(),
+      platformRef: String(o.platformRef || '').trim(),
+      orderRef: String(o.platformRef || o.orderId || '').trim(),
+      customerName: String(o.customerName || '').trim(),
+      customerPhone: String(o.customerPhone || '').trim(),
+      driverInfo: driverInfo,
+      items: items,
+      subtotal: Number(o.subtotal) || 0,
+      packagingFee: Number(o.packagingFee) || 0,
+      totalAmount: Number(o.totalAmount) || 0,
+      grandTotal: Number(o.totalAmount) || 0,
+      specialNotes: String(o.specialNotes || '').trim(),
+      status: String(o.status || 'new').trim().toLowerCase(),
+      createdAt: String(o.createdAt || '').trim(),
+      updatedAt: String(o.updatedAt || '').trim()
+    };
+  });
+
+  if (filterTenantId) {
+    orders = orders.filter(o => o.tenantId.toLowerCase() === filterTenantId);
+  }
+
+  if (filterStatus) {
+    orders = orders.filter(o => o.status.toLowerCase() === filterStatus);
+  }
+
+  if (limit > 0 && orders.length > limit) {
+    orders = orders.slice(-limit);
+  }
+
+  return {
+    success: true,
+    orders: orders,
+    data: orders
+  };
+}
+
+/**
+ * Update Status Pesanan Online
+ */
+function handleUpdateOnlineOrderStatus(data) {
+  if (!data || !data.orderId || String(data.orderId).trim() === '') {
+    throw new Error('orderId wajib diisi untuk update status pesanan');
+  }
+  if (!data.status || String(data.status).trim() === '') {
+    throw new Error('status wajib diisi untuk update status pesanan');
+  }
+
+  const orderId = String(data.orderId).trim();
+  const cleanTenantId = (data.tenantId && String(data.tenantId).trim())
+    ? String(data.tenantId).trim().toLowerCase()
+    : '';
+  const newStatus = String(data.status).trim().toLowerCase();
+
+  const sheet = getOrCreateOnlineOrdersSheet_();
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0];
+  const orderIdIdx = headers.indexOf('orderId');
+  const tenantIdIdx = headers.indexOf('tenantId');
+  const statusIdx = headers.indexOf('status');
+  const driverInfoIdx = headers.indexOf('driverInfo');
+  const updatedAtIdx = headers.indexOf('updatedAt');
+
+  let targetRow = -1;
+  for (let r = 1; r < values.length; r++) {
+    const rOrderId = String(values[r][orderIdIdx] || '').trim();
+    const rTenantId = String(values[r][tenantIdIdx] || '').trim().toLowerCase();
+
+    if (rOrderId === orderId) {
+      if (!cleanTenantId || rTenantId === cleanTenantId) {
+        targetRow = r + 1; // 1-based index
+        break;
+      }
+    }
+  }
+
+  if (targetRow === -1) {
+    return {
+      success: false,
+      notFound: true,
+      message: 'Pesanan online dengan ID ' + orderId + ' tidak ditemukan'
+    };
+  }
+
+  const nowIso = new Date().toISOString();
+
+  if (statusIdx !== -1) {
+    sheet.getRange(targetRow, statusIdx + 1).setValue(newStatus);
+  }
+  if (updatedAtIdx !== -1) {
+    sheet.getRange(targetRow, updatedAtIdx + 1).setValue(nowIso);
+  }
+  if (data.driverInfo !== undefined && driverInfoIdx !== -1) {
+    const dStr = typeof data.driverInfo === 'object' ? JSON.stringify(data.driverInfo) : String(data.driverInfo);
+    sheet.getRange(targetRow, driverInfoIdx + 1).setValue(dStr);
+  }
+
+  return {
+    success: true,
+    orderId: orderId,
+    status: newStatus,
+    message: 'Status pesanan online berhasil diperbarui.'
+  };
+}
+
+// ==============================================================================
 // 4. UTILITIES & HELPER DATABASE
 // ==============================================================================
 
@@ -1545,6 +1846,21 @@ function getOrCreatePaymentsSheet_() {
   return sheet;
 }
 
+function getOrCreateOnlineOrdersSheet_(ss) {
+  const targetSs = ss || getSpreadsheet_();
+  let sheet = targetSs.getSheetByName(CONFIG.SHEET_NAMES.ONLINE_ORDERS);
+  if (!sheet) {
+    sheet = targetSs.insertSheet(CONFIG.SHEET_NAMES.ONLINE_ORDERS);
+    sheet.appendRow(ONLINE_ORDER_HEADERS);
+    styleHeader(sheet, '#EA580C');
+  }
+  return sheet;
+}
+
+function initOnlineOrdersSheet_(ss) {
+  return getOrCreateOnlineOrdersSheet_(ss);
+}
+
 function getSheet(sheetName) {
   const ss = getSpreadsheet_();
   let sheet = ss.getSheetByName(sheetName);
@@ -1554,6 +1870,9 @@ function getSheet(sheetName) {
     }
     if (sheetName === CONFIG.SHEET_NAMES.PAYMENTS) {
       return getOrCreatePaymentsSheet_();
+    }
+    if (sheetName === CONFIG.SHEET_NAMES.ONLINE_ORDERS) {
+      return getOrCreateOnlineOrdersSheet_();
     }
     throw new Error('Sheet ' + sheetName + ' tidak ditemukan di Spreadsheet');
   }
@@ -1793,6 +2112,11 @@ function setupAppEnvironment() {
   const paySheet = ss.insertSheet(CONFIG.SHEET_NAMES.PAYMENTS);
   paySheet.appendRow(PAYMENT_HEADERS);
   styleHeader(paySheet, '#059669');
+
+  // -------------------------------------------------------------
+  // Sheet 9: OnlineOrders (Direktori Pesanan Online Delivery)
+  // -------------------------------------------------------------
+  initOnlineOrdersSheet_(ss);
 
   // 3. Simpan ID & Kunci Rahasia ke PropertiesService secara otomatis!
   const props = PropertiesService.getScriptProperties();
