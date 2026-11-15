@@ -624,7 +624,7 @@ test("4. owner_settings_saas.html updateLicenseBannerUI() renders dynamic tenant
 
   const waBtn = doc.getElementById("btnTenantUpgradeWa");
   assert(Boolean(waBtn), "#btnTenantUpgradeWa CTA link must exist inside #tenantCloudPlanBox");
-  assert(waBtn.href.indexOf("https://wa.me/6282286452105") === 0, "WhatsApp CTA must point to 6282286452105");
+  assert(waBtn.href.indexOf("https://wa.me/6285174273313") === 0, "WhatsApp CTA must point to 6285174273313");
   assert(waBtn.href.indexOf("warung-maju") !== -1, "WhatsApp CTA text must include tenant ID warung-maju");
 });
 

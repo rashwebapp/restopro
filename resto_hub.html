@@ -203,7 +203,7 @@
           </p>
         </div>
       </div>
-      <a id="btnHubExpiredWa" href="https://wa.me/6282286452105" target="_blank" rel="noopener noreferrer" class="touch-btn px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
+      <a id="btnHubExpiredWa" href="https://wa.me/6285174273313" target="_blank" rel="noopener noreferrer" class="touch-btn px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
         <span class="material-symbols-outlined text-[16px]">chat</span>
         <span>Perpanjang via WhatsApp</span>
       </a>
@@ -469,7 +469,7 @@
   <!-- ========================================================================= -->
   <footer class="mt-auto py-6 border-t border-stone-200 dark:border-stone-800 text-center text-xs text-stone-500">
     <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p>© 2026 Resto Pro Multi-Tenant SaaS. Powered by <strong class="text-amber-600 dark:text-amber-400">RASH WebApp Builder</strong>.</p>
+      <p>© 2026 Resto Pro Multi-Tenant SaaS. Powered by <a href="https://lynk.id/rabiasultan" target="_blank" rel="noopener noreferrer" class="text-amber-600 dark:text-amber-400 font-bold hover:underline">RASH WebApp Builder</a>.</p>
       <div class="flex items-center gap-4">
         <a href="index.html" class="hover:text-amber-600 transition-colors">Landing Page</a>
         <span id="footerAdminSeparator" class="hidden">•</span>
@@ -752,7 +752,7 @@
       if (expiredBanner) expiredBanner.classList.add("hidden");
       if (notSyncedBanner) notSyncedBanner.classList.add("hidden");
 
-      const csNumber = "6282286452105";
+      const csNumber = "6285174273313";
       if (lic.isMaster) {
         if (statusEl) statusEl.className = "text-xs font-heading font-extrabold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5";
         if (statusText) statusText.textContent = "Akun Aktif";
@@ -1078,6 +1078,9 @@
       return RestoSync.submitPaymentProof(payload)
         .then(res => {
           if (res && res.success) {
+            _currentPaymentProofBase64 = "";
+            const fileInput = document.getElementById("paymentProofFile");
+            if (fileInput) fileInput.value = "";
             closePaymentCheckoutModal();
             showToast("🎉 Bukti transfer berhasil dikirim! Menunggu verifikasi Admin.", "success");
             renderPaymentStatusUI({

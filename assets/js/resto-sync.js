@@ -3868,7 +3868,7 @@ const RestoSync = {
         const safeName = this._escapeHtml(restoName);
         const safeTenantId = this._escapeHtml(tenantId);
         const waMsg = encodeURIComponent(`Halo Admin RASH, akun restoran "${restoName}" (ID: ${tenantId}) berstatus Suspended. Mohon informasi aktivasi kembali.`);
-        const waHref = `https://wa.me/6282286452105?text=${waMsg}`;
+        const waHref = `https://wa.me/6285174273313?text=${waMsg}`;
         const safeWaHref = this._escapeHtml(waHref);
 
         const buildOverlayHtml = () => `

@@ -83,7 +83,7 @@
           </span>
         </div>
         <p id="ownerDashboardSub" class="text-[11px] text-[#78716C] dark:text-[#94A3B8] hidden sm:block">
-          by RASH WebApp Builder • Pengaturan Lisensi, Stok Menu & Analitik
+          by <a href="https://lynk.id/rabiasultan" target="_blank" rel="noopener noreferrer" class="text-amber-600 dark:text-amber-400 font-bold hover:underline">RASH WebApp Builder</a> • Pengaturan Lisensi, Stok Menu & Analitik
         </p>
       </div>
     </div>
@@ -222,7 +222,7 @@
               <span class="material-symbols-outlined text-[16px]">verified</span>
               <span>Upgrade / Bayar Paket Pro</span>
             </button>
-            <a id="btnTenantUpgradeWa" href="https://wa.me/6282286452105" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
+            <a id="btnTenantUpgradeWa" href="https://wa.me/6285174273313" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
               <span class="material-symbols-outlined text-[16px]">chat</span>
               <span id="btnTenantUpgradeWaLabel">Perpanjang / Hubungi Admin RASH</span>
             </a>
@@ -251,7 +251,7 @@
           </p>
         </div>
       </div>
-      <a id="btnExpiredBannerWa" href="https://wa.me/6282286452105" target="_blank" rel="noopener noreferrer" class="touch-btn px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
+      <a id="btnExpiredBannerWa" href="https://wa.me/6285174273313" target="_blank" rel="noopener noreferrer" class="touch-btn px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
         <span class="material-symbols-outlined text-[16px]">chat</span>
         <span>Perpanjang Paket via WhatsApp</span>
       </a>
@@ -857,7 +857,7 @@
           </div>
         </div>
 
-        <a id="ownerConciergeWaLink" href="https://wa.me/6282286452105?text=Halo%20RASH%20WebApp%20Builder%2C%20saya%20pemilik%20Resto%20Pro%20membutuhkan%20bantuan" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-3 rounded-xl bg-white text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:bg-amber-100 transition-all">
+        <a id="ownerConciergeWaLink" href="https://wa.me/6285174273313?text=Halo%20RASH%20WebApp%20Builder%2C%20saya%20pemilik%20Resto%20Pro%20membutuhkan%20bantuan" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-3 rounded-xl bg-white text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg hover:bg-amber-100 transition-all">
           <span class="material-symbols-outlined text-[18px]">chat</span>
           <span>Buka WhatsApp Support RASH</span>
         </a>
@@ -2747,7 +2747,7 @@
       }
 
       // Expired Banner (Keputusan 2A)
-      const adminWaNumber = "6282286452105";
+      const adminWaNumber = "6285174273313";
       if (expiredBanner) {
         if (lic.isExpired && !lic.isMaster) {
           expiredBanner.classList.remove("hidden");
@@ -4048,6 +4048,9 @@ END $$;
       return RestoSync.submitPaymentProof(payload)
         .then(res => {
           if (res && res.success) {
+            _currentPaymentProofBase64 = "";
+            const fileInput = document.getElementById("paymentProofFile");
+            if (fileInput) fileInput.value = "";
             closePaymentCheckoutModal();
             alert("Bukti transfer berhasil dikirim! Tim Admin RASH akan segera memverifikasi pembayaran Anda.");
             renderPaymentStatusUI({
