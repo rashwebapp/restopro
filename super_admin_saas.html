@@ -247,64 +247,155 @@
       </section>
 
       <!-- ===================================================================== -->
-      <!-- SECTION 2: TENANT CLIENT DIRECTORY & SEARCH TABLE                     -->
+      <!-- TAB NAVIGATION: RESTO & LISENSI vs PERSETUJUAN PEMBAYARAN             -->
       <!-- ===================================================================== -->
-      <section class="glass-card rounded-3xl p-6 lg:p-8 space-y-6">
-        
-        <!-- Directory Header & Filters -->
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800">
-          <div>
-            <h2 class="font-heading font-extrabold text-xl text-white flex items-center gap-2">
-              <span>Direktori Klien Resto Pro</span>
-              <span id="badgeTenantCount" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-bold">0</span>
-            </h2>
-            <p class="text-xs text-slate-400 mt-1">
-              Kelola akses, perpanjang lisensi, dapatkan link operasional, dan kirim akun via WhatsApp dalam 1 klik.
-            </p>
-          </div>
+      <div class="flex items-center gap-2 border-b border-slate-800 pb-2">
+        <button 
+          id="tabTenantsList" 
+          onclick="switchAdminTab('tenants')" 
+          class="touch-btn px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-600/20"
+        >
+          <span class="material-symbols-outlined text-base">storefront</span>
+          <span>Daftar Restoran &amp; Lisensi</span>
+        </button>
 
-          <!-- Controls: Search & Filter Tabs -->
-          <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-            <!-- Search Bar -->
-            <div class="relative w-full sm:w-64">
-              <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-500 text-lg">search</span>
-              <input type="text" id="tenantSearchInput" oninput="filterTenants()" placeholder="Cari nama resto / WA..."
-                class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-hidden focus:border-brand-500">
+        <button 
+          id="tabPaymentsApproval" 
+          onclick="switchAdminTab('payments')" 
+          class="touch-btn px-4 py-2.5 rounded-2xl font-heading font-bold text-xs transition-all flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60"
+        >
+          <span class="material-symbols-outlined text-base">payments</span>
+          <span>Persetujuan Pembayaran</span>
+          <span id="badgePendingPaymentsCount" class="hidden px-2 py-0.5 rounded-full bg-amber-500 text-[#0F172A] text-[10px] font-black font-mono shadow-xs animate-pulse">0</span>
+        </button>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PANEL 1: DAFTAR RESTORAN & LISENSI (TENANT CLIENT DIRECTORY)          -->
+      <!-- ===================================================================== -->
+      <div id="panelTenantsList" class="space-y-6">
+        <section class="glass-card rounded-3xl p-6 lg:p-8 space-y-6">
+          
+          <!-- Directory Header & Filters -->
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800">
+            <div>
+              <h2 class="font-heading font-extrabold text-xl text-white flex items-center gap-2">
+                <span>Direktori Klien Resto Pro</span>
+                <span id="badgeTenantCount" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-bold">0</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">
+                Kelola akses, perpanjang lisensi, dapatkan link operasional, dan kirim akun via WhatsApp dalam 1 klik.
+              </p>
             </div>
 
-            <!-- Status Filter -->
-            <select id="tenantStatusFilter" onchange="filterTenants()" class="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-hidden focus:border-brand-500 font-medium">
-              <option value="all">Semua Status</option>
-              <option value="active">🟢 Aktif Berbayar</option>
-              <option value="trial">🟡 Masa Free Trial</option>
-              <option value="expired">🔴 Telah Kedaluwarsa</option>
-              <option value="suspended">⛔ Ditangguhkan (Suspended)</option>
-            </select>
+            <!-- Controls: Search & Filter Tabs -->
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <!-- Search Bar -->
+              <div class="relative w-full sm:w-64">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-500 text-lg">search</span>
+                <input type="text" id="tenantSearchInput" oninput="filterTenants()" placeholder="Cari nama resto / WA..."
+                  class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-hidden focus:border-brand-500">
+              </div>
+
+              <!-- Status Filter -->
+              <select id="tenantStatusFilter" onchange="filterTenants()" class="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-hidden focus:border-brand-500 font-medium">
+                <option value="all">Semua Status</option>
+                <option value="active">🟢 Aktif Berbayar</option>
+                <option value="trial">🟡 Masa Free Trial</option>
+                <option value="expired">🔴 Telah Kedaluwarsa</option>
+                <option value="suspended">⛔ Ditangguhkan (Suspended)</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <!-- Tenant Cards Container -->
-        <div id="tenantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <!-- Populated dynamically via JavaScript -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="hidden text-center py-16 text-slate-500">
-          <span class="material-symbols-outlined text-5xl mb-3 text-slate-600">store_mall_directory</span>
-          <h4 class="font-heading font-bold text-base text-slate-300 mb-1">Belum Ada Klien Ditemukan</h4>
-          <p class="text-xs max-w-sm mx-auto mb-5">Mulai daftarkan restoran pertama Anda atau muat contoh data demo untuk simulasi.</p>
-          <div class="flex flex-wrap items-center justify-center gap-3">
-            <button onclick="openNewTenantModal()" class="touch-btn px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-heading font-bold">
-              + Daftarkan Restoran Baru
-            </button>
-            <button id="btnLoadDemoTenants" onclick="handleLoadDemoTenants()" class="touch-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-heading font-bold flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-base text-amber-400">science</span>
-              <span>Muat Contoh Data Demo</span>
-            </button>
+          <!-- Tenant Cards Container -->
+          <div id="tenantsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Populated dynamically via JavaScript -->
           </div>
-        </div>
 
-      </section>
+          <!-- Empty State -->
+          <div id="emptyState" class="hidden text-center py-16 text-slate-500">
+            <span class="material-symbols-outlined text-5xl mb-3 text-slate-600">store_mall_directory</span>
+            <h4 class="font-heading font-bold text-base text-slate-300 mb-1">Belum Ada Klien Ditemukan</h4>
+            <p class="text-xs max-w-sm mx-auto mb-5">Mulai daftarkan restoran pertama Anda atau muat contoh data demo untuk simulasi.</p>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+              <button onclick="openNewTenantModal()" class="touch-btn px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-heading font-bold">
+                + Daftarkan Restoran Baru
+              </button>
+              <button id="btnLoadDemoTenants" onclick="handleLoadDemoTenants()" class="touch-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-heading font-bold flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-base text-amber-400">science</span>
+                <span>Muat Contoh Data Demo</span>
+              </button>
+            </div>
+          </div>
+
+        </section>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- PANEL 2: PERSETUJUAN BUKTI TRANSFER & PEMBAYARAN                       -->
+      <!-- ===================================================================== -->
+      <div id="panelPaymentsApproval" class="hidden space-y-6">
+        <section class="glass-card rounded-3xl p-6 lg:p-8 space-y-6">
+          
+          <!-- Header and Filters -->
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800">
+            <div>
+              <h2 class="font-heading font-extrabold text-xl text-white flex items-center gap-2">
+                <span>Persetujuan Bukti Transfer Pembayaran</span>
+                <span id="badgePaymentsTotalCount" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-xs font-mono font-bold">0</span>
+              </h2>
+              <p class="text-xs text-slate-400 mt-1">
+                Verifikasi bukti transfer pembayaran dari pemilik restoran. 1-klik untuk menyetujui lisensi Pro instan atau tolak dengan alasan.
+              </p>
+            </div>
+
+            <!-- Filter Buttons: Semua, Pending, Disetujui, Ditolak -->
+            <div class="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-900 border border-slate-800 flex-wrap">
+              <button id="btnFilterPaymentAll" onclick="filterPaymentStatus('all')" class="payment-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-brand-600 text-white shadow-xs">
+                Semua
+              </button>
+              <button id="btnFilterPaymentPending" onclick="filterPaymentStatus('pending')" class="payment-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">
+                Pending
+              </button>
+              <button id="btnFilterPaymentVerified" onclick="filterPaymentStatus('verified')" class="payment-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">
+                Disetujui
+              </button>
+              <button id="btnFilterPaymentRejected" onclick="filterPaymentStatus('rejected')" class="payment-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white">
+                Ditolak
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto">
+            <table id="tablePaymentsList" class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-900/80 text-slate-400 font-heading font-bold uppercase tracking-wider text-[11px] border-b border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">ID Transaksi</th>
+                  <th class="py-3 px-4">Tanggal / Waktu</th>
+                  <th class="py-3 px-4">Restoran (Tenant)</th>
+                  <th class="py-3 px-4">Paket &amp; Nominal</th>
+                  <th class="py-3 px-4">Bank &amp; Pengirim</th>
+                  <th class="py-3 px-4 text-center">Bukti Transfer</th>
+                  <th class="py-3 px-4 text-center">Status</th>
+                  <th class="py-3 px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="paymentsTableBody" class="divide-y divide-slate-800/60 font-sans">
+                <!-- Dynamically populated via loadPaymentsApprovalList() -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State Payments -->
+          <div id="emptyPaymentsState" class="hidden text-center py-12 text-slate-500">
+            <span class="material-symbols-outlined text-4xl mb-2 text-slate-600">receipt_long</span>
+            <p class="text-xs font-semibold">Tidak ada data transaksi pembayaran yang cocok dengan filter.</p>
+          </div>
+
+        </section>
+      </div>
 
       <!-- ===================================================================== -->
       <!-- SECTION 3: SYSTEM ARCHITECTURE & ONBOARDING GUIDE                     -->
@@ -797,6 +888,39 @@
   </div>
 
   <!-- ========================================================================= -->
+  <!-- 4B. MODAL: PREVIEW GAMBAR BUKTI TRANSFER                                  -->
+  <!-- ========================================================================= -->
+  <div id="proofImageModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-card max-w-2xl w-full rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-700">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-lg">receipt_long</span>
+          </span>
+          <div>
+            <h3 class="font-heading font-extrabold text-sm text-white" id="proofModalTitle">Bukti Transfer Pembayaran</h3>
+            <p class="text-[11px] text-slate-400" id="proofModalSubtitle">Periksa keabsahan struk transfer bank sebelum menyetujui lisensi</p>
+          </div>
+        </div>
+        <button id="btnCloseProofModal" onclick="closeProofImageModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Preview Image Container -->
+      <div class="flex items-center justify-center bg-slate-950/80 rounded-2xl p-3 border border-slate-800 max-h-[70vh] overflow-hidden">
+        <img id="proofImagePreview" src="" alt="Bukti Transfer" class="max-h-[60vh] max-w-full rounded-xl object-contain shadow-lg" />
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeProofImageModal()" class="touch-btn px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">
+          Tutup Preview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- 5. TOAST NOTIFICATION CONTAINER                                           -->
   <!-- ========================================================================= -->
   <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -900,6 +1024,7 @@
           if (isUnlocked) {
             try { renderAllTenants(); } catch (e) {}
             try { updateKpis(); } catch (e) {}
+            try { loadPaymentsApprovalList({ silent: true }); } catch (e) {}
           }
         });
       }
@@ -993,6 +1118,12 @@
         updateKpis();
       } catch (err) {
         console.warn("updateKpis threw:", err);
+      }
+
+      try {
+        loadPaymentsApprovalList({ silent: true });
+      } catch (err) {
+        console.warn("loadPaymentsApprovalList threw:", err);
       }
 
       if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
@@ -2184,6 +2315,291 @@
         el.style.opacity = "0";
         setTimeout(() => el.remove(), 300);
       }, 3500);
+    }
+
+    // -------------------------------------------------------------------------
+    // TAB MANAGEMENT & PAYMENT APPROVAL ENGINE
+    // -------------------------------------------------------------------------
+    let currentAdminTab = "tenants"; // "tenants" or "payments"
+    let currentPaymentFilter = "all";
+    let cachedAdminPayments = [];
+
+    function switchAdminTab(tabName) {
+      currentAdminTab = tabName === "payments" ? "payments" : "tenants";
+      const tabTenants = document.getElementById("tabTenantsList");
+      const tabPayments = document.getElementById("tabPaymentsApproval");
+      const panelTenants = document.getElementById("panelTenantsList");
+      const panelPayments = document.getElementById("panelPaymentsApproval");
+
+      if (currentAdminTab === "payments") {
+        if (panelTenants) panelTenants.classList.add("hidden");
+        if (panelPayments) panelPayments.classList.remove("hidden");
+
+        if (tabTenants) {
+          tabTenants.className = "touch-btn px-4 py-2.5 rounded-2xl font-heading font-bold text-xs transition-all flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60";
+        }
+        if (tabPayments) {
+          tabPayments.className = "touch-btn px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-600/20";
+        }
+        return loadPaymentsApprovalList();
+      } else {
+        if (panelTenants) panelTenants.classList.remove("hidden");
+        if (panelPayments) panelPayments.classList.add("hidden");
+
+        if (tabTenants) {
+          tabTenants.className = "touch-btn px-4 py-2.5 rounded-2xl font-heading font-extrabold text-xs transition-all flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 text-white shadow-md shadow-brand-600/20";
+        }
+        if (tabPayments) {
+          tabPayments.className = "touch-btn px-4 py-2.5 rounded-2xl font-heading font-bold text-xs transition-all flex items-center gap-2 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60";
+        }
+      }
+    }
+
+    async function loadPaymentsApprovalList(options = {}) {
+      try {
+        let payments = [];
+        if (typeof RestoSync !== "undefined" && typeof RestoSync.getPaymentsAdmin === "function") {
+          const res = await RestoSync.getPaymentsAdmin("all");
+          if (res && res.payments && Array.isArray(res.payments)) {
+            payments = res.payments;
+            cachedAdminPayments = payments;
+          } else if (res && res.success && Array.isArray(res.data)) {
+            payments = res.data;
+            cachedAdminPayments = payments;
+          }
+        }
+
+        const pendingCount = cachedAdminPayments.filter(p => (p.status || "").toLowerCase() === "pending").length;
+        const badgePending = document.getElementById("badgePendingPaymentsCount");
+        if (badgePending) {
+          if (pendingCount > 0) {
+            badgePending.textContent = String(pendingCount);
+            badgePending.classList.remove("hidden");
+          } else {
+            badgePending.textContent = "0";
+            badgePending.classList.add("hidden");
+          }
+        }
+
+        renderPaymentsApprovalTable();
+        return { success: true, count: cachedAdminPayments.length, pendingCount };
+      } catch (err) {
+        console.warn("loadPaymentsApprovalList error:", err);
+        return { success: false, error: err };
+      }
+    }
+
+    function filterPaymentStatus(status) {
+      currentPaymentFilter = status || "all";
+      const filterBtns = {
+        all: document.getElementById("btnFilterPaymentAll"),
+        pending: document.getElementById("btnFilterPaymentPending"),
+        verified: document.getElementById("btnFilterPaymentVerified"),
+        rejected: document.getElementById("btnFilterPaymentRejected")
+      };
+      Object.keys(filterBtns).forEach(k => {
+        const btn = filterBtns[k];
+        if (btn) {
+          if (k === currentPaymentFilter) {
+            btn.className = "payment-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-brand-600 text-white shadow-xs";
+          } else {
+            btn.className = "payment-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all text-slate-400 hover:text-white";
+          }
+        }
+      });
+      renderPaymentsApprovalTable();
+    }
+
+    function filterPayments(status) {
+      return filterPaymentStatus(status);
+    }
+
+    function renderPaymentsApprovalTable(paymentsList) {
+      const tbody = document.getElementById("paymentsTableBody");
+      const empty = document.getElementById("emptyPaymentsState");
+      const badgeTotal = document.getElementById("badgePaymentsTotalCount");
+      if (!tbody) return;
+
+      let list = Array.isArray(paymentsList) ? paymentsList : (cachedAdminPayments || []);
+      if (currentPaymentFilter && currentPaymentFilter !== "all") {
+        list = list.filter(p => (p.status || "").toLowerCase() === currentPaymentFilter);
+      }
+
+      if (badgeTotal) badgeTotal.textContent = String(list.length);
+
+      if (list.length === 0) {
+        tbody.innerHTML = "";
+        if (empty) empty.classList.remove("hidden");
+        return;
+      }
+      if (empty) empty.classList.add("hidden");
+
+      tbody.innerHTML = list.map(item => {
+        const id = escapeHtml(item.id || "-");
+        const tenantId = escapeHtml(item.tenantId || "-");
+        const tenantName = escapeHtml(item.tenantName || tenantId);
+        const planName = (item.plan === "lifetime") ? "Resto Pro Lifetime" : "Resto Pro Bulanan";
+        const amountStr = typeof formatRupiah === "function" ? formatRupiah(item.amount || 0) : `Rp ${(item.amount || 0).toLocaleString("id-ID")}`;
+        const bank = escapeHtml(item.senderBank || "-");
+        const sender = escapeHtml(item.senderName || "-");
+        const proofUrl = item.proofUrl || "";
+        const status = (item.status || "pending").toLowerCase();
+        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleString("id-ID") : "-";
+
+        let statusBadge = "";
+        if (status === "verified" || status === "active" || status === "approved") {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">Disetujui</span>`;
+        } else if (status === "rejected") {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[10px] font-bold">Ditolak</span>`;
+        } else {
+          statusBadge = `<span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold animate-pulse">Pending</span>`;
+        }
+
+        const previewBtn = proofUrl ? `
+          <button id="btnPreviewProof-${id}" onclick="openProofImageModal('${escapeJsString(proofUrl)}')" class="touch-btn px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-300 border border-slate-700 text-[11px] font-bold flex items-center justify-center gap-1 mx-auto">
+            <span class="material-symbols-outlined text-[14px]">visibility</span>
+            <span>Lihat Bukti</span>
+          </button>
+        ` : `<span class="text-slate-600 text-[11px] italic">Tidak ada foto</span>`;
+
+        let actions = "";
+        if (status === "pending") {
+          actions = `
+            <div class="flex items-center justify-end gap-1.5">
+              <button id="btnApprovePayment-${id}" onclick="handleApprovePayment('${id}')" class="touch-btn px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1 shadow-xs" title="Setujui Bukti Pembayaran">
+                <span class="material-symbols-outlined text-[14px]">check</span>
+                <span>Setujui</span>
+              </button>
+              <button id="btnRejectPayment-${id}" onclick="handleRejectPayment('${id}')" class="touch-btn px-2.5 py-1 rounded-lg bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/30 font-bold text-[11px] flex items-center gap-1 transition-colors" title="Tolak Bukti Pembayaran">
+                <span class="material-symbols-outlined text-[14px]">close</span>
+                <span>Tolak</span>
+              </button>
+            </div>
+          `;
+        } else if (status === "verified" || status === "approved") {
+          actions = `<span class="text-emerald-400/80 text-[11px] font-medium">✅ Telah Diverifikasi</span>`;
+        } else {
+          const reason = escapeHtml(item.rejectReason || item.notes || "Bukti tidak valid");
+          actions = `<span class="text-rose-400/80 text-[11px]" title="${reason}">❌ Ditolak: ${reason}</span>`;
+        }
+
+        return `
+          <tr class="hover:bg-slate-900/40 transition-colors">
+            <td class="py-3 px-4 font-mono font-bold text-white text-[11px]">${id}</td>
+            <td class="py-3 px-4 text-slate-400 text-[11px]">${dateStr}</td>
+            <td class="py-3 px-4">
+              <div class="font-bold text-white">${tenantName}</div>
+              <div class="text-[10px] text-slate-500 font-mono">${tenantId}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-semibold text-brand-300">${planName}</div>
+              <div class="font-mono text-slate-400 text-[11px] font-bold">${amountStr}</div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="font-semibold text-slate-200">${bank}</div>
+              <div class="text-[10px] text-slate-400">a.n ${sender}</div>
+            </td>
+            <td class="py-3 px-4 text-center">${previewBtn}</td>
+            <td class="py-3 px-4 text-center">${statusBadge}</td>
+            <td class="py-3 px-4 text-right">${actions}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function handleApprovePayment(paymentId) {
+      if (!confirm(`Konfirmasi: Setujui pembayaran ${paymentId} dan aktifkan lisensi Pro restoran?`)) {
+        return;
+      }
+      try {
+        if (typeof RestoSync !== "undefined" && typeof RestoSync.verifyPaymentAdmin === "function") {
+          const res = await RestoSync.verifyPaymentAdmin(paymentId, "approve");
+          if (res && res.success) {
+            alert(`✅ Pembayaran ${paymentId} berhasil disetujui! Lisensi restoran telah diaktifkan ke Pro.`);
+            showToast(`Pembayaran ${paymentId} berhasil disetujui.`, "success");
+            await loadPaymentsApprovalList();
+            if (typeof handleCloudRefreshTenants === "function") {
+              handleCloudRefreshTenants({ silent: true });
+            } else if (typeof renderAllTenants === "function") {
+              renderAllTenants();
+            }
+            return res;
+          } else {
+            const errMsg = (res && res.error) ? res.error : "Gagal memverifikasi pembayaran.";
+            alert(`⚠️ Gagal menyetujui: ${errMsg}`);
+            return res;
+          }
+        }
+      } catch (e) {
+        console.error("handleApprovePayment error:", e);
+        alert("Terjadi kesalahan saat memproses persetujuan pembayaran.");
+      }
+    }
+
+    async function handleRejectPayment(paymentId) {
+      const reason = prompt("Alasan penolakan bukti transfer:", "Nominal transfer tidak sesuai");
+      if (reason === null) {
+        return;
+      }
+      const cleanReason = String(reason).trim() || "Nominal transfer tidak sesuai";
+      try {
+        if (typeof RestoSync !== "undefined" && typeof RestoSync.verifyPaymentAdmin === "function") {
+          const res = await RestoSync.verifyPaymentAdmin(paymentId, "reject", cleanReason);
+          if (res && res.success) {
+            alert(`❌ Pembayaran ${paymentId} telah ditolak dengan alasan: "${cleanReason}".`);
+            showToast(`Pembayaran ${paymentId} ditolak.`, "info");
+            await loadPaymentsApprovalList();
+            return res;
+          } else {
+            const errMsg = (res && res.error) ? res.error : "Gagal memproses penolakan.";
+            alert(`⚠️ Gagal menolak: ${errMsg}`);
+            return res;
+          }
+        }
+      } catch (e) {
+        console.error("handleRejectPayment error:", e);
+        alert("Terjadi kesalahan saat memproses penolakan pembayaran.");
+      }
+    }
+
+    function openProofImageModal(imageUrl) {
+      const modal = document.getElementById("proofImageModal");
+      const img = document.getElementById("proofImagePreview");
+      if (img) img.src = imageUrl || "";
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeProofImageModal() {
+      const modal = document.getElementById("proofImageModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function escapeJsString(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, "\\n")
+        .replace(/\r/g, "\\r");
+    }
+
+    // Export functions to window
+    if (typeof window !== "undefined") {
+      window.switchAdminTab = switchAdminTab;
+      window.loadPaymentsApprovalList = loadPaymentsApprovalList;
+      window.filterPaymentStatus = filterPaymentStatus;
+      window.filterPayments = filterPayments;
+      window.handleApprovePayment = handleApprovePayment;
+      window.handleRejectPayment = handleRejectPayment;
+      window.openProofImageModal = openProofImageModal;
+      window.closeProofImageModal = closeProofImageModal;
     }
 
     document.addEventListener("DOMContentLoaded", () => {

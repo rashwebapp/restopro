@@ -343,7 +343,7 @@
             <span class="font-bold">Pelanggan & CRM Member</span>
           </div>
           <!-- Button Tambah Member Baru Kasir -->
-          <button onclick="openCashierAddMemberModal()" class="touch-btn px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500 text-amber-700 dark:text-amber-400 hover:text-[#0F172A] font-bold text-[10px] flex items-center gap-1 transition-all" title="Daftarkan pelanggan baru ke database CRM">
+          <button id="btnRegisterMember" onclick="openCashierAddMemberModal()" class="touch-btn px-2 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500 text-amber-700 dark:text-amber-400 hover:text-[#0F172A] font-bold text-[10px] flex items-center gap-1 transition-all" title="Daftarkan pelanggan baru ke database CRM">
             <span class="material-symbols-outlined text-[13px]">person_add</span>
             <span>+ Member Baru</span>
           </button>
@@ -477,7 +477,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="openCashierReservationModal()" class="touch-btn px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center gap-1 hover:bg-indigo-100 transition-colors" title="Lihat & Buat Reservasi Meja">
+          <button id="btnOpenReservationModal" onclick="openCashierReservationModal()" class="touch-btn px-2.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center gap-1 hover:bg-indigo-100 transition-colors" title="Lihat & Buat Reservasi Meja">
             <span class="material-symbols-outlined text-[15px]">event_seat</span>
             <span>Reservasi (<span id="activeReservationBadge">2</span>)</span>
           </button>
@@ -3060,6 +3060,16 @@
 
     // Modal Pendaftaran Member Baru di Kasir
     function openCashierAddMemberModal() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.isFeatureAllowed === "function") {
+        if (!RestoSync.isFeatureAllowed("crm_members")) {
+          if (typeof RestoSync.showProFeatureLockedModal === "function") {
+            RestoSync.showProFeatureLockedModal("CRM Pelanggan & Loyalty Points");
+          } else {
+            alert("Fitur CRM Pelanggan & Loyalty Points hanya tersedia pada lisensi Resto Pro Berbayar.");
+          }
+          return;
+        }
+      }
       const form = document.getElementById("cashierAddMemberForm");
       form.reset();
       document.getElementById("cashierAddMemberModal").classList.remove("hidden");
@@ -3567,6 +3577,16 @@
     // MODAL RESERVASI MEJA & LOGIKA BOOKING KASIR
     // ============================================================
     function openCashierReservationModal() {
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.isFeatureAllowed === "function") {
+        if (!RestoSync.isFeatureAllowed("reservations")) {
+          if (typeof RestoSync.showProFeatureLockedModal === "function") {
+            RestoSync.showProFeatureLockedModal("Manajemen Reservasi Meja Restoran");
+          } else {
+            alert("Fitur Manajemen Reservasi Meja hanya tersedia pada lisensi Resto Pro Berbayar.");
+          }
+          return;
+        }
+      }
       populateReservationTableOptions();
       const modal = document.getElementById("cashierReservationModal");
       modal.classList.remove("hidden");
