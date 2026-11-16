@@ -464,7 +464,11 @@
       </div>
 
       <!-- Action Button -->
-      <div class="p-4 border-t border-[#E7DFD5] dark:border-[#334155] bg-white dark:bg-[#1E293B]">
+      <div class="p-4 border-t border-[#E7DFD5] dark:border-[#334155] bg-white dark:bg-[#1E293B] flex flex-col gap-2">
+        <button id="btnOpenGuestQris" onclick="openGuestQrisModal()" class="touch-btn w-full h-12 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-2 active:scale-98">
+          <span class="material-symbols-outlined text-[20px]">qr_code_2</span>
+          <span>Bayar Langsung via QRIS Dinamis</span>
+        </button>
         <button onclick="submitOrderToKitchen()" class="touch-btn w-full h-13 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-extrabold text-sm uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 active:scale-98">
           <span class="material-symbols-outlined text-[20px]">send</span>
           <span id="submitOrderTableBtnText">Kirim Pesanan ke Dapur (Meja 05)</span>
@@ -618,6 +622,83 @@
       <div class="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1" id="tableSwitchGrid">
         <!-- Rendered by JS -->
       </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL 5: PEMBAYARAN QRIS DINAMIS MANDIRI TAMU
+       ============================================================ -->
+  <div id="guestQrisModal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex-col justify-end md:justify-center md:items-center p-0 md:p-4 transition-opacity duration-300">
+    <div onclick="closeGuestQrisModal()" class="flex-1 w-full md:hidden"></div>
+    <div class="bg-white dark:bg-[#1E293B] w-full max-w-md mx-auto rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom duration-300 border border-stone-200 dark:border-stone-700 max-h-[92vh] flex flex-col">
+      
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between bg-[#FAF7F2] dark:bg-[#0F172A]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[22px]">qr_code_2</span>
+          </div>
+          <div>
+            <h3 id="guestQrisModalHeader" class="font-heading font-bold text-base text-[#1C1917] dark:text-white leading-tight">
+              Pembayaran QRIS Dinamis (Meja 05)
+            </h3>
+            <p class="text-[11px] text-stone-500 dark:text-stone-400">Scan via BCA, GoPay, OVO, Dana, ShopeePay</p>
+          </div>
+        </div>
+        <button onclick="closeGuestQrisModal()" class="w-8 h-8 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 flex items-center justify-center hover:bg-stone-300 dark:hover:bg-stone-700 transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 flex flex-col items-center gap-4 text-center overflow-y-auto">
+        <!-- Nominal Badge -->
+        <div class="w-full flex flex-col items-center gap-1">
+          <span class="text-xs text-stone-500 dark:text-stone-400 font-medium">Total Tagihan Pesanan:</span>
+          <div id="guestQrisAmountBadge" class="font-heading font-black text-2xl text-amber-600 dark:text-amber-400 tabular-nums">
+            Rp 0
+          </div>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300 font-medium text-[11px]">
+            ⚡ Nominal Otomatis Pas (Tanpa Input Manual)
+          </span>
+        </div>
+
+        <!-- QR Code Container -->
+        <div class="p-4 bg-white rounded-2xl shadow-inner border border-stone-200 flex flex-col items-center justify-center relative">
+          <img id="guestQrisImage" src="" alt="QRIS Dinamis Tamu" class="w-48 h-48 object-contain rounded-lg" />
+          <div class="mt-2 text-[10px] font-mono text-stone-400">QRIS Standar Nasional EMVCo / BI</div>
+        </div>
+
+        <!-- Countdown Timer -->
+        <div class="w-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2 text-left">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[20px] animate-pulse">timer</span>
+            <div>
+              <div class="text-xs font-bold text-stone-800 dark:text-stone-200">Batas Waktu Bayar</div>
+              <div class="text-[10px] text-stone-500 dark:text-stone-400">QR kedaluwarsa otomatis</div>
+            </div>
+          </div>
+          <div id="guestQrisCountdown" class="font-mono font-black text-lg text-amber-600 dark:text-amber-400 tabular-nums">
+            15:00
+          </div>
+        </div>
+
+        <p class="text-[11px] text-stone-500 dark:text-stone-400 leading-snug">
+          Buka aplikasi e-wallet atau m-Banking Anda, pilih Scan QR, dan selesaikan pembayaran.
+        </p>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-[#E7DFD5] dark:border-[#334155] bg-stone-50 dark:bg-[#0F172A] flex flex-col sm:flex-row gap-2">
+        <button id="btnConfirmGuestQris" onclick="confirmGuestQrisPayment()" class="touch-btn flex-1 h-12 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-extrabold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-1.5 active:scale-98">
+          <span class="material-symbols-outlined text-[18px]">verified</span>
+          <span>Konfirmasi Pembayaran Selesai</span>
+        </button>
+        <button id="btnCloseGuestQris" onclick="closeGuestQrisModal()" class="touch-btn sm:w-24 h-12 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-heading font-bold text-xs hover:bg-stone-300 dark:hover:bg-stone-700 transition-colors">
+          Tutup
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -1423,6 +1504,105 @@
       RestoSync.emit("CALL_WAITER", { table: currentTableName, tableId: currentTableId });
       RestoSync.playWaiterBell();
       showToast(`🔔 Pelayan sedang menuju ke ${currentTableName}...`, "notifications_active");
+    }
+
+    // ============================================================
+    // PEMBAYARAN QRIS DINAMIS MANDIRI OLEH TAMU
+    // ============================================================
+    let guestQrisCountdownInterval = null;
+
+    function openGuestQrisModal() {
+      if (cart.length === 0) {
+        showToast("Keranjang Anda masih kosong!");
+        return;
+      }
+
+      const subtotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+      const tax = Math.round(subtotal * 0.10);
+      const grandTotal = subtotal + tax;
+
+      const headerEl = document.getElementById("guestQrisModalHeader");
+      if (headerEl) {
+        headerEl.textContent = `Pembayaran QRIS Dinamis (${currentTableName})`;
+      }
+
+      const amountBadge = document.getElementById("guestQrisAmountBadge");
+      if (amountBadge) {
+        amountBadge.textContent = formatRupiah(grandTotal);
+      }
+
+      const tenantId = (typeof RestoSync !== "undefined" && typeof RestoSync.getTenantId === "function") 
+        ? RestoSync.getTenantId() 
+        : "default";
+      let staticQris = (typeof RestoSync !== "undefined" && typeof RestoSync.getTenantQris === "function") 
+        ? RestoSync.getTenantQris(tenantId) 
+        : "";
+
+      if (!staticQris) {
+        staticQris = "00020101021126570011ID.CO.QRIS.WWW011893600918000000000002150000000000000000303UME51440014ID.CO.QRIS.WWW02150000000000000000303UME5204581253033605802ID5915WARUNG_CONTOH6007JAKARTA61051234062070703A0163042F91";
+      }
+
+      const conv = (typeof RestoSync !== "undefined" && typeof RestoSync.convertStaticQrisToDynamic === "function")
+        ? RestoSync.convertStaticQrisToDynamic(staticQris, grandTotal, { billNo: currentTableId })
+        : { success: true, dynamicQris: staticQris };
+
+      const dynamicPayload = (conv && conv.success && conv.dynamicQris) ? conv.dynamicQris : staticQris;
+
+      const qrisImg = document.getElementById("guestQrisImage");
+      if (qrisImg) {
+        qrisImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(dynamicPayload)}`;
+      }
+
+      const countdownEl = document.getElementById("guestQrisCountdown");
+      if (countdownEl) {
+        countdownEl.textContent = "15:00";
+      }
+
+      if (guestQrisCountdownInterval) {
+        clearInterval(guestQrisCountdownInterval);
+      }
+
+      let secondsLeft = 15 * 60;
+      guestQrisCountdownInterval = setInterval(() => {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+          clearInterval(guestQrisCountdownInterval);
+          if (countdownEl) countdownEl.textContent = "00:00 (Kedaluwarsa)";
+        } else {
+          const m = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+          const s = String(secondsLeft % 60).padStart(2, "0");
+          if (countdownEl) countdownEl.textContent = `${m}:${s}`;
+        }
+      }, 1000);
+
+      const modal = document.getElementById("guestQrisModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closeGuestQrisModal() {
+      if (guestQrisCountdownInterval) {
+        clearInterval(guestQrisCountdownInterval);
+        guestQrisCountdownInterval = null;
+      }
+      const modal = document.getElementById("guestQrisModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+    }
+
+    function confirmGuestQrisPayment() {
+      if (cart.length > 0) {
+        submitOrderToKitchen();
+      }
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.emit === "function") {
+        RestoSync.emit("ORDER_PAID", { tableId: currentTableId, table: currentTableName, method: "qris" });
+      }
+      closeGuestQrisModal();
+      showToast("✅ Konfirmasi pembayaran QRIS terkirim ke kasir & dapur!", "verified");
     }
 
     // ============================================================

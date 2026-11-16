@@ -290,6 +290,20 @@
         renderKdsTickets();
       });
 
+      RestoSync.on("ONLINE_ORDER_RECEIVED", (order) => {
+        const plat = (order.platform || order.channel || "delivery").toUpperCase();
+        const ref = order.platformRef || order.orderRef || order.id || "";
+        showKdsToast(`🛵 PESANAN ONLINE BARU: ${plat} #${ref}!`, true);
+        if (isSoundEnabled) {
+          RestoSync.playKitchenBell();
+        }
+        renderKdsTickets();
+      });
+
+      RestoSync.on("ONLINE_ORDER_STATUS_CHANGED", () => {
+        renderKdsTickets();
+      });
+
       // Sinkronisasi realtime saat item diceklis dari device lain (Dapur vs Bar Minuman)
       RestoSync.on("TICKET_ITEMS_UPDATED", () => {
         renderKdsTickets();
@@ -342,7 +356,7 @@
       // Filter stasiun device (Dapur Makanan vs Bar Minuman vs Delivery Online vs Expo Semua)
       if (activeStationFilter === "delivery") {
         tickets = tickets.filter(ticket => 
-          ['gofood', 'grabfood', 'shopeefood', 'takeaway'].includes((ticket.orderType || '').toLowerCase()) ||
+          ['gofood', 'grabfood', 'shopeefood', 'qpon', 'takeaway'].includes((ticket.orderType || '').toLowerCase()) ||
           (ticket.section && (ticket.section.toLowerCase().includes('delivery') || ticket.section.toLowerCase().includes('bungkus')))
         );
       } else if (activeStationFilter === "kitchen" || activeStationFilter === "food") {
@@ -376,7 +390,7 @@
 
       container.innerHTML = tickets.map(ticket => {
         const elapsedMinutes = Math.floor((now - ticket.createdAt) / 60000);
-        const isDelivery = ['gofood', 'grabfood', 'shopeefood', 'takeaway'].includes((ticket.orderType || '').toLowerCase()) || 
+        const isDelivery = ['gofood', 'grabfood', 'shopeefood', 'qpon', 'takeaway'].includes((ticket.orderType || '').toLowerCase()) || 
                            (ticket.section && (ticket.section.toLowerCase().includes('delivery') || ticket.section.toLowerCase().includes('bungkus')));
         const ch = (ticket.orderType || '').toLowerCase();
         
@@ -387,8 +401,10 @@
           platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#00B14F] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛵 GRABFOOD</span>`;
         } else if (ch === 'shopeefood') {
           platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#EE4D2D] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛵 SHOPEEFOOD</span>`;
+        } else if (ch === 'qpon') {
+          platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#8B5CF6] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🟣 QPON</span>`;
         } else if (ch === 'takeaway') {
-          platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#8B5CF6] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛍️ TAKEAWAY</span>`;
+          platformBadge = `<span class="px-2 py-0.5 rounded-lg bg-[#0284C7] text-white font-extrabold text-[10px] shadow-sm flex items-center gap-1 shrink-0">🛍️ TAKEAWAY</span>`;
         }
         
         // Perhitungan Ceklis Item-Per-Item
@@ -589,6 +605,9 @@
         } else if (station === "kitchen" || station === "food") {
           badge.textContent = "🍳 Mode Device: KHUSUS DAPUR MAKANAN";
           badge.className = "font-bold text-amber-300 bg-amber-950/80 border border-amber-500/50 px-2.5 py-1 rounded-xl";
+        } else if (station === "delivery") {
+          badge.textContent = "🛵 Mode Device: DELIVERY ONLINE & TAKEAWAY";
+          badge.className = "font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-500/50 px-2.5 py-1 rounded-xl";
         } else {
           badge.textContent = "🛎️ Mode Device: SEMUA STATION (EXPO RUNNER)";
           badge.className = "font-bold text-amber-300 bg-amber-950/60 border border-amber-500/40 px-2.5 py-1 rounded-xl";
