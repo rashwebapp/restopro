@@ -491,7 +491,10 @@ function mountOwnerSettings(options) {
       handleTestQrisConversion: typeof handleTestQrisConversion === "function" ? handleTestQrisConversion : undefined,
       initOnlineOrdersUI: typeof initOnlineOrdersUI === "function" ? initOnlineOrdersUI : undefined,
       copyOnlineWebhookUrl: typeof copyOnlineWebhookUrl === "function" ? copyOnlineWebhookUrl : undefined,
-      renderOnlineOrdersStatsSummary: typeof renderOnlineOrdersStatsSummary === "function" ? renderOnlineOrdersStatsSummary : undefined
+      renderOnlineOrdersStatsSummary: typeof renderOnlineOrdersStatsSummary === "function" ? renderOnlineOrdersStatsSummary : undefined,
+      initSecurityPinsUI: typeof initSecurityPinsUI === "function" ? initSecurityPinsUI : undefined,
+      handleSaveTenantPins: typeof handleSaveTenantPins === "function" ? handleSaveTenantPins : undefined,
+      togglePinVisibility: typeof togglePinVisibility === "function" ? togglePinVisibility : undefined
     };
   `;
 
@@ -797,6 +800,50 @@ test("6. Load & Init: Halaman otomatis mengisi #qrisStaticInput dan #onlineWebho
 
   const webhookInput = doc.getElementById("onlineWebhookUrlInput");
   assert(webhookInput.value.includes("tenantId=warung-berkah"), "Webhook URL must be auto-populated with tenant ID");
+});
+
+test("7. Keamanan Akses: #sectionSecurityPins merender form ganti PIN dan handleSaveTenantPins memperbarui PIN Kasir & Owner", function () {
+  localStorage.clear();
+  RestoSync.registerNewTenant({
+    id: "warung-berkah",
+    name: "Warung Berkah",
+    plan: "monthly",
+    cashierPin: "1234",
+    ownerPin: "1234",
+    _skipCloud: true
+  });
+
+  const { doc, api } = mountOwnerSettings({ search: "?tenant=warung-berkah" });
+
+  const sec = doc.getElementById("sectionSecurityPins");
+  assert(Boolean(sec), "#sectionSecurityPins must exist in owner_settings_saas.html");
+
+  const cashierInput = doc.getElementById("inputCashierPin");
+  const ownerInput = doc.getElementById("inputOwnerPin");
+  assert(Boolean(cashierInput), "#inputCashierPin must exist");
+  assert(Boolean(ownerInput), "#inputOwnerPin must exist");
+
+  if (typeof api.initSecurityPinsUI === "function") {
+    api.initSecurityPinsUI();
+  }
+  assertEqual(cashierInput.value, "1234", "Initial cashier PIN must be populated");
+  assertEqual(ownerInput.value, "1234", "Initial owner PIN must be populated");
+
+  // Change PINs
+  cashierInput.value = "4321";
+  ownerInput.value = "9876";
+
+  if (typeof api.handleSaveTenantPins === "function") {
+    api.handleSaveTenantPins({ preventDefault: function () {} });
+  }
+
+  // Verify updated in RestoSync
+  const updated = RestoSync.getTenantInfo("warung-berkah");
+  assertEqual(updated.cashierPin, "4321", "Cashier PIN must be updated to 4321");
+  assertEqual(updated.ownerPin, "9876", "Owner PIN must be updated to 9876");
+  assertEqual(RestoSync.verifyPosPin("4321", "warung-berkah"), true, "New Cashier PIN 4321 must verify successfully");
+  assertEqual(RestoSync.verifyOwnerPin("9876", "warung-berkah"), true, "New Owner PIN 9876 must verify successfully");
+  assertEqual(RestoSync.verifyPosPin("1234", "warung-berkah"), false, "Old Cashier PIN 1234 must now fail");
 });
 
 print("===============================================================================");

@@ -616,8 +616,12 @@ const RestoSync = {
   updateTenant(tenantId, updates = {}) {
     if (!tenantId) return { success: false, message: "Tenant ID wajib diisi" };
     const tenants = this.getAllTenants();
-    const idx = tenants.findIndex(t => t.id === tenantId);
-    if (idx === -1) return { success: false, message: "Klien restoran tidak ditemukan" };
+    let idx = tenants.findIndex(t => t.id === tenantId);
+    if (idx === -1) {
+      const base = this.getTenantInfo(tenantId);
+      tenants.unshift(base);
+      idx = 0;
+    }
 
     const t = Object.assign({}, tenants[idx]);
 

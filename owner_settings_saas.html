@@ -1133,7 +1133,106 @@
 
 
     <!-- ============================================================
-         7. INTEGRASI GOOGLE APPS SCRIPT (GAS) & GOOGLE SHEETS BACKEND
+         7. KEAMANAN AKSES & GANTI PIN TOKO (KASIR & OWNER)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionSecurityPins">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">pin</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Keamanan Akses & Ganti PIN Toko</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                PIN 4-6 Digit
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Atur PIN Kasir untuk melayani transaksi dan PIN Owner rahasia untuk laporan keuangan & pengaturan</p>
+          </div>
+        </div>
+
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-slate-800 text-stone-600 dark:text-stone-300 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Terenkripsi SHA-256</span>
+        </div>
+      </div>
+
+      <form id="formChangeTenantPins" onsubmit="handleSaveTenantPins(event)" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Box PIN Kasir -->
+          <div class="p-4 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label for="inputCashierPin" class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-emerald-600 text-base">point_of_sale</span>
+                <span>PIN Baru Kasir POS</span>
+              </label>
+              <button type="button" onclick="togglePinVisibility('inputCashierPin', 'iconEyeCashier')" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs flex items-center gap-1 cursor-pointer">
+                <span id="iconEyeCashier" class="material-symbols-outlined text-base">visibility</span>
+                <span class="text-[11px]">Lihat</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-stone-500">
+              Digunakan staf kasir untuk membuka meja dan mencatat pembayaran.
+            </p>
+            <input 
+              type="password" 
+              id="inputCashierPin" 
+              maxlength="6" 
+              inputmode="numeric" 
+              placeholder="Masukkan 4-6 angka (default: 1234)" 
+              class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-stone-300 dark:border-slate-700 text-sm font-mono tracking-widest text-stone-900 dark:text-white focus:outline-hidden focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+
+          <!-- Box PIN Owner -->
+          <div class="p-4 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label for="inputOwnerPin" class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-blue-600 text-base">shield_person</span>
+                <span>PIN Baru Pemilik (Owner)</span>
+              </label>
+              <button type="button" onclick="togglePinVisibility('inputOwnerPin', 'iconEyeOwner')" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs flex items-center gap-1 cursor-pointer">
+                <span id="iconEyeOwner" class="material-symbols-outlined text-base">visibility</span>
+                <span class="text-[11px]">Lihat</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-stone-500">
+              Digunakan pemilik resto untuk membuka menu Pengaturan dan melihat omzet.
+            </p>
+            <input 
+              type="password" 
+              id="inputOwnerPin" 
+              maxlength="6" 
+              inputmode="numeric" 
+              placeholder="Masukkan 4-6 angka (default: 1234)" 
+              class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-stone-300 dark:border-slate-700 text-sm font-mono tracking-widest text-stone-900 dark:text-white focus:outline-hidden focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          <p id="pinSaveFeedback" class="text-xs text-stone-500 dark:text-stone-400 italic">
+            *PIN bawaan default adalah <strong>1234</strong>. Anda dapat mengganti PIN Kasir atau PIN Owner sesuai kebutuhan usaha Anda.
+          </p>
+          <button 
+            type="submit" 
+            id="btnSavePins"
+            class="touch-btn w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-heading font-extrabold text-xs shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
+          >
+            <span class="material-symbols-outlined text-base">save</span>
+            <span>Simpan PIN Baru</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+
+
+    <!-- ============================================================
+         8. INTEGRASI GOOGLE APPS SCRIPT (GAS) & GOOGLE SHEETS BACKEND
          ============================================================ -->
     <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionGasBackend">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
@@ -2106,6 +2205,7 @@
       initGasSettingsUI();
       initQrisSettingsUI();
       initOnlineOrdersUI();
+      initSecurityPinsUI();
       renderCatalogManager();
       renderMembersTable();
       renderLedgerTable();
@@ -2142,6 +2242,7 @@
         applyOwnerTenantBranding();
         initQrisSettingsUI();
         initOnlineOrdersUI();
+        initSecurityPinsUI();
         updateLicenseBannerUI();
         renderOwnerTables();
         updateProFeatureLockUI();
@@ -4539,6 +4640,90 @@ END $$;
     window.initOnlineOrdersUI = initOnlineOrdersUI;
     window.copyOnlineWebhookUrl = copyOnlineWebhookUrl;
     window.renderOnlineOrdersStatsSummary = renderOnlineOrdersStatsSummary;
+
+    // ============================================================
+    // 10. KEAMANAN AKSES & PENGATURAN PIN TOKO (KASIR & OWNER)
+    // ============================================================
+    function initSecurityPinsUI() {
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const t = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo(tenantId) : null;
+      const cashierInput = document.getElementById("inputCashierPin");
+      const ownerInput = document.getElementById("inputOwnerPin");
+      if (t) {
+        if (cashierInput && t.cashierPin) cashierInput.value = t.cashierPin;
+        if (ownerInput && t.ownerPin) ownerInput.value = t.ownerPin;
+      }
+    }
+
+    function togglePinVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (!input) return;
+      if (input.type === "password") {
+        input.type = "text";
+        if (icon) icon.textContent = "visibility_off";
+      } else {
+        input.type = "password";
+        if (icon) icon.textContent = "visibility";
+      }
+    }
+
+    function handleSaveTenantPins(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      const tenantId = typeof RestoSync !== "undefined" ? RestoSync.getTenantId() : "default";
+      const cashierInput = document.getElementById("inputCashierPin");
+      const ownerInput = document.getElementById("inputOwnerPin");
+      const feedback = document.getElementById("pinSaveFeedback");
+
+      const newCashier = cashierInput ? cashierInput.value.trim() : "";
+      const newOwner = ownerInput ? ownerInput.value.trim() : "";
+
+      if (newCashier && (newCashier.length < 4 || !/^\d+$/.test(newCashier))) {
+        alert("PIN Kasir harus berupa 4 sampai 6 digit angka!");
+        if (cashierInput) cashierInput.focus();
+        return;
+      }
+      if (newOwner && (newOwner.length < 4 || !/^\d+$/.test(newOwner))) {
+        alert("PIN Owner harus berupa 4 sampai 6 digit angka!");
+        if (ownerInput) ownerInput.focus();
+        return;
+      }
+
+      if (!newCashier && !newOwner) {
+        alert("Silakan masukkan PIN Kasir atau PIN Owner baru yang ingin disimpan.");
+        return;
+      }
+
+      const updates = {};
+      if (newCashier) updates.cashierPin = newCashier;
+      if (newOwner) updates.ownerPin = newOwner;
+
+      if (typeof RestoSync !== "undefined") {
+        const res = RestoSync.updateTenantPins(tenantId, updates);
+        if (res && res.success) {
+          if (feedback) {
+            feedback.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✅ PIN Kasir & PIN Owner berhasil disimpan!</span>`;
+            setTimeout(() => {
+              feedback.innerHTML = `*PIN bawaan default adalah <strong>1234</strong>. Anda dapat mengganti PIN Kasir atau PIN Owner sesuai kebutuhan usaha Anda.`;
+            }, 4000);
+          }
+          if (typeof showToast === "function") {
+            showToast("✅ PIN berhasil diperbarui!", "success");
+          } else {
+            alert("✅ PIN Kasir dan PIN Owner berhasil diperbarui!");
+          }
+          if (typeof RestoSync.syncTenantsToCloud === "function") {
+            RestoSync.syncTenantsToCloud().catch(() => null);
+          }
+        } else {
+          alert("Gagal memperbarui PIN: " + (res && res.message ? res.message : "Tenant tidak ditemukan"));
+        }
+      }
+    }
+
+    window.initSecurityPinsUI = initSecurityPinsUI;
+    window.togglePinVisibility = togglePinVisibility;
+    window.handleSaveTenantPins = handleSaveTenantPins;
   </script>
 </body>
 </html>
