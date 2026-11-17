@@ -436,7 +436,17 @@ function mountCashierPos(options = {}) {
       handoverDeliveryOrder: typeof handoverDeliveryOrder === "function" ? handoverDeliveryOrder : undefined,
       updateOrderStatus: typeof updateOrderStatus === "function" ? updateOrderStatus : undefined,
       getActiveDeliveryFilter: function () { return typeof activeDeliveryFilter !== "undefined" ? activeDeliveryFilter : null; },
-      getPosQrisCountdownInterval: function () { return typeof posQrisCountdownInterval !== "undefined" ? posQrisCountdownInterval : null; }
+      getPosQrisCountdownInterval: function () { return typeof posQrisCountdownInterval !== "undefined" ? posQrisCountdownInterval : null; },
+      openPosModifierModal: typeof openPosModifierModal === "function" ? openPosModifierModal : undefined,
+      closePosModifierModal: typeof closePosModifierModal === "function" ? closePosModifierModal : undefined,
+      openTicketItemNotesModal: typeof openTicketItemNotesModal === "function" ? openTicketItemNotesModal : undefined,
+      confirmPosAddToCart: typeof confirmPosAddToCart === "function" ? confirmPosAddToCart : undefined,
+      addDishToTicket: typeof addDishToTicket === "function" ? addDishToTicket : undefined,
+      addDishToTicketDirect: typeof addDishToTicketDirect === "function" ? addDishToTicketDirect : undefined,
+      getCurrentTicketItems: function () { return typeof currentTicketItems !== "undefined" ? currentTicketItems : []; },
+      renderTicketItems: typeof renderTicketItems === "function" ? renderTicketItems : undefined,
+      renderTablesGrid: typeof renderTablesGrid === "function" ? renderTablesGrid : undefined,
+      selectTable: typeof selectTable === "function" ? selectTable : undefined
     };
   `;
 
@@ -531,6 +541,7 @@ function runTest(name, fn) {
     testResults.push({ name, pass: false, error: err });
     print("  [FAIL] " + name);
     print("         " + (err && err.message ? err.message : err));
+    if (err && err.stack) print("STACK: " + err.stack);
   }
 }
 
@@ -816,6 +827,65 @@ runTest("5. Penyelesaian pesanan online memanggil RestoSync.updateOnlineOrderSta
   RestoSync.emit("ONLINE_ORDER_STATUS_CHANGED", { orderId: orderId, status: "completed" });
   assert(container.innerHTML.indexOf("Selesai") !== -1 || container.innerHTML.indexOf("Lunas Online") !== -1,
     "Container must reflect completed state reactively");
+});
+
+// -----------------------------------------------------------------------------
+// Test 6: Denah Meja Tampak di Layar (Kolom 1) & Fitur Catatan / Keterangan Pesanan Kasir
+// -----------------------------------------------------------------------------
+runTest("6. Denah Meja Tampak di Layar & Fitur Kustomisasi / Catatan Pesanan Kasir", function () {
+  localStorage.clear();
+  const { doc, api } = mountCashierPos({ search: "?tenant=warung-berkah" });
+
+  // 1. Column 1 Table Grid & Floor Switcher visible
+  const tablesContainer = doc.getElementById("tablesGridContainer");
+  assert(Boolean(tablesContainer), "#tablesGridContainer must exist directly in main Column 1");
+  const dineInPanel = doc.getElementById("posDineInPanel");
+  assert(Boolean(dineInPanel), "#posDineInPanel must exist in Column 1");
+  const tabDineInBtn = doc.getElementById("posTabDineInBtn");
+  const tabDeliveryBtn = doc.getElementById("posTabDeliveryBtn");
+  assert(Boolean(tabDineInBtn), "#posTabDineInBtn must exist");
+  assert(Boolean(tabDeliveryBtn), "#posTabDeliveryBtn must exist");
+
+  // 2. Modifier modal exists with fields
+  const modifierModal = doc.getElementById("posModifierModal");
+  assert(Boolean(modifierModal), "#posModifierModal must exist");
+  const notesInput = doc.getElementById("posCookingNotesInput");
+  assert(Boolean(notesInput), "#posCookingNotesInput must exist");
+  const spiceGroup = doc.getElementById("posSpiceGroup");
+  assert(Boolean(spiceGroup), "#posSpiceGroup must exist");
+  const btnConfirm = doc.getElementById("btnConfirmPosModal");
+  assert(Boolean(btnConfirm), "#btnConfirmPosModal must exist");
+
+  // 3. Open modifier modal for a dish
+  api.openPosModifierModal("mandhi-lamb");
+  assertEqual(modifierModal.classList.contains("hidden"), false, "Modifier modal must show when opened");
+  assertEqual(doc.getElementById("posModalDishName").textContent, "Nasi Mandhi Daging Kambing (Mandhi Lamb Rice)", "Dish name must be populated");
+
+  // 4. Input notes and add to cart
+  notesInput.value = "Jangan pakai bawang merah, kuah kari dipisah";
+  api.confirmPosAddToCart();
+  assertEqual(modifierModal.classList.contains("hidden"), true, "Modifier modal must hide after confirm");
+
+  const ticketItems = api.getCurrentTicketItems();
+  assertEqual(ticketItems.length, 1, "Ticket should have 1 item");
+  assert(ticketItems[0].notes.indexOf("Jangan pakai bawang merah, kuah kari dipisah") !== -1,
+    "Item notes in ticket must contain custom notes entered by cashier");
+
+  // 5. Open ticket item notes modal for editing
+  api.openTicketItemNotesModal(0);
+  assertEqual(modifierModal.classList.contains("hidden"), false, "Modifier modal must open in edit mode from ticket");
+  assertEqual(doc.getElementById("posModifierModalTitle").textContent, "Ubah Catatan & Keterangan", "Modal title must reflect edit mode");
+
+  // Update notes
+  notesInput.value = "Extra sambal merah";
+  api.confirmPosAddToCart();
+  assert(ticketItems[0].notes.indexOf("Extra sambal merah") !== -1,
+    "Edited note must be reflected in ticket item");
+
+  // 6. Direct 1-tap add with default notes
+  api.addDishToTicketDirect("teh-tarik");
+  assertEqual(ticketItems.length, 2, "Direct add should add second item to ticket");
+  assert(ticketItems[1].notes.indexOf("Es Normal") !== -1, "Direct add drink should have default notes");
 });
 
 // -----------------------------------------------------------------------------

@@ -159,107 +159,98 @@
        MAIN 2-ZONE CLEAN TOUCH INTERFACE (v2.0 LEAN POS)
        ============================================================ -->
   <main class="flex-1 p-3 lg:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 overflow-hidden">
-
     <!-- ============================================================
-         ZONE 1: MENU CATALOG & ORDER ACTION BAR (8 Cols ~ 67%)
+         COLUMN 1: TABLE MAP & FLOOR GRID (3 Cols ~ 25%)
          ============================================================ -->
-    <section class="lg:col-span-8 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
+    <section class="lg:col-span-3 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
       
-      <!-- Top Action Bar: Quick Table Selector + Dine-in/Online Mode + Search -->
-      <div class="flex flex-wrap items-center justify-between gap-2.5 pb-2.5 border-b border-[#E7DFD5] dark:border-[#334155] shrink-0">
-        
-        <!-- Left: Quick Table Selector Pop-up & Mode Switcher -->
-        <div class="flex items-center gap-2">
-          <!-- Pop-up Table Selector Button -->
-          <button onclick="openTablePickerModal()" class="touch-btn group flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-900 dark:text-amber-300 transition-all text-left shadow-2xs" title="Buka Denah Meja untuk Memilih atau Mengubah Meja">
-            <div class="w-8 h-8 rounded-lg bg-amber-500 text-[#0F172A] font-heading font-black text-xs flex items-center justify-center shadow-xs">
-              #<span id="activeSelectorTableNum">03</span>
-            </div>
-            <div>
-              <div class="flex items-center gap-1 font-heading font-bold text-xs leading-none text-stone-900 dark:text-white">
-                <span id="activeSelectorTableName">Meja 03 (Indoor)</span>
-                <span class="material-symbols-outlined text-[16px] text-amber-600 dark:text-amber-400 group-hover:translate-y-0.5 transition-transform">expand_more</span>
-              </div>
-              <p id="activeSelectorTableSub" class="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5 truncate max-w-[140px] sm:max-w-[200px]">Minta Tagihan • Ganti Meja</p>
-            </div>
-          </button>
+      <!-- Switcher Mode: Meja Makan Dine-In vs Online Delivery & Takeaway -->
+      <div class="grid grid-cols-2 gap-1 p-1 bg-stone-100 dark:bg-stone-900 rounded-xl mb-2.5 border border-stone-200 dark:border-stone-800 shrink-0">
+        <button id="posTabDineInBtn" onclick="switchPosFloorMode('dinein')" class="touch-btn py-1.5 px-2 rounded-lg text-xs font-heading font-extrabold flex items-center justify-center gap-1.5 bg-white dark:bg-[#1E293B] text-amber-600 dark:text-amber-400 shadow-xs">
+          <span class="material-symbols-outlined text-[16px]">table_restaurant</span>
+          <span>Dine-In</span>
+        </button>
+        <button id="posTabDeliveryBtn" onclick="switchPosFloorMode('delivery')" class="touch-btn py-1.5 px-2 rounded-lg text-xs font-heading font-extrabold flex items-center justify-center gap-1.5 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200">
+          <span class="material-symbols-outlined text-[16px]">moped</span>
+          <span>Online (<span id="activeOnlineOrdersCountBadge">0</span>)</span>
+        </button>
+      </div>
 
-          <!-- Floor Mode Switcher (Meja Makan vs Online Delivery) -->
-          <div class="flex items-center bg-stone-100 dark:bg-stone-900 p-1 rounded-xl border border-stone-200 dark:border-stone-800">
-            <button id="posTabDineInBtn" onclick="switchPosFloorMode('dinein')" class="touch-btn py-1.5 px-2.5 rounded-lg text-xs font-heading font-extrabold flex items-center gap-1.5 bg-white dark:bg-[#1E293B] text-amber-600 dark:text-amber-400 shadow-xs">
-              <span class="material-symbols-outlined text-[16px]">restaurant</span>
-              <span>Dine-In</span>
-            </button>
-            <button id="posTabDeliveryBtn" onclick="switchPosFloorMode('delivery')" class="touch-btn py-1.5 px-2.5 rounded-lg text-xs font-heading font-extrabold flex items-center gap-1.5 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200">
-              <span class="material-symbols-outlined text-[16px]">moped</span>
-              <span>Online (<span id="activeOnlineOrdersCountBadge">0</span>)</span>
-            </button>
+      <!-- PANEL DINE-IN (DENAH MEJA RESTO) -->
+      <div id="posDineInPanel" class="flex flex-col flex-1 overflow-hidden">
+        <!-- Table Grid Header -->
+        <div class="flex items-center justify-between pb-2 border-b border-[#E7DFD5] dark:border-[#334155]">
+          <div class="flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[18px]">table_restaurant</span>
+            <h2 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">Denah Meja Resto</h2>
+          </div>
+          <button onclick="openCashierReservationModal()" class="touch-btn px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-[10px] flex items-center gap-1 hover:bg-indigo-100 transition-colors" title="Lihat & Buat Reservasi Meja">
+            <span class="material-symbols-outlined text-[13px]">event_seat</span>
+            <span>Reservasi (<span id="activeReservationBadge">0</span>)</span>
+          </button>
+        </div>
+
+        <!-- Status Indicator Legend (Kosong, Terisi, Bill, Booking) -->
+        <div class="grid grid-cols-4 gap-1 py-1.5 text-[9px] font-semibold text-center border-b border-[#E7DFD5] dark:border-[#334155] mb-2">
+          <div class="p-1 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center gap-0.5 border border-emerald-200 dark:border-emerald-800/40">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Kosong
+          </div>
+          <div class="p-1 rounded bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 flex items-center justify-center gap-0.5 border border-red-200 dark:border-red-800/40">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Terisi
+          </div>
+          <div class="p-1 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 flex items-center justify-center gap-0.5 border border-amber-200 dark:border-amber-800/40">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Bill
+          </div>
+          <div class="p-1 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-800 dark:text-indigo-300 flex items-center justify-center gap-0.5 border border-indigo-200 dark:border-indigo-800/40">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Booking
           </div>
         </div>
 
-        <!-- Right: Search Bar Menu -->
-        <div class="relative flex-1 min-w-[180px] max-w-xs">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-[18px]">search</span>
-          <input 
-            id="posMenuSearch" 
-            type="text" 
-            oninput="handlePosSearch(this.value)"
-            placeholder="Cari menu Arab, Malaysia, Thai..." 
-            class="w-full h-9 pl-9 pr-3 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs text-[#1C1917] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
+        <!-- Table Filter Pills -->
+        <div class="flex items-center gap-1 overflow-x-auto pb-1 mb-1.5 text-[10px] font-heading font-bold" id="tableFilterPills">
+          <button id="tableFilterAllBtn" onclick="filterTableGrid('all')" class="table-pill px-2 py-0.5 rounded-lg bg-amber-500 text-[#0F172A]">Semua</button>
+          <button onclick="filterTableGrid('available')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Kosong</button>
+          <button onclick="filterTableGrid('occupied')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Terisi</button>
+          <button onclick="filterTableGrid('bill_requested')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Bill</button>
+          <button onclick="filterTableGrid('reserved')" class="table-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">Booking</button>
         </div>
 
-      </div>
-
-      <!-- PANEL DINE-IN (KATALOG MENU LEGA) -->
-      <div id="posDineInPanel" class="flex flex-col flex-1 overflow-hidden pt-2">
-        <!-- Category Tabs -->
-        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2 shrink-0">
-          <button onclick="filterPosCategory('all')" data-poscat="all" class="pos-cat-btn active touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A] shadow-xs">
-            Semua Menu
-          </button>
-          <button onclick="filterPosCategory('arabian')" data-poscat="arabian" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
-            Arabian 🕌
-          </button>
-          <button onclick="filterPosCategory('malaysian')" data-poscat="malaysian" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
-            Malaysian 🇲🇾
-          </button>
-          <button onclick="filterPosCategory('thai')" data-poscat="thai" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
-            Thai 🇹🇭
-          </button>
-          <button onclick="filterPosCategory('drinks')" data-poscat="drinks" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
-            Minuman 🍹
-          </button>
+        <!-- Interactive Tables Grid (Scrollable) -->
+        <div id="tablesGridContainer" class="grid grid-cols-2 gap-2 overflow-y-auto flex-1 pr-1">
+          <!-- Tables populated by JS -->
         </div>
 
-        <!-- Touch Food Tile Grid (4 Kolom Lega pada Layar Besar, 3 Kolom pada Tablet, 2 pada HP) -->
-        <div id="posTilesContainer" class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2.5 overflow-y-auto flex-1 pr-1">
-          <!-- Rendered by JS -->
+        <!-- Quick Floor KPI Summary -->
+        <div class="mt-2 pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between text-xs text-[#78716C] dark:text-[#94A3B8]">
+          <span>Okupansi Meja:</span>
+          <span id="occupancyRateDisplay" class="font-heading font-bold text-amber-600 dark:text-amber-400">
+            -
+          </span>
         </div>
       </div>
 
       <!-- PANEL ONLINE DELIVERY & TAKEAWAY -->
-      <div id="posDeliveryPanel" class="hidden flex-col flex-1 overflow-hidden pt-2">
+      <div id="posDeliveryPanel" class="hidden flex-col flex-1 overflow-hidden">
         <!-- Actions & Header -->
         <div class="flex items-center justify-between pb-2 border-b border-[#E7DFD5] dark:border-[#334155] shrink-0">
           <div class="flex items-center gap-1.5">
             <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">two_wheeler</span>
-            <h2 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">Daftar Pesanan Online Delivery</h2>
+            <h2 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">Pesanan Online</h2>
           </div>
-          <button onclick="openOnlineDeliveryModal()" class="touch-btn px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1 transition-colors">
-            <span class="material-symbols-outlined text-[14px]">add_circle</span>
-            <span>+ Pesanan Manual</span>
+          <button onclick="openOnlineDeliveryModal()" class="touch-btn px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] flex items-center gap-1 transition-colors">
+            <span class="material-symbols-outlined text-[13px]">add_circle</span>
+            <span>+ Manual</span>
           </button>
         </div>
 
         <!-- Platform Filter Pills -->
-        <div class="flex items-center gap-1.5 overflow-x-auto py-2 shrink-0 text-xs font-heading font-bold" id="deliveryFilterPills">
-          <button onclick="filterDeliveryOrders('all')" class="delivery-pill px-3 py-1 rounded-xl bg-emerald-600 text-white font-bold">Semua</button>
-          <button onclick="filterDeliveryOrders('gofood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GoFood</button>
-          <button onclick="filterDeliveryOrders('grabfood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GrabFood</button>
-          <button onclick="filterDeliveryOrders('shopeefood')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">ShopeeFood</button>
-          <button onclick="filterDeliveryOrders('qpon')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">Qpon</button>
-          <button onclick="filterDeliveryOrders('takeaway')" class="delivery-pill px-3 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">Takeaway</button>
+        <div class="flex items-center gap-1 overflow-x-auto py-1.5 mb-1 text-[10px] font-heading font-bold" id="deliveryFilterPills">
+          <button onclick="filterDeliveryOrders('all')" class="delivery-pill px-2 py-0.5 rounded-lg bg-emerald-600 text-white font-bold">Semua</button>
+          <button onclick="filterDeliveryOrders('gofood')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GoFood</button>
+          <button onclick="filterDeliveryOrders('grabfood')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">GrabFood</button>
+          <button onclick="filterDeliveryOrders('shopeefood')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">ShopeeFood</button>
+          <button onclick="filterDeliveryOrders('qpon')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">Qpon</button>
+          <button onclick="filterDeliveryOrders('takeaway')" class="delivery-pill px-2 py-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 font-bold">Takeaway</button>
         </div>
 
         <!-- Online Delivery Cards List (Scrollable) -->
@@ -270,19 +261,19 @@
         <!-- Simulation Helper Button Bar -->
         <div class="mt-2 pt-2 border-t border-[#E7DFD5] dark:border-[#334155] flex flex-col gap-1.5 shrink-0">
           <div class="text-[10px] font-bold text-stone-500 uppercase tracking-wider flex items-center justify-between">
-            <span>⚡ Simulasi Order Masuk:</span>
+            <span>⚡ Simulasi Order:</span>
           </div>
-          <div class="grid grid-cols-4 gap-2">
-            <button onclick="triggerQuickOnlineOrder('gofood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#00AA13]/15 hover:bg-[#00AA13]/30 text-[#00AA13] dark:text-emerald-400 font-extrabold text-xs border border-[#00AA13]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari GoFood">
+          <div class="grid grid-cols-4 gap-1.5">
+            <button onclick="triggerQuickOnlineOrder('gofood')" class="touch-btn py-1 px-1 rounded-lg bg-[#00AA13]/15 hover:bg-[#00AA13]/30 text-[#00AA13] dark:text-emerald-400 font-extrabold text-[10px] border border-[#00AA13]/30 flex items-center justify-center gap-0.5">
               <span>+ GoFood</span>
             </button>
-            <button onclick="triggerQuickOnlineOrder('grabfood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#00B14F]/15 hover:bg-[#00B14F]/30 text-[#00B14F] dark:text-emerald-400 font-extrabold text-xs border border-[#00B14F]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari GrabFood">
-              <span>+ GrabFood</span>
+            <button onclick="triggerQuickOnlineOrder('grabfood')" class="touch-btn py-1 px-1 rounded-lg bg-[#00B14F]/15 hover:bg-[#00B14F]/30 text-[#00B14F] dark:text-emerald-400 font-extrabold text-[10px] border border-[#00B14F]/30 flex items-center justify-center gap-0.5">
+              <span>+ Grab</span>
             </button>
-            <button onclick="triggerQuickOnlineOrder('shopeefood')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#EE4D2D]/15 hover:bg-[#EE4D2D]/30 text-[#EE4D2D] dark:text-orange-400 font-extrabold text-xs border border-[#EE4D2D]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari ShopeeFood">
+            <button onclick="triggerQuickOnlineOrder('shopeefood')" class="touch-btn py-1 px-1 rounded-lg bg-[#EE4D2D]/15 hover:bg-[#EE4D2D]/30 text-[#EE4D2D] dark:text-orange-400 font-extrabold text-[10px] border border-[#EE4D2D]/30 flex items-center justify-center gap-0.5">
               <span>+ Shopee</span>
             </button>
-            <button onclick="triggerQuickOnlineOrder('qpon')" class="touch-btn py-1.5 px-2 rounded-xl bg-[#8B5CF6]/15 hover:bg-[#8B5CF6]/30 text-[#8B5CF6] dark:text-purple-400 font-extrabold text-xs border border-[#8B5CF6]/30 flex items-center justify-center gap-1" title="Simulasi Order Masuk dari Qpon Direct">
+            <button onclick="triggerQuickOnlineOrder('qpon')" class="touch-btn py-1 px-1 rounded-lg bg-[#8B5CF6]/15 hover:bg-[#8B5CF6]/30 text-[#8B5CF6] dark:text-purple-400 font-extrabold text-[10px] border border-[#8B5CF6]/30 flex items-center justify-center gap-0.5">
               <span>+ Qpon</span>
             </button>
           </div>
@@ -290,8 +281,53 @@
       </div>
 
     </section>
-
     <!-- ============================================================
+         COLUMN 2: QUICK-TOUCH MENU CATALOG (5 Cols ~ 42%)
+         ============================================================ -->
+    <section class="lg:col-span-5 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
+      
+      <!-- Top Action Bar: Search Bar Menu -->
+      <div class="flex items-center justify-between gap-2.5 pb-2.5 border-b border-[#E7DFD5] dark:border-[#334155] shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[20px]">menu_book</span>
+          <h2 class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Katalog Menu Kasir</h2>
+        </div>
+        <div class="relative flex-1 max-w-xs">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-[18px]">search</span>
+          <input 
+            id="posMenuSearch" 
+            type="text" 
+            oninput="handlePosSearch(this.value)"
+            placeholder="Cari menu makanan, minuman..." 
+            class="w-full h-8 pl-8 pr-3 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs text-[#1C1917] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+          />
+        </div>
+      </div>
+
+      <!-- Category Tabs -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 shrink-0">
+        <button onclick="filterPosCategory('all')" data-poscat="all" class="pos-cat-btn active touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#D97706] dark:bg-[#F59E0B] text-white dark:text-[#0F172A] shadow-xs">
+          Semua Menu
+        </button>
+        <button onclick="filterPosCategory('arabian')" data-poscat="arabian" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+          Arabian 🕌
+        </button>
+        <button onclick="filterPosCategory('malaysian')" data-poscat="malaysian" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+          Malaysian 🇲🇾
+        </button>
+        <button onclick="filterPosCategory('thai')" data-poscat="thai" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+          Thai 🇹🇭
+        </button>
+        <button onclick="filterPosCategory('drinks')" data-poscat="drinks" class="pos-cat-btn touch-btn px-3 py-1.5 rounded-xl font-heading text-xs font-semibold whitespace-nowrap bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-[#78716C] dark:text-[#94A3B8] hover:border-amber-500">
+          Minuman 🍹
+        </button>
+      </div>
+
+      <!-- Touch Food Tile Grid (Scrollable) -->
+      <div id="posTilesContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto flex-1 pr-1">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
          ZONE 2: ORDER TICKET & CHECKOUT ACTION (4 Cols ~ 33%)
          ============================================================ -->
     <section class="lg:col-span-4 flex flex-col bg-white dark:bg-[#1E293B] rounded-2xl border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-3.5 overflow-hidden">
@@ -461,6 +497,162 @@
   <!-- ============================================================
        MODAL 0: POP-UP DENAH MEJA RESTORAN (LEAN 2-ZONE POS SELECTOR)
        ============================================================ -->
+  
+  <!-- ============================================================
+       MODAL: KUSTOMISASI & CATATAN KHUSUS MENU KASIR
+       ============================================================ -->
+  <div id="posModifierModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+    <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden shadow-2xl animate-scaleUp">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-3.5 border-b border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-500 text-[22px]">tune</span>
+          <div>
+            <h3 id="posModifierModalTitle" class="font-heading font-extrabold text-sm text-[#1C1917] dark:text-white">Kustomisasi & Catatan Menu</h3>
+            <p id="posModifierModalSubtitle" class="text-[10px] text-stone-500 dark:text-stone-400">Atur level pedas, varian, dan catatan khusus dapur</p>
+          </div>
+        </div>
+        <button type="button" onclick="closePosModifierModal()" class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <!-- Dish Preview Bar -->
+      <div class="p-4 pb-3 flex gap-3 items-center border-b border-[#E7DFD5]/50 dark:border-[#334155]/50 bg-[#FAF7F2]/60 dark:bg-[#0F172A]/40 shrink-0">
+        <img id="posModalDishImage" src="" alt="Dish" class="w-16 h-16 rounded-xl object-cover shrink-0 shadow-xs border border-stone-200 dark:border-stone-700" />
+        <div class="min-w-0 flex-1">
+          <span id="posModalDishCategory" class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Arabian</span>
+          <h4 id="posModalDishName" class="font-heading font-bold text-sm text-[#1C1917] dark:text-white leading-tight mt-0.5 truncate">Nama Hidangan</h4>
+          <div id="posModalDishPrice" class="font-heading font-extrabold text-amber-600 dark:text-amber-400 text-sm mt-1 tabular-nums">Rp 0</div>
+        </div>
+      </div>
+
+      <!-- Scrollable Options Body -->
+      <div class="overflow-y-auto px-5 py-4 space-y-4 text-xs flex-1">
+        
+        <!-- 1. Level Kepedasan (0 - 5) -->
+        <div id="posSpiceGroup" class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white flex items-center gap-1.5">
+              <span>Level Kepedasan</span>
+              <span class="text-red-500 font-bold">🌶️</span>
+            </label>
+            <span class="text-[10px] text-stone-500">Pilih salah satu</span>
+          </div>
+          <div class="grid grid-cols-6 gap-1.5" id="posSpiceLevelPills">
+            <button type="button" onclick="selectPosSpice(0)" data-posspice="0" class="pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 0</button>
+            <button type="button" onclick="selectPosSpice(1)" data-posspice="1" class="pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-amber-500 bg-amber-500 text-[#0F172A] font-extrabold shadow-sm">Lvl 1</button>
+            <button type="button" onclick="selectPosSpice(2)" data-posspice="2" class="pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 2</button>
+            <button type="button" onclick="selectPosSpice(3)" data-posspice="3" class="pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 3</button>
+            <button type="button" onclick="selectPosSpice(4)" data-posspice="4" class="pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 4</button>
+            <button type="button" onclick="selectPosSpice(5)" data-posspice="5" class="pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B]">Lvl 5 🔥</button>
+          </div>
+        </div>
+
+        <!-- 2. Porsi Nasi (Menu Nasi) -->
+        <div id="posRiceGroup" class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white">Porsi Nasi</label>
+            <span class="text-[10px] text-stone-500">Pilihan varian</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center justify-between p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="posRicePortion" value="Regular" checked onchange="updatePosModifierPrice()" class="accent-amber-600">
+                <span class="text-xs font-semibold">Porsi Biasa</span>
+              </div>
+              <span class="text-[10px] text-stone-500">Standar</span>
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="posRicePortion" value="Extra" onchange="updatePosModifierPrice()" class="accent-amber-600">
+                <span class="text-xs font-semibold">Extra Nasi Jumbo</span>
+              </div>
+              <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400">+Rp 10.000</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. Suhu Minuman (Minuman) -->
+        <div id="posDrinkGroup" class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white">Suhu Minuman</label>
+            <span class="text-[10px] text-stone-500">Pilih suhu / es</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer text-center">
+              <input type="radio" name="posDrinkTemp" value="Hot" class="accent-amber-600 mb-1">
+              <span class="text-xs font-semibold">Panas 🔥</span>
+            </label>
+            <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer text-center">
+              <input type="radio" name="posDrinkTemp" value="Less Ice" class="accent-amber-600 mb-1">
+              <span class="text-xs font-semibold">Sedikit Es 🧊</span>
+            </label>
+            <label class="flex flex-col items-center justify-center p-2 rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] cursor-pointer text-center">
+              <input type="radio" name="posDrinkTemp" value="Normal Ice" checked class="accent-amber-600 mb-1">
+              <span class="text-xs font-semibold">Es Normal ❄️</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 4. Tombol Shortcut Cepat Kasir (Pill Pintar) -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white">
+              Shortcut Catatan Cepat Kasir
+            </label>
+            <span class="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Klik untuk tambah</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="appendPosQuickNote('Bungkus / Takeaway')" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-[11px] font-semibold border border-stone-200 dark:border-stone-700 transition-colors">🛍️ Bungkus</button>
+            <button type="button" onclick="appendPosQuickNote('Kuah Dipisah')" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-[11px] font-semibold border border-stone-200 dark:border-stone-700 transition-colors">🥣 Kuah Dipisah</button>
+            <button type="button" onclick="appendPosQuickNote('Tanpa Bawang')" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-[11px] font-semibold border border-stone-200 dark:border-stone-700 transition-colors">🧅 Tanpa Bawang</button>
+            <button type="button" onclick="appendPosQuickNote('Tanpa Seledri')" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-[11px] font-semibold border border-stone-200 dark:border-stone-700 transition-colors">🌿 Tanpa Seledri</button>
+            <button type="button" onclick="appendPosQuickNote('Jangan Terlalu Manis')" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-[11px] font-semibold border border-stone-200 dark:border-stone-700 transition-colors">🍬 Kurang Manis</button>
+            <button type="button" onclick="appendPosQuickNote('Tawar / Tanpa Gula')" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-[11px] font-semibold border border-stone-200 dark:border-stone-700 transition-colors">🥤 Tawar</button>
+            <button type="button" onclick="clearPosCookingNotes()" class="px-2 py-1 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 text-[11px] font-semibold ml-auto">Hapus Teks</button>
+          </div>
+        </div>
+
+        <!-- 5. Catatan Khusus Dapur (Textarea) -->
+        <div>
+          <label class="font-heading font-bold text-xs uppercase tracking-wider text-[#1C1917] dark:text-white block mb-1.5">
+            Catatan Khusus untuk Dapur / Keterangan
+          </label>
+          <textarea 
+            id="posCookingNotesInput" 
+            rows="2" 
+            placeholder="Contoh: Kuah dipisah, jangan pakai bawang, sambal banyak..." 
+            class="w-full p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs text-[#1C1917] dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="p-4 border-t border-[#E7DFD5] dark:border-[#334155] bg-white dark:bg-[#1E293B] flex items-center gap-3 shrink-0">
+        <!-- Qty Stepper (hanya saat mode tambah baru) -->
+        <div id="posModalQtyContainer" class="flex items-center justify-between bg-stone-100 dark:bg-stone-800 rounded-xl px-2 py-1.5 w-28 shrink-0">
+          <button type="button" onclick="decrementPosModalQty()" class="w-7 h-7 rounded-lg bg-white dark:bg-stone-700 flex items-center justify-center text-stone-800 dark:text-white font-bold shadow-xs active:scale-95">
+            <span class="material-symbols-outlined text-[16px]">remove</span>
+          </button>
+          <span id="posModalQtyDisplay" class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">1</span>
+          <button type="button" onclick="incrementPosModalQty()" class="w-7 h-7 rounded-lg bg-white dark:bg-stone-700 flex items-center justify-center text-stone-800 dark:text-white font-bold shadow-xs active:scale-95">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+          </button>
+        </div>
+
+        <!-- Confirm Button -->
+        <button id="btnConfirmPosModal" type="button" onclick="confirmPosAddToCart()" class="touch-btn flex-1 h-12 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#0F172A] font-heading font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 active:scale-98">
+          <span id="posModalAddButtonText">Tambah 1 ke Tiket • Rp 0</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <span id="activeSelectorTableNum" class="hidden">01</span>
   <div id="tablePickerModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="bg-white dark:bg-[#1E293B] w-full max-w-2xl rounded-3xl border border-[#E7DFD5] dark:border-[#334155] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-150">
       
@@ -3010,9 +3202,9 @@
                   <span class="text-[10px] font-bold text-white uppercase bg-red-600 px-2 py-0.5 rounded-md">Habis</span>
                 </div>
               ` : `
-                <span class="absolute bottom-1.5 right-1.5 w-7 h-7 rounded-lg bg-amber-500 text-[#0F172A] flex items-center justify-center font-bold shadow-sm group-hover:scale-110 transition-transform">
+                <button type="button" onclick="addDishToTicketDirect('${item.id}', event)" class="touch-btn absolute bottom-1.5 right-1.5 w-7 h-7 rounded-lg bg-amber-500 hover:bg-amber-600 text-[#0F172A] flex items-center justify-center font-bold shadow-sm hover:scale-110 active:scale-95 transition-transform" title="Tambah Cepat 1x (Tanpa Kustomisasi)">
                   <span class="material-symbols-outlined text-[16px]">add</span>
-                </span>
+                </button>
               `}
             </div>
 
@@ -3064,13 +3256,259 @@
       renderPosTiles(matched);
     }
 
+    // ============================================================
+    // KUSTOMISASI & CATATAN KHUSUS MENU KASIR (MODIFIER MODAL)
+    // ============================================================
+    let currentModifierDish = null;
+    let currentModifierMode = 'add'; // 'add' | 'edit'
+    let currentModifierItemIndex = -1;
+    let currentModifierSpice = 1;
+    let currentModifierQty = 1;
+
+    function openPosModifierModal(dishIdOrDish, options = {}) {
+      let dish = null;
+      if (dishIdOrDish && typeof dishIdOrDish === "object") {
+        dish = dishIdOrDish;
+      } else {
+        const catalog = RestoSync.getMenuCatalog();
+        dish = catalog.find(m => m.id === dishIdOrDish || m.name === dishIdOrDish);
+      }
+      if (!dish || dish.isSoldOut) return;
+
+      currentModifierDish = dish;
+      currentModifierMode = options.mode || 'add';
+      currentModifierItemIndex = options.index !== undefined ? options.index : -1;
+      currentModifierQty = options.qty || 1;
+      currentModifierSpice = options.spice !== undefined ? options.spice : (dish.spicyLevel || 1);
+
+      const modalTitle = document.getElementById("posModifierModalTitle");
+      const modalSub = document.getElementById("posModifierModalSubtitle");
+      const btnAdd = document.getElementById("posModalAddButtonText");
+      const qtyContainer = document.getElementById("posModalQtyContainer");
+      const notesInput = document.getElementById("posCookingNotesInput");
+
+      document.getElementById("posModalDishImage").src = dish.image;
+      document.getElementById("posModalDishName").textContent = dish.name;
+      document.getElementById("posModalDishCategory").textContent = dish.categoryLabel || dish.category;
+      document.getElementById("posModalDishPrice").textContent = formatRupiah(dish.price);
+      document.getElementById("posModalQtyDisplay").textContent = currentModifierQty;
+
+      const spiceGroup = document.getElementById("posSpiceGroup");
+      const riceGroup = document.getElementById("posRiceGroup");
+      const drinkGroup = document.getElementById("posDrinkGroup");
+
+      if (dish.category === "drinks" || dish.isDrink) {
+        spiceGroup.classList.add("hidden");
+        riceGroup.classList.add("hidden");
+        drinkGroup.classList.remove("hidden");
+      } else {
+        drinkGroup.classList.add("hidden");
+        spiceGroup.classList.remove("hidden");
+        selectPosSpice(currentModifierSpice);
+
+        if (dish.name.toLowerCase().includes("nasi") || dish.name.toLowerCase().includes("rice")) {
+          riceGroup.classList.remove("hidden");
+        } else {
+          riceGroup.classList.add("hidden");
+        }
+      }
+
+      // Reset radio defaults
+      const defaultRice = document.querySelector('input[name="posRicePortion"][value="Regular"]');
+      if (defaultRice) defaultRice.checked = true;
+      const defaultDrink = document.querySelector('input[name="posDrinkTemp"][value="Normal Ice"]');
+      if (defaultDrink) defaultDrink.checked = true;
+
+      if (currentModifierMode === "edit") {
+        if (modalTitle) modalTitle.textContent = "Ubah Catatan & Keterangan";
+        if (modalSub) modalSub.textContent = `Sesuaikan catatan untuk ${dish.name}`;
+        if (btnAdd) btnAdd.textContent = "Simpan Perubahan Catatan";
+        if (qtyContainer) qtyContainer.classList.add("hidden");
+        
+        const existingItem = currentTicketItems[currentModifierItemIndex];
+        if (notesInput && existingItem) {
+          notesInput.value = existingItem.notes || "";
+        }
+      } else {
+        if (modalTitle) modalTitle.textContent = "Kustomisasi & Catatan Menu";
+        if (modalSub) modalSub.textContent = "Atur level pedas, varian, dan catatan khusus dapur";
+        if (qtyContainer) qtyContainer.classList.remove("hidden");
+        if (notesInput) notesInput.value = "";
+        updatePosModifierPrice();
+      }
+
+      const modal = document.getElementById("posModifierModal");
+      if (modal) {
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+    }
+
+    function closePosModifierModal() {
+      const modal = document.getElementById("posModifierModal");
+      if (modal) {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+      currentModifierDish = null;
+      currentModifierItemIndex = -1;
+    }
+
+    function openTicketItemNotesModal(index) {
+      if (!currentTicketItems[index]) return;
+      const item = currentTicketItems[index];
+      const catalog = RestoSync.getMenuCatalog();
+      let dish = catalog.find(m => m.name === item.name || m.id === item.id);
+      if (!dish) {
+        dish = {
+          id: "custom_" + index,
+          name: item.name,
+          price: item.price,
+          category: item.name.toLowerCase().includes("teh") || item.name.toLowerCase().includes("jus") || item.name.toLowerCase().includes("kopi") ? "drinks" : "food",
+          image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80"
+        };
+      }
+      openPosModifierModal(dish, { mode: "edit", index: index });
+    }
+
+    function selectPosSpice(level) {
+      currentModifierSpice = level;
+      document.querySelectorAll(".pos-spice-btn").forEach(btn => {
+        const val = btn.getAttribute ? btn.getAttribute("data-posspice") : (btn.dataset ? btn.dataset.posspice : null);
+        if (parseInt(val) === level) {
+          btn.className = "pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-amber-500 bg-amber-500 text-[#0F172A] font-extrabold shadow-sm";
+        } else {
+          btn.className = "pos-spice-btn p-2 rounded-xl text-center font-bold text-xs border border-stone-300 dark:border-stone-700 bg-white dark:bg-[#1E293B] text-stone-600 dark:text-stone-300";
+        }
+      });
+    }
+
+    function appendPosQuickNote(text) {
+      const input = document.getElementById("posCookingNotesInput");
+      if (!input) return;
+      const current = input.value.trim();
+      if (!current) {
+        input.value = text;
+      } else if (!current.includes(text)) {
+        input.value = current + ", " + text;
+      }
+      input.focus();
+    }
+
+    function clearPosCookingNotes() {
+      const input = document.getElementById("posCookingNotesInput");
+      if (input) input.value = "";
+    }
+
+    function calculatePosUnitPrice() {
+      if (!currentModifierDish) return 0;
+      let price = currentModifierDish.price;
+      const riceExtra = document.querySelector('input[name="posRicePortion"]:checked');
+      if (riceExtra && riceExtra.value === "Extra") {
+        price += 10000;
+      }
+      return price;
+    }
+
+    function updatePosModifierPrice() {
+      const unit = calculatePosUnitPrice();
+      const total = unit * currentModifierQty;
+      const btn = document.getElementById("posModalAddButtonText");
+      if (btn && currentModifierMode === "add") {
+        btn.textContent = `Tambah ${currentModifierQty} ke Tiket • ${formatRupiah(total)}`;
+      }
+    }
+
+    function incrementPosModalQty() {
+      currentModifierQty++;
+      document.getElementById("posModalQtyDisplay").textContent = currentModifierQty;
+      updatePosModifierPrice();
+    }
+
+    function decrementPosModalQty() {
+      if (currentModifierQty > 1) {
+        currentModifierQty--;
+        document.getElementById("posModalQtyDisplay").textContent = currentModifierQty;
+        updatePosModifierPrice();
+      }
+    }
+
+    function confirmPosAddToCart() {
+      if (!currentModifierDish) return;
+
+      const rawNotes = document.getElementById("posCookingNotesInput") ? document.getElementById("posCookingNotesInput").value.trim() : "";
+      const noteParts = [];
+
+      if (currentModifierDish.category === "drinks" || currentModifierDish.isDrink) {
+        const temp = document.querySelector('input[name="posDrinkTemp"]:checked');
+        if (temp) {
+          const tempVal = temp.value === "Hot" ? "Panas 🔥" : temp.value === "Less Ice" ? "Sedikit Es 🧊" : "Es Normal";
+          noteParts.push(tempVal);
+        }
+      } else {
+        if (currentModifierSpice > 0) {
+          noteParts.push(`Pedas Lvl ${currentModifierSpice}`);
+        } else {
+          noteParts.push("Tidak Pedas (Lvl 0)");
+        }
+        const rice = document.querySelector('input[name="posRicePortion"]:checked');
+        if (rice && rice.value === "Extra") {
+          noteParts.push("Extra Nasi Jumbo (+10rb)");
+        }
+      }
+
+      if (rawNotes) {
+        noteParts.push(rawNotes);
+      }
+
+      const finalNotes = noteParts.join(" • ");
+
+      const dishName = currentModifierDish.name;
+
+      if (currentModifierMode === "edit") {
+        if (currentModifierItemIndex >= 0 && currentTicketItems[currentModifierItemIndex]) {
+          currentTicketItems[currentModifierItemIndex].notes = finalNotes;
+          renderTicketItems();
+          showPosNotification(`✅ Catatan ${dishName} diperbarui!`);
+        }
+        closePosModifierModal();
+        return;
+      }
+
+      // Mode: Add
+      const unitPrice = calculatePosUnitPrice();
+      const existing = currentTicketItems.find(i => i.name === dishName && (i.notes || "") === finalNotes);
+      if (existing) {
+        existing.qty += currentModifierQty;
+      } else {
+        currentTicketItems.push({
+          name: dishName,
+          qty: currentModifierQty,
+          price: unitPrice,
+          notes: finalNotes
+        });
+      }
+
+      renderTicketItems();
+      showPosNotification(`➕ ${currentModifierQty}x ${dishName} ditambahkan ke tiket!`);
+      closePosModifierModal();
+    }
+
     // Tambah Hidangan ke Tiket
     function addDishToTicket(dishId) {
+      openPosModifierModal(dishId);
+    }
+
+    function addDishToTicketDirect(dishId, event) {
+      if (event && typeof event.stopPropagation === "function") {
+        event.stopPropagation();
+      }
       const catalog = RestoSync.getMenuCatalog();
       const dish = catalog.find(m => m.id === dishId);
       if (!dish || dish.isSoldOut) return;
 
-      const existing = currentTicketItems.find(i => i.name === dish.name);
+      const defaultNotes = (dish.category === "drinks" || dish.isDrink) ? "Es Normal" : (dish.spicyLevel > 0 ? `Pedas Lvl ${dish.spicyLevel}` : "Pedas Lvl 1");
+      const existing = currentTicketItems.find(i => i.name === dish.name && i.notes === defaultNotes);
       if (existing) {
         existing.qty += 1;
       } else {
@@ -3078,10 +3516,11 @@
           name: dish.name,
           qty: 1,
           price: dish.price,
-          notes: dish.category === 'drinks' ? "Es Normal" : "Pedas Lvl 1"
+          notes: defaultNotes
         });
       }
       renderTicketItems();
+      showPosNotification(`⚡ 1x ${dish.name} ditambahkan langsung!`);
     }
 
     // Render Baris Item Tiket
@@ -3101,37 +3540,49 @@
 
       container.innerHTML = currentTicketItems.map((item, index) => {
         return `
-          <div class="p-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex items-center justify-between gap-2 shadow-xs">
-            <div class="min-w-0 flex-1">
-              <h5 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate">
-                ${item.name}
-              </h5>
-              <div class="text-[10px] text-[#78716C] dark:text-[#94A3B8] flex items-center gap-1.5 mt-0.5">
-                <span>${formatRupiah(item.price)}</span>
-                ${item.notes ? `<span>• ${item.notes}</span>` : ''}
+          <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] flex flex-col gap-1.5 shadow-xs">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <h5 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate">
+                  ${escapeHtmlSafe(item.name)}
+                </h5>
+                <div class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5 tabular-nums">
+                  ${formatRupiah(item.price)}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <!-- Stepper -->
+                <div class="flex items-center bg-white dark:bg-[#1E293B] rounded-lg border border-stone-300 dark:border-stone-700 px-1 py-0.5">
+                  <button type="button" onclick="updateTicketQty(${index}, -1)" class="w-5 h-5 rounded flex items-center justify-center text-stone-600 dark:text-stone-300 font-bold hover:bg-stone-200">
+                    -
+                  </button>
+                  <span class="w-6 text-center text-xs font-bold font-heading">${item.qty}</span>
+                  <button type="button" onclick="updateTicketQty(${index}, 1)" class="w-5 h-5 rounded flex items-center justify-center text-stone-600 dark:text-stone-300 font-bold hover:bg-stone-200">
+                    +
+                  </button>
+                </div>
+
+                <!-- Line Total -->
+                <span class="font-heading font-bold text-xs text-[#1C1917] dark:text-white w-16 text-right tabular-nums">
+                  ${formatRupiah(item.price * item.qty)}
+                </span>
+
+                <!-- Remove -->
+                <button type="button" onclick="removeTicketItem(${index})" class="text-stone-400 hover:text-red-500">
+                  <span class="material-symbols-outlined text-[16px]">close</span>
+                </button>
               </div>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0">
-              <!-- Stepper -->
-              <div class="flex items-center bg-white dark:bg-[#1E293B] rounded-lg border border-stone-300 dark:border-stone-700 px-1 py-0.5">
-                <button onclick="updateTicketQty(${index}, -1)" class="w-5 h-5 rounded flex items-center justify-center text-stone-600 dark:text-stone-300 font-bold hover:bg-stone-200">
-                  -
-                </button>
-                <span class="w-6 text-center text-xs font-bold font-heading">${item.qty}</span>
-                <button onclick="updateTicketQty(${index}, 1)" class="w-5 h-5 rounded flex items-center justify-center text-stone-600 dark:text-stone-300 font-bold hover:bg-stone-200">
-                  +
-                </button>
-              </div>
-
-              <!-- Line Total -->
-              <span class="font-heading font-bold text-xs text-[#1C1917] dark:text-white w-16 text-right tabular-nums">
-                ${formatRupiah(item.price * item.qty)}
-              </span>
-
-              <!-- Remove -->
-              <button onclick="removeTicketItem(${index})" class="text-stone-400 hover:text-red-500">
-                <span class="material-symbols-outlined text-[16px]">close</span>
+            <!-- Notes Button / Pill (Click to edit notes) -->
+            <div class="pt-1 border-t border-stone-200/60 dark:border-stone-800 flex items-center justify-between gap-1">
+              <button type="button" onclick="openTicketItemNotesModal(${index})" class="group/btn flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/25 transition-all text-left max-w-full truncate" title="Klik untuk mengubah catatan atau permintaan khusus dapur">
+                <span class="material-symbols-outlined text-[13px] text-amber-600 dark:text-amber-400 shrink-0">edit_note</span>
+                <span class="text-[10px] font-semibold truncate">
+                  ${item.notes ? escapeHtmlSafe(item.notes) : '+ Tambah Catatan / Keterangan'}
+                </span>
+                <span class="material-symbols-outlined text-[11px] opacity-60 group-hover/btn:translate-x-0.5 transition-transform shrink-0">chevron_right</span>
               </button>
             </div>
           </div>
