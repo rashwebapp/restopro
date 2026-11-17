@@ -134,13 +134,16 @@
     <!-- ============================================================
          1. SAAS LICENSE STATUS & ACTIVE TIER BANNER
          ============================================================ -->
-    <section class="relative overflow-hidden rounded-3xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-6 lg:p-8">
-      <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-3xl pointer-events-none"></div>
-      <div class="absolute -left-12 -bottom-12 w-48 h-48 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 blur-2xl pointer-events-none"></div>
+    <!-- ============================================================
+         1. SAAS LICENSE STATUS & ACTIVE TIER BANNER (COMPACT)
+         ============================================================ -->
+    <section class="relative overflow-hidden rounded-2xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] shadow-xs p-4 sm:p-5 lg:p-6">
+      <div class="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-amber-500/10 dark:bg-amber-500/15 blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-12 -bottom-12 w-40 h-40 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 blur-2xl pointer-events-none"></div>
 
-      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
         
-        <div class="space-y-4 max-w-2xl">
+        <div class="space-y-3 max-w-2xl">
           <div class="flex flex-wrap items-center gap-2">
             <span id="licenseTierBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-[#0F172A] shadow-sm font-heading font-extrabold text-xs uppercase tracking-wider">
               <span class="material-symbols-outlined text-[16px]">verified</span>
@@ -156,25 +159,25 @@
           </div>
 
           <div>
-            <h2 class="font-heading font-extrabold text-2xl lg:text-3xl text-[#1C1917] dark:text-white tracking-tight">
+            <h2 class="font-heading font-extrabold text-xl lg:text-2xl text-[#1C1917] dark:text-white tracking-tight">
               Resto Pro by RASH WebApp Builder ✨
             </h2>
-            <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-1 leading-relaxed">
+            <p class="text-[11px] sm:text-xs text-[#78716C] dark:text-[#94A3B8] mt-0.5 leading-relaxed">
               Masa Aktif Lisensi: <strong id="licenseExpiryLabel" class="text-[#1C1917] dark:text-white">Memuat status lisensi...</strong> • 
               <span id="licenseVerificationNote" class="text-amber-600 dark:text-amber-400 font-bold">Memeriksa Lisensi Cloud</span>
             </p>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-            <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-0.5">
+            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
               <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Client ID Lisensi</span>
               <div id="licenseClientIdLabel" class="font-mono font-bold text-xs text-[#1C1917] dark:text-white mt-0.5">-</div>
             </div>
-            <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
               <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Restoran Terdaftar</span>
               <div id="licenseRestoNameLabel" class="font-heading font-bold text-xs text-[#1C1917] dark:text-white truncate mt-0.5">-</div>
             </div>
-            <div class="p-3 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
+            <div class="p-2.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155]">
               <span class="text-[10px] font-semibold text-[#78716C] dark:text-[#94A3B8] uppercase tracking-wider">Batas Meja & Terminal</span>
               <div id="licenseTableLimitLabel" class="font-heading font-bold text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 mt-0.5">
                 <span class="material-symbols-outlined text-[16px]">sync</span> Memuat kuota meja...
@@ -184,7 +187,7 @@
         </div>
 
         <!-- Token Renewal Box (Khusus Mode Master) -->
-        <div id="masterManualTokenBox" class="lg:w-80 shrink-0 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
+        <div id="masterManualTokenBox" class="lg:w-72 shrink-0 p-4 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="text-xs font-heading font-bold text-[#1C1917] dark:text-white uppercase tracking-wider">Aktivasi Token Lisensi</span>
             <span class="material-symbols-outlined text-amber-500 text-[18px]">key</span>
@@ -194,9 +197,9 @@
               id="licenseKeyInput" 
               type="text" 
               placeholder="RASH-XXXX-XXXX-XXXX" 
-              class="w-full px-3 py-2 text-xs font-mono uppercase bg-white dark:bg-[#1E293B] border border-stone-300 dark:border-stone-700 text-[#1C1917] dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              class="w-full px-3 py-1.5 text-xs font-mono uppercase bg-white dark:bg-[#1E293B] border border-stone-300 dark:border-stone-700 text-[#1C1917] dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
             />
-            <button onclick="handleActivateToken()" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
+            <button onclick="handleActivateToken()" class="touch-btn w-full py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
               <span class="material-symbols-outlined text-[16px]">sync</span>
               <span>Verifikasi Token Lisensi</span>
             </button>
@@ -207,27 +210,27 @@
         </div>
 
         <!-- Cloud Package Status Box (Untuk Tenant Klien Non-Master) -->
-        <div id="tenantCloudPlanBox" class="hidden lg:w-80 shrink-0 p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
+        <div id="tenantCloudPlanBox" class="hidden lg:w-72 shrink-0 p-4 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-2.5">
           <div class="flex items-center justify-between">
             <span class="text-xs font-heading font-bold text-[#1C1917] dark:text-white uppercase tracking-wider">Status Paket Cloud</span>
             <span class="material-symbols-outlined text-amber-500 text-[18px]">cloud_done</span>
           </div>
-          <div class="p-3 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] space-y-1">
+          <div class="p-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] space-y-1">
             <div id="tenantCloudPlanName" class="font-heading font-extrabold text-sm text-[#1C1917] dark:text-white">Memuat Paket...</div>
             <div id="tenantCloudPlanStatus" class="text-[11px] font-semibold text-amber-600 dark:text-amber-400">Memeriksa Cloud...</div>
             <div id="tenantCloudTableQuota" class="text-[10px] text-[#78716C] dark:text-[#94A3B8]">Kuota Meja: Memuat...</div>
           </div>
-          <div class="space-y-2">
-            <button id="btnOwnerOpenPaymentModal" type="button" onclick="openPaymentCheckoutModal()" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-heading font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all">
+          <div class="space-y-1.5">
+            <button id="btnOwnerOpenPaymentModal" type="button" onclick="openPaymentCheckoutModal()" class="touch-btn w-full py-2 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-heading font-black text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all">
               <span class="material-symbols-outlined text-[16px]">verified</span>
               <span>Upgrade / Bayar Paket Pro</span>
             </button>
-            <a id="btnTenantUpgradeWa" href="https://wa.me/6285174273313" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-2.5 px-4 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
+            <a id="btnTenantUpgradeWa" href="https://wa.me/6285174273313" target="_blank" rel="noopener noreferrer" class="touch-btn w-full py-2 px-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-heading font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-1.5 transition-all">
               <span class="material-symbols-outlined text-[16px]">chat</span>
               <span id="btnTenantUpgradeWaLabel">Perpanjang / Hubungi Admin RASH</span>
             </a>
-            <button type="button" onclick="handleTenantCloudSyncRefresh()" class="touch-btn w-full py-2 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-[11px] flex items-center justify-center gap-1.5 transition-colors">
-              <span class="material-symbols-outlined text-[15px]">sync</span>
+            <button type="button" onclick="handleTenantCloudSyncRefresh()" class="touch-btn w-full py-1.5 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 font-heading font-bold text-[10px] flex items-center justify-center gap-1.5 transition-colors">
+              <span class="material-symbols-outlined text-[14px]">sync</span>
               <span>Sinkronkan Status Cloud</span>
             </button>
           </div>
@@ -280,12 +283,60 @@
       </div>
     </section>
 
+    <!-- ============================================================
+         OWNER NAVIGATION BAR (COMPACT SEGMENTED PILLS TABS)
+         ============================================================ -->
+    <nav id="ownerTabNavbar" class="sticky top-16 z-30 bg-[#FAF7F2]/95 dark:bg-[#0F172A]/95 backdrop-blur-md py-2 -mx-4 px-4 sm:mx-0 sm:px-0 transition-all border-b border-[#E7DFD5]/60 dark:border-[#334155]/60">
+      <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar p-1.5 rounded-2xl bg-stone-100/90 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700/80 shadow-xs">
+        <div class="flex items-center gap-1.5 shrink-0">
+          
+          <!-- Tab 1: Analisis & Laporan -->
+          <button id="tabBtnAnalytics" type="button" onclick="switchOwnerTab('analytics')" class="owner-nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-heading font-extrabold bg-white dark:bg-[#0F172A] text-amber-600 dark:text-amber-400 shadow-xs border border-stone-200/80 dark:border-stone-700/80 transition-all duration-150">
+            <span class="material-symbols-outlined text-[18px]">monitoring</span>
+            <span>Analisis & Laporan</span>
+          </button>
 
+          <!-- Tab 2: Pengaturan Menu -->
+          <button id="tabBtnMenu" type="button" onclick="switchOwnerTab('menu')" class="owner-nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-heading font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-700/50 border border-transparent transition-all duration-150">
+            <span class="material-symbols-outlined text-[18px]">restaurant_menu</span>
+            <span>Pengaturan Menu</span>
+          </button>
 
+          <!-- Tab 3: Meja & Operasional -->
+          <button id="tabBtnOperations" type="button" onclick="switchOwnerTab('operations')" class="owner-nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-heading font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-700/50 border border-transparent transition-all duration-150">
+            <span class="material-symbols-outlined text-[18px]">table_restaurant</span>
+            <span>Meja & Operasional</span>
+          </button>
+
+          <!-- Tab 4: Keamanan & PIN -->
+          <button id="tabBtnSecurity" type="button" onclick="switchOwnerTab('security')" class="owner-nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-heading font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-700/50 border border-transparent transition-all duration-150">
+            <span class="material-symbols-outlined text-[18px]">lock</span>
+            <span>Keamanan & PIN</span>
+          </button>
+
+          <!-- Tab 5: Integrasi Cloud -->
+          <button id="tabBtnIntegrations" type="button" onclick="switchOwnerTab('integrations')" class="owner-nav-tab flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-heading font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-700/50 border border-transparent transition-all duration-150">
+            <span class="material-symbols-outlined text-[18px]">hub</span>
+            <span>Integrasi Cloud</span>
+          </button>
+        </div>
+
+        <!-- Quick View Toggle: Tampilkan Semua -->
+        <button id="tabBtnAll" type="button" onclick="switchOwnerTab('all')" class="owner-nav-tab shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-heading font-medium text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-700/50 border border-transparent hover:border-stone-300 dark:hover:border-stone-600 transition-all duration-150" title="Tampilkan seluruh modul dalam satu halaman gulir">
+          <span class="material-symbols-outlined text-[16px]">view_agenda</span>
+          <span class="hidden sm:inline">Buka Semua</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ============================================================
+         PANEL 1: ANALISIS & LAPORAN DATA BISNIS
+         ============================================================ -->
+    <div id="ownerPanelAnalytics" class="space-y-6">
     <!-- ============================================================
          2. TODAY'S BUSINESS ANALYTICS & REVENUE OVERVIEW (4 Cards)
          ============================================================ -->
-    <section class="space-y-3">
+    <section class="space-y-3" id="sectionRevenueCards">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[22px]">monitoring</span>
@@ -384,7 +435,6 @@
 
       </div>
     </section>
-
 
 
     <!-- ============================================================
@@ -541,6 +591,7 @@
 
     </section>
 
+
     <!-- ============================================================
          3. BUKU KAS & RIWAYAT TRANSAKSI PENJUALAN (MULTI-HARI)
          ============================================================ -->
@@ -647,6 +698,13 @@
 
     </section>
 
+    </div>
+
+    <!-- ============================================================
+         PANEL 2: PENGATURAN MENU & KATALOG HIDANGAN
+         ============================================================ -->
+    <div id="ownerPanelMenu" class="space-y-6 hidden">
+
     <!-- ============================================================
          4. KATALOG & PENGATURAN PRODUK MENU (CRUD & LIVE STOCK)
          ============================================================ -->
@@ -697,72 +755,120 @@
 
     </section>
 
+    </div>
+
     <!-- ============================================================
-         5. DIREKTORI PELANGGAN & MEMBER LOYALITAS (CRM DATABASE)
+         PANEL 3: MEJA & OPERASIONAL RESTORAN
          ============================================================ -->
-    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionCrmMembers">
-      
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[24px]">stars</span>
-            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">
-              Direktori Pelanggan & Member Loyalitas (CRM Database)
-            </h2>
+    <div id="ownerPanelOperations" class="space-y-6 hidden">
+
+    <!-- ============================================================
+         5B. MANAJEMEN DENAH MEJA RESTORAN (CRUD MEJA & CETAK STIKER QR)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionTableManagement">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">table_restaurant</span>
           </div>
-          <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-0.5">
-            Kelola data pelanggan setia, level diskon (VIP Gold 10%, VIP Silver 5%), serta akumulasi poin transaksi.
-          </p>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Manajemen Denah & Meja Restoran</h2>
+              <span id="ownerTableCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                12 Meja Aktif
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Tambah meja baru, ubah kapasitas kursi, hapus meja, dan cetak stiker QR akrilik</p>
+          </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <!-- Button Tambah Member -->
-          <button onclick="openMemberModal()" class="touch-btn px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-sm">
-            <span class="material-symbols-outlined text-[18px]">person_add</span>
-            <span>+ Daftarkan Member Baru</span>
+          <a id="btnOwnerQrPrintLink" href="table_qr_print_sheet.html" target="_blank" class="touch-btn px-4 py-2.5 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-heading font-bold text-xs flex items-center gap-1.5 border border-stone-300 dark:border-stone-700 transition-all">
+            <span class="material-symbols-outlined text-[18px]">print</span>
+            <span>🖨️ Cetak Stiker QR Akrilik</span>
+          </a>
+
+          <button onclick="openAddTableModal()" class="touch-btn px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>+ Tambah Meja Baru</span>
           </button>
         </div>
       </div>
 
-      <!-- Member Search Bar -->
-      <div class="flex items-center justify-between gap-3">
-        <div class="relative flex-1 max-w-sm">
-          <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-stone-400">search</span>
-          <input type="text" id="memberSearchInput" oninput="handleMemberSearch(this.value)" placeholder="Cari nama, no. WhatsApp, atau ID member..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs outline-none focus:border-amber-500 text-[#1C1917] dark:text-white" />
+      <!-- Tables Grid View -->
+      <div id="ownerTablesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         5. MANAJEMEN RESERVASI MEJA RESTORAN (TABLE BOOKINGS LEDGER)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionReservations">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">event_seat</span>
+          </div>
+          <div>
+            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Manajemen Reservasi Meja Restoran</h2>
+            <p class="text-xs text-stone-500">Pantau jadwal booking tamu, pre-order sajian, dan sinkronisasi denah meja kasir</p>
+          </div>
         </div>
-        <div id="memberCountBadge" class="text-xs font-semibold text-stone-500">
-          4 Member Terdaftar
+
+        <button onclick="openOwnerAddReservationModal()" class="touch-btn px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0">
+          <span class="material-symbols-outlined text-[18px]">add_circle</span>
+          <span>+ Buat Reservasi Meja</span>
+        </button>
+      </div>
+
+      <!-- Filter Tabs & Search -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="resStatusFilterButtons">
+          <button onclick="filterOwnerReservationStatus('all')" class="res-status-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold shadow-xs">Semua</button>
+          <button onclick="filterOwnerReservationStatus('confirmed')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Menunggu Tamu</button>
+          <button onclick="filterOwnerReservationStatus('seated')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Sudah Duduk</button>
+          <button onclick="filterOwnerReservationStatus('cancelled')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Dibatalkan</button>
+        </div>
+
+        <div class="relative w-full sm:w-64">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-stone-400 text-[16px]">search</span>
+          <input 
+            type="text" 
+            placeholder="Cari nama tamu / meja..." 
+            oninput="handleOwnerReservationSearch(this.value)"
+            class="w-full pl-9 pr-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500"
+          />
         </div>
       </div>
 
-      <!-- Members Table -->
-      <div class="overflow-x-auto rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
+      <!-- Table View -->
+      <div class="overflow-x-auto border border-[#E7DFD5] dark:border-[#334155] rounded-2xl">
         <table class="w-full text-left text-xs">
-          <thead class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-500 font-heading border-b border-[#E7DFD5] dark:border-[#334155]">
+          <thead class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-600 dark:text-stone-400 font-heading font-bold border-b border-[#E7DFD5] dark:border-[#334155]">
             <tr>
-              <th class="p-3">ID Member</th>
-              <th class="p-3">Nama Pelanggan</th>
-              <th class="p-3">WhatsApp</th>
-              <th class="p-3">Tier Loyalitas</th>
-              <th class="p-3 text-right">Poin Tersedia</th>
-              <th class="p-3 text-center">Total Kunjungan</th>
-              <th class="p-3">Kunjungan Terakhir</th>
-              <th class="p-3">Catatan / Preferensi</th>
-              <th class="p-3 text-center">Aksi</th>
+              <th class="py-3 px-4">ID & Meja</th>
+              <th class="py-3 px-4">Tamu & Kontak</th>
+              <th class="py-3 px-4">Jadwal / Waktu</th>
+              <th class="py-3 px-4">Pax</th>
+              <th class="py-3 px-4">Catatan & Pre-Order</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody id="memberTableBody" class="divide-y divide-[#E7DFD5] dark:divide-[#334155] bg-white dark:bg-[#1E293B]">
+          <tbody id="ownerReservationTableBody" class="divide-y divide-[#E7DFD5] dark:divide-[#334155] bg-white dark:bg-[#1E293B]">
             <!-- Rendered by JS -->
           </tbody>
         </table>
       </div>
-
     </section>
+
 
     <!-- ============================================================
          4. RESTAURANT SYSTEM CONFIGURATION (Tax, Printer, CRM)
          ============================================================ -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="sectionStoreHoursAndTax">
       
       <!-- 1. Pajak & Keuangan -->
       <div class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs flex flex-col justify-between gap-4">
@@ -865,106 +971,375 @@
 
     </section>
 
-    <!-- ============================================================
-         5. MANAJEMEN RESERVASI MEJA RESTORAN (TABLE BOOKINGS LEDGER)
-         ============================================================ -->
-    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionReservations">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">event_seat</span>
-          </div>
-          <div>
-            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Manajemen Reservasi Meja Restoran</h2>
-            <p class="text-xs text-stone-500">Pantau jadwal booking tamu, pre-order sajian, dan sinkronisasi denah meja kasir</p>
-          </div>
-        </div>
-
-        <button onclick="openOwnerAddReservationModal()" class="touch-btn px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-bold text-xs flex items-center gap-2 shadow-sm transition-all shrink-0">
-          <span class="material-symbols-outlined text-[18px]">add_circle</span>
-          <span>+ Buat Reservasi Meja</span>
-        </button>
-      </div>
-
-      <!-- Filter Tabs & Search -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="resStatusFilterButtons">
-          <button onclick="filterOwnerReservationStatus('all')" class="res-status-btn px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold shadow-xs">Semua</button>
-          <button onclick="filterOwnerReservationStatus('confirmed')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Menunggu Tamu</button>
-          <button onclick="filterOwnerReservationStatus('seated')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Sudah Duduk</button>
-          <button onclick="filterOwnerReservationStatus('cancelled')" class="res-status-btn px-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-stone-600 dark:text-stone-300 font-bold hover:text-indigo-600">Dibatalkan</button>
-        </div>
-
-        <div class="relative w-full sm:w-64">
-          <span class="material-symbols-outlined absolute left-3 top-2.5 text-stone-400 text-[16px]">search</span>
-          <input 
-            type="text" 
-            placeholder="Cari nama tamu / meja..." 
-            oninput="handleOwnerReservationSearch(this.value)"
-            class="w-full pl-9 pr-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs font-semibold text-[#1C1917] dark:text-white outline-none focus:border-indigo-500"
-          />
-        </div>
-      </div>
-
-      <!-- Table View -->
-      <div class="overflow-x-auto border border-[#E7DFD5] dark:border-[#334155] rounded-2xl">
-        <table class="w-full text-left text-xs">
-          <thead class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-600 dark:text-stone-400 font-heading font-bold border-b border-[#E7DFD5] dark:border-[#334155]">
-            <tr>
-              <th class="py-3 px-4">ID & Meja</th>
-              <th class="py-3 px-4">Tamu & Kontak</th>
-              <th class="py-3 px-4">Jadwal / Waktu</th>
-              <th class="py-3 px-4">Pax</th>
-              <th class="py-3 px-4">Catatan & Pre-Order</th>
-              <th class="py-3 px-4">Status</th>
-              <th class="py-3 px-4 text-center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="ownerReservationTableBody" class="divide-y divide-[#E7DFD5] dark:divide-[#334155] bg-white dark:bg-[#1E293B]">
-            <!-- Rendered by JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
 
     <!-- ============================================================
-         5B. MANAJEMEN DENAH MEJA RESTORAN (CRUD MEJA & CETAK STIKER QR)
+         5. DIREKTORI PELANGGAN & MEMBER LOYALITAS (CRM DATABASE)
          ============================================================ -->
-    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionTableManagement">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">table_restaurant</span>
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-4" id="sectionCrmMembers">
+      
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-[#E7DFD5] dark:border-[#334155]">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[24px]">stars</span>
+            <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">
+              Direktori Pelanggan & Member Loyalitas (CRM Database)
+            </h2>
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Manajemen Denah & Meja Restoran</h2>
-              <span id="ownerTableCountBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                12 Meja Aktif
-              </span>
-            </div>
-            <p class="text-xs text-stone-500">Tambah meja baru, ubah kapasitas kursi, hapus meja, dan cetak stiker QR akrilik</p>
-          </div>
+          <p class="text-xs text-[#78716C] dark:text-[#94A3B8] mt-0.5">
+            Kelola data pelanggan setia, level diskon (VIP Gold 10%, VIP Silver 5%), serta akumulasi poin transaksi.
+          </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-          <a id="btnOwnerQrPrintLink" href="table_qr_print_sheet.html" target="_blank" class="touch-btn px-4 py-2.5 rounded-2xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 font-heading font-bold text-xs flex items-center gap-1.5 border border-stone-300 dark:border-stone-700 transition-all">
-            <span class="material-symbols-outlined text-[18px]">print</span>
-            <span>🖨️ Cetak Stiker QR Akrilik</span>
-          </a>
-
-          <button onclick="openAddTableModal()" class="touch-btn px-4 py-2.5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-sm transition-all">
-            <span class="material-symbols-outlined text-[18px]">add_circle</span>
-            <span>+ Tambah Meja Baru</span>
+          <!-- Button Tambah Member -->
+          <button onclick="openMemberModal()" class="touch-btn px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-[#0F172A] font-heading font-extrabold text-xs flex items-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">person_add</span>
+            <span>+ Daftarkan Member Baru</span>
           </button>
         </div>
       </div>
 
-      <!-- Tables Grid View -->
-      <div id="ownerTablesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-        <!-- Rendered by JS -->
+      <!-- Member Search Bar -->
+      <div class="flex items-center justify-between gap-3">
+        <div class="relative flex-1 max-w-sm">
+          <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-stone-400">search</span>
+          <input type="text" id="memberSearchInput" oninput="handleMemberSearch(this.value)" placeholder="Cari nama, no. WhatsApp, atau ID member..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] text-xs outline-none focus:border-amber-500 text-[#1C1917] dark:text-white" />
+        </div>
+        <div id="memberCountBadge" class="text-xs font-semibold text-stone-500">
+          4 Member Terdaftar
+        </div>
+      </div>
+
+      <!-- Members Table -->
+      <div class="overflow-x-auto rounded-2xl border border-[#E7DFD5] dark:border-[#334155]">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-[#FAF7F2] dark:bg-[#0F172A] text-stone-500 font-heading border-b border-[#E7DFD5] dark:border-[#334155]">
+            <tr>
+              <th class="p-3">ID Member</th>
+              <th class="p-3">Nama Pelanggan</th>
+              <th class="p-3">WhatsApp</th>
+              <th class="p-3">Tier Loyalitas</th>
+              <th class="p-3 text-right">Poin Tersedia</th>
+              <th class="p-3 text-center">Total Kunjungan</th>
+              <th class="p-3">Kunjungan Terakhir</th>
+              <th class="p-3">Catatan / Preferensi</th>
+              <th class="p-3 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="memberTableBody" class="divide-y divide-[#E7DFD5] dark:divide-[#334155] bg-white dark:bg-[#1E293B]">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+
+    </div>
+
+    <!-- ============================================================
+         PANEL 4: KEAMANAN AKSES & PIN
+         ============================================================ -->
+    <div id="ownerPanelSecurity" class="space-y-6 hidden">
+
+
+
+    <!-- ============================================================
+         7. KEAMANAN AKSES & GANTI PIN TOKO (KASIR & OWNER)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionSecurityPins">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">pin</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Keamanan Akses & Ganti PIN Toko</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                PIN 4-6 Digit
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Atur PIN Kasir untuk melayani transaksi dan PIN Owner rahasia untuk laporan keuangan & pengaturan</p>
+          </div>
+        </div>
+
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-slate-800 text-stone-600 dark:text-stone-300 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Terenkripsi SHA-256</span>
+        </div>
+      </div>
+
+      <form id="formChangeTenantPins" onsubmit="handleSaveTenantPins(event)" class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Box PIN Kasir -->
+          <div class="p-4 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label for="inputCashierPin" class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-emerald-600 text-base">point_of_sale</span>
+                <span>PIN Baru Kasir POS</span>
+              </label>
+              <button type="button" onclick="togglePinVisibility('inputCashierPin', 'iconEyeCashier')" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs flex items-center gap-1 cursor-pointer">
+                <span id="iconEyeCashier" class="material-symbols-outlined text-base">visibility</span>
+                <span class="text-[11px]">Lihat</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-stone-500">
+              Digunakan staf kasir untuk membuka meja dan mencatat pembayaran.
+            </p>
+            <input 
+              type="password" 
+              id="inputCashierPin" 
+              maxlength="6" 
+              inputmode="numeric" 
+              placeholder="Masukkan 4-6 angka (default: 1234)" 
+              class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-stone-300 dark:border-slate-700 text-sm font-mono tracking-widest text-stone-900 dark:text-white focus:outline-hidden focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+
+          <!-- Box PIN Owner -->
+          <div class="p-4 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <label for="inputOwnerPin" class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-blue-600 text-base">shield_person</span>
+                <span>PIN Baru Pemilik (Owner)</span>
+              </label>
+              <button type="button" onclick="togglePinVisibility('inputOwnerPin', 'iconEyeOwner')" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs flex items-center gap-1 cursor-pointer">
+                <span id="iconEyeOwner" class="material-symbols-outlined text-base">visibility</span>
+                <span class="text-[11px]">Lihat</span>
+              </button>
+            </div>
+            <p class="text-[11px] text-stone-500">
+              Digunakan pemilik resto untuk membuka menu Pengaturan dan melihat omzet.
+            </p>
+            <input 
+              type="password" 
+              id="inputOwnerPin" 
+              maxlength="6" 
+              inputmode="numeric" 
+              placeholder="Masukkan 4-6 angka (default: 1234)" 
+              class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-stone-300 dark:border-slate-700 text-sm font-mono tracking-widest text-stone-900 dark:text-white focus:outline-hidden focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+            />
+          </div>
+
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          <p id="pinSaveFeedback" class="text-xs text-stone-500 dark:text-stone-400 italic">
+            *PIN bawaan default adalah <strong>1234</strong>. Anda dapat mengganti PIN Kasir atau PIN Owner sesuai kebutuhan usaha Anda.
+          </p>
+          <button 
+            type="submit" 
+            id="btnSavePins"
+            class="touch-btn w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-heading font-extrabold text-xs shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
+          >
+            <span class="material-symbols-outlined text-base">save</span>
+            <span>Simpan PIN Baru</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    </div>
+
+    <!-- ============================================================
+         PANEL 5: INTEGRASI CLOUD & BACKUP
+         ============================================================ -->
+    <div id="ownerPanelIntegrations" class="space-y-6 hidden">
+
+
+
+    <!-- ============================================================
+         8. PENGATURAN QRIS TOKO & GENERATOR DINAMIS (EMVCo)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionQrisSettings">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">qr_code_2</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Pengaturan QRIS Toko & Generator Dinamis (EMVCo)</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                Rp0 Biaya API
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Konfigurasi kode QRIS statis warung untuk otomatis diubah menjadi QRIS dinamis ber-nominal pas pada layar kasir & tamu (Rp0 biaya API).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area & Controls -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-amber-500">qr_code</span>
+              <span>Payload String QRIS Statis Toko (Standar Bank Indonesia / EMVCo)</span>
+            </label>
+            <button type="button" id="btnLoadSampleQris" onclick="handleLoadSampleQris()" class="text-[11px] font-heading font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">dataset</span>
+              <span>Muat Contoh QRIS Bank Indonesia</span>
+            </button>
+          </div>
+          <textarea 
+            id="qrisStaticInput" 
+            rows="3" 
+            placeholder="00020101021126570011ID.CO.QRIS.WWW011893600918000000000002150000000000000000303UME51440014ID.CO.QRIS.WWW02150000000000000000303UME5204581253033605802ID5915WARUNG_CONTOH6007JAKARTA61051234062070703A016304XXXX" 
+            class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500"
+          ></textarea>
+          <p class="text-[11px] text-stone-500 mt-1">
+            Dapatkan string ini dari gambar QRIS statis warung Anda menggunakan aplikasi pemindai QR / Google Lens.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+          <div id="qrisSaveFeedback" class="hidden text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">check_circle</span>
+            <span>Pengaturan QRIS berhasil disimpan untuk outlet ini!</span>
+          </div>
+          <button id="btnSaveQris" onclick="handleSaveQrisSettings()" class="touch-btn ml-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">save</span>
+            <span>Simpan QRIS Toko</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Area Pratinjau & Simulator Nominal Dinamis -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
+        <h3 class="font-heading font-extrabold text-sm text-[#1C1917] dark:text-white flex items-center gap-2">
+          <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">tune</span>
+          <span>Simulator Generator Nominal Pas (Uji Konversi Dinamis)</span>
+        </h3>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
+          <div class="flex-1">
+            <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white block mb-1">
+              Nominal Uji Coba Transaksi (Rp)
+            </label>
+            <input 
+              id="qrisTestAmount" 
+              type="number" 
+              min="1000" 
+              step="1000" 
+              value="10000" 
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-semibold text-[#1C1917] dark:text-white outline-none focus:border-emerald-500"
+            />
+          </div>
+          <button id="btnTestQrisConvert" onclick="handleTestQrisConversion()" class="touch-btn px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px]">play_arrow</span>
+            <span>Uji Konversi QRIS</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="md:col-span-2 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">
+                String QRIS Dinamis Hasil Konversi (Tag 54 + CRC16 Otomatis)
+              </label>
+              <span id="qrisTestResultBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
+                Menunggu Uji Coba
+              </span>
+            </div>
+            <textarea 
+              id="qrisDynamicOutput" 
+              readonly 
+              rows="3" 
+              placeholder="Hasil konversi QRIS dinamis akan muncul di sini..." 
+              class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono text-stone-700 dark:text-stone-300 outline-none"
+            ></textarea>
+          </div>
+
+          <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-center min-h-[160px]">
+            <img id="qrisDynamicPreview" src="" alt="Pratinjau QRIS Dinamis" class="w-36 h-36 object-contain rounded-lg border border-stone-200 dark:border-stone-700 hidden" />
+            <div id="qrisDynamicPlaceholder" class="text-stone-400 text-xs flex flex-col items-center gap-1">
+              <span class="material-symbols-outlined text-[32px] text-stone-300 dark:text-stone-600">qr_code</span>
+              <span>Pratinjau QR Code Dinamis</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
+
+
+
+
+    <!-- ============================================================
+         9. JEMBATAN PESANAN ONLINE LYNK.ID & QPON (WEBHOOK)
+         ============================================================ -->
+    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionOnlineOrdersWebhook">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">delivery_dining</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Jembatan Pesanan Online (GoFood, GrabFood, ShopeeFood, Lynk.id & Qpon)</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300">
+                Omnichannel Delivery
+              </span>
+            </div>
+            <p class="text-xs text-stone-500">Alamat penerima otomatis (Webhook) untuk mengalirkan pesanan dari landing page promosi Lynk.id / Qpon ke dapur KDS & kasir.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Webhook URL Box -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
+        <div>
+          <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white block mb-1">
+            Endpoint Webhook URL Penerima Pesanan Online (action=submitOnlineOrder)
+          </label>
+          <div class="flex flex-col sm:flex-row items-stretch gap-2">
+            <input 
+              id="onlineWebhookUrlInput" 
+              type="text" 
+              readonly 
+              placeholder="Konfigurasikan URL GAS di atas terlebih dahulu" 
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none"
+            />
+            <button id="btnCopyWebhookUrl" onclick="copyOnlineWebhookUrl()" class="touch-btn px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
+              <span class="material-symbols-outlined text-[16px]">content_copy</span>
+              <span>Salin URL Webhook</span>
+            </button>
+          </div>
+          <p class="text-[11px] text-stone-500 mt-1">
+            Tempelkan URL ini di pengaturan Webhook Lynk.id, Qpon, atau middleware kurir delivery untuk memasukkan pesanan online otomatis ke Resto Pro.
+          </p>
+        </div>
+
+        <!-- KPI Ringkasan Statistik Omset Online Delivery -->
+        <div id="onlineOrdersStatsSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <!-- Cards rendered by renderOnlineOrdersStatsSummary() -->
+        </div>
+      </div>
+
+      <!-- Dokumentasi Payload JSON -->
+      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
+        <h3 class="font-heading font-extrabold text-xs text-[#1C1917] dark:text-white flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px] text-indigo-500">code</span>
+          <span>Spesifikasi Format Payload JSON Webhook (POST / GET)</span>
+        </h3>
+        <p class="text-[11px] text-stone-500">
+          Setiap platform pengirim (Lynk.id, Qpon, bot WhatsApp, agregator) mengirimkan data pesanan dalam format JSON standar berikut:
+        </p>
+        <pre class="p-4 rounded-xl bg-stone-900 text-stone-200 text-xs font-mono overflow-x-auto leading-relaxed border border-stone-800"><code>{
+  "tenantId": "warung-berkah",
+  "platform": "qpon",
+  "platformRef": "QP-9901",
+  "customerName": "Budi Santoso",
+  "customerPhone": "08123456789",
+  "items": [{"name": "Nasi Mandhi", "qty": 2, "price": 65000}],
+  "packagingFee": 4000,
+  "totalAmount": 134000,
+  "specialNotes": "Sendok 2 set"
+}</code></pre>
+      </div>
+    </section>
+
 
 
 
@@ -1132,104 +1507,6 @@
 
 
 
-    <!-- ============================================================
-         7. KEAMANAN AKSES & GANTI PIN TOKO (KASIR & OWNER)
-         ============================================================ -->
-    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionSecurityPins">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">pin</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Keamanan Akses & Ganti PIN Toko</h2>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                PIN 4-6 Digit
-              </span>
-            </div>
-            <p class="text-xs text-stone-500">Atur PIN Kasir untuk melayani transaksi dan PIN Owner rahasia untuk laporan keuangan & pengaturan</p>
-          </div>
-        </div>
-
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-100 dark:bg-slate-800 text-stone-600 dark:text-stone-300 text-xs font-mono">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Terenkripsi SHA-256</span>
-        </div>
-      </div>
-
-      <form id="formChangeTenantPins" onsubmit="handleSaveTenantPins(event)" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-          <!-- Box PIN Kasir -->
-          <div class="p-4 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <label for="inputCashierPin" class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-emerald-600 text-base">point_of_sale</span>
-                <span>PIN Baru Kasir POS</span>
-              </label>
-              <button type="button" onclick="togglePinVisibility('inputCashierPin', 'iconEyeCashier')" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs flex items-center gap-1 cursor-pointer">
-                <span id="iconEyeCashier" class="material-symbols-outlined text-base">visibility</span>
-                <span class="text-[11px]">Lihat</span>
-              </button>
-            </div>
-            <p class="text-[11px] text-stone-500">
-              Digunakan staf kasir untuk membuka meja dan mencatat pembayaran.
-            </p>
-            <input 
-              type="password" 
-              id="inputCashierPin" 
-              maxlength="6" 
-              inputmode="numeric" 
-              placeholder="Masukkan 4-6 angka (default: 1234)" 
-              class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-stone-300 dark:border-slate-700 text-sm font-mono tracking-widest text-stone-900 dark:text-white focus:outline-hidden focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-            />
-          </div>
-
-          <!-- Box PIN Owner -->
-          <div class="p-4 rounded-2xl bg-stone-50 dark:bg-slate-900/60 border border-stone-200 dark:border-slate-800 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <label for="inputOwnerPin" class="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-blue-600 text-base">shield_person</span>
-                <span>PIN Baru Pemilik (Owner)</span>
-              </label>
-              <button type="button" onclick="togglePinVisibility('inputOwnerPin', 'iconEyeOwner')" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-xs flex items-center gap-1 cursor-pointer">
-                <span id="iconEyeOwner" class="material-symbols-outlined text-base">visibility</span>
-                <span class="text-[11px]">Lihat</span>
-              </button>
-            </div>
-            <p class="text-[11px] text-stone-500">
-              Digunakan pemilik resto untuk membuka menu Pengaturan dan melihat omzet.
-            </p>
-            <input 
-              type="password" 
-              id="inputOwnerPin" 
-              maxlength="6" 
-              inputmode="numeric" 
-              placeholder="Masukkan 4-6 angka (default: 1234)" 
-              class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-stone-300 dark:border-slate-700 text-sm font-mono tracking-widest text-stone-900 dark:text-white focus:outline-hidden focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-            />
-          </div>
-
-        </div>
-
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-          <p id="pinSaveFeedback" class="text-xs text-stone-500 dark:text-stone-400 italic">
-            *PIN bawaan default adalah <strong>1234</strong>. Anda dapat mengganti PIN Kasir atau PIN Owner sesuai kebutuhan usaha Anda.
-          </p>
-          <button 
-            type="submit" 
-            id="btnSavePins"
-            class="touch-btn w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-heading font-extrabold text-xs shadow-md shadow-amber-500/20 flex items-center justify-center gap-2 cursor-pointer transition-all"
-          >
-            <span class="material-symbols-outlined text-base">save</span>
-            <span>Simpan PIN Baru</span>
-          </button>
-        </div>
-      </form>
-    </section>
-
-
 
     <!-- ============================================================
          8. INTEGRASI GOOGLE APPS SCRIPT (GAS) & GOOGLE SHEETS BACKEND
@@ -1360,197 +1637,7 @@
       </div>
     </section>
 
-
-
-    <!-- ============================================================
-         8. PENGATURAN QRIS TOKO & GENERATOR DINAMIS (EMVCo)
-         ============================================================ -->
-    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionQrisSettings">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">qr_code_2</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Pengaturan QRIS Toko & Generator Dinamis (EMVCo)</h2>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                Rp0 Biaya API
-              </span>
-            </div>
-            <p class="text-xs text-stone-500">Konfigurasi kode QRIS statis warung untuk otomatis diubah menjadi QRIS dinamis ber-nominal pas pada layar kasir & tamu (Rp0 biaya API).</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Input Area & Controls -->
-      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
-        <div>
-          <div class="flex items-center justify-between mb-1">
-            <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-[16px] text-amber-500">qr_code</span>
-              <span>Payload String QRIS Statis Toko (Standar Bank Indonesia / EMVCo)</span>
-            </label>
-            <button type="button" id="btnLoadSampleQris" onclick="handleLoadSampleQris()" class="text-[11px] font-heading font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1">
-              <span class="material-symbols-outlined text-[13px]">dataset</span>
-              <span>Muat Contoh QRIS Bank Indonesia</span>
-            </button>
-          </div>
-          <textarea 
-            id="qrisStaticInput" 
-            rows="3" 
-            placeholder="00020101021126570011ID.CO.QRIS.WWW011893600918000000000002150000000000000000303UME51440014ID.CO.QRIS.WWW02150000000000000000303UME5204581253033605802ID5915WARUNG_CONTOH6007JAKARTA61051234062070703A016304XXXX" 
-            class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none focus:border-amber-500"
-          ></textarea>
-          <p class="text-[11px] text-stone-500 mt-1">
-            Dapatkan string ini dari gambar QRIS statis warung Anda menggunakan aplikasi pemindai QR / Google Lens.
-          </p>
-        </div>
-
-        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
-          <div id="qrisSaveFeedback" class="hidden text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-            <span class="material-symbols-outlined text-[15px]">check_circle</span>
-            <span>Pengaturan QRIS berhasil disimpan untuk outlet ini!</span>
-          </div>
-          <button id="btnSaveQris" onclick="handleSaveQrisSettings()" class="touch-btn ml-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-sm">
-            <span class="material-symbols-outlined text-[16px]">save</span>
-            <span>Simpan QRIS Toko</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Area Pratinjau & Simulator Nominal Dinamis -->
-      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
-        <h3 class="font-heading font-extrabold text-sm text-[#1C1917] dark:text-white flex items-center gap-2">
-          <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-[18px]">tune</span>
-          <span>Simulator Generator Nominal Pas (Uji Konversi Dinamis)</span>
-        </h3>
-
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
-          <div class="flex-1">
-            <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white block mb-1">
-              Nominal Uji Coba Transaksi (Rp)
-            </label>
-            <input 
-              id="qrisTestAmount" 
-              type="number" 
-              min="1000" 
-              step="1000" 
-              value="10000" 
-              class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-semibold text-[#1C1917] dark:text-white outline-none focus:border-emerald-500"
-            />
-          </div>
-          <button id="btnTestQrisConvert" onclick="handleTestQrisConversion()" class="touch-btn px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
-            <span class="material-symbols-outlined text-[16px]">play_arrow</span>
-            <span>Uji Konversi QRIS</span>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div class="md:col-span-2 space-y-2">
-            <div class="flex items-center justify-between">
-              <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">
-                String QRIS Dinamis Hasil Konversi (Tag 54 + CRC16 Otomatis)
-              </label>
-              <span id="qrisTestResultBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300">
-                Menunggu Uji Coba
-              </span>
-            </div>
-            <textarea 
-              id="qrisDynamicOutput" 
-              readonly 
-              rows="3" 
-              placeholder="Hasil konversi QRIS dinamis akan muncul di sini..." 
-              class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono text-stone-700 dark:text-stone-300 outline-none"
-            ></textarea>
-          </div>
-
-          <div class="flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-center min-h-[160px]">
-            <img id="qrisDynamicPreview" src="" alt="Pratinjau QRIS Dinamis" class="w-36 h-36 object-contain rounded-lg border border-stone-200 dark:border-stone-700 hidden" />
-            <div id="qrisDynamicPlaceholder" class="text-stone-400 text-xs flex flex-col items-center gap-1">
-              <span class="material-symbols-outlined text-[32px] text-stone-300 dark:text-stone-600">qr_code</span>
-              <span>Pratinjau QR Code Dinamis</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-
-
-    <!-- ============================================================
-         9. JEMBATAN PESANAN ONLINE LYNK.ID & QPON (WEBHOOK)
-         ============================================================ -->
-    <section class="bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] rounded-3xl p-6 shadow-xs space-y-5" id="sectionOnlineOrdersWebhook">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#E7DFD5] dark:border-[#334155] pb-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">delivery_dining</span>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="font-heading font-extrabold text-lg text-[#1C1917] dark:text-white">Jembatan Pesanan Online (GoFood, GrabFood, ShopeeFood, Lynk.id & Qpon)</h2>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300">
-                Omnichannel Delivery
-              </span>
-            </div>
-            <p class="text-xs text-stone-500">Alamat penerima otomatis (Webhook) untuk mengalirkan pesanan dari landing page promosi Lynk.id / Qpon ke dapur KDS & kasir.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Webhook URL Box -->
-      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-4">
-        <div>
-          <label class="font-heading font-bold text-xs text-[#1C1917] dark:text-white block mb-1">
-            Endpoint Webhook URL Penerima Pesanan Online (action=submitOnlineOrder)
-          </label>
-          <div class="flex flex-col sm:flex-row items-stretch gap-2">
-            <input 
-              id="onlineWebhookUrlInput" 
-              type="text" 
-              readonly 
-              placeholder="Konfigurasikan URL GAS di atas terlebih dahulu" 
-              class="flex-1 px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E293B] border border-[#E7DFD5] dark:border-[#334155] text-xs font-mono font-semibold text-[#1C1917] dark:text-white outline-none"
-            />
-            <button id="btnCopyWebhookUrl" onclick="copyOnlineWebhookUrl()" class="touch-btn px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-heading font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap">
-              <span class="material-symbols-outlined text-[16px]">content_copy</span>
-              <span>Salin URL Webhook</span>
-            </button>
-          </div>
-          <p class="text-[11px] text-stone-500 mt-1">
-            Tempelkan URL ini di pengaturan Webhook Lynk.id, Qpon, atau middleware kurir delivery untuk memasukkan pesanan online otomatis ke Resto Pro.
-          </p>
-        </div>
-
-        <!-- KPI Ringkasan Statistik Omset Online Delivery -->
-        <div id="onlineOrdersStatsSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <!-- Cards rendered by renderOnlineOrdersStatsSummary() -->
-        </div>
-      </div>
-
-      <!-- Dokumentasi Payload JSON -->
-      <div class="p-5 rounded-2xl bg-[#FAF7F2] dark:bg-[#0F172A] border border-[#E7DFD5] dark:border-[#334155] space-y-3">
-        <h3 class="font-heading font-extrabold text-xs text-[#1C1917] dark:text-white flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px] text-indigo-500">code</span>
-          <span>Spesifikasi Format Payload JSON Webhook (POST / GET)</span>
-        </h3>
-        <p class="text-[11px] text-stone-500">
-          Setiap platform pengirim (Lynk.id, Qpon, bot WhatsApp, agregator) mengirimkan data pesanan dalam format JSON standar berikut:
-        </p>
-        <pre class="p-4 rounded-xl bg-stone-900 text-stone-200 text-xs font-mono overflow-x-auto leading-relaxed border border-stone-800"><code>{
-  "tenantId": "warung-berkah",
-  "platform": "qpon",
-  "platformRef": "QP-9901",
-  "customerName": "Budi Santoso",
-  "customerPhone": "08123456789",
-  "items": [{"name": "Nasi Mandhi", "qty": 2, "price": 65000}],
-  "packagingFee": 4000,
-  "totalAmount": 134000,
-  "specialNotes": "Sendok 2 set"
-}</code></pre>
-      </div>
-    </section>
+    </div>
 
 
 
@@ -2216,6 +2303,8 @@
       updateLicenseBannerUI();
       updateProFeatureLockUI();
       checkTenantPaymentStatus();
+      checkOwnerUrlHash();
+      window.addEventListener('hashchange', checkOwnerUrlHash);
 
       // Listen to real-time events across windows
       RestoSync.on("ORDER_PAID", () => {
@@ -2233,6 +2322,8 @@
         renderOwnerTables();
         updateProFeatureLockUI();
         checkTenantPaymentStatus();
+      checkOwnerUrlHash();
+      window.addEventListener('hashchange', checkOwnerUrlHash);
       });
 
       RestoSync.on("TENANTS_UPDATED", () => {
@@ -2247,6 +2338,8 @@
         renderOwnerTables();
         updateProFeatureLockUI();
         checkTenantPaymentStatus();
+      checkOwnerUrlHash();
+      window.addEventListener('hashchange', checkOwnerUrlHash);
       });
 
       RestoSync.on("GAS_CONFIG_CHANGED", () => {
@@ -4720,6 +4813,119 @@ END $$;
         }
       }
     }
+
+    
+    // ============================================================
+    // 11. SISTEM TAB & NAVIGASI OWNER COMPACT (SEGMENTED PILLS)
+    // ============================================================
+    const OWNER_TABS = {
+      analytics: { panelId: 'ownerPanelAnalytics', btnId: 'tabBtnAnalytics' },
+      menu: { panelId: 'ownerPanelMenu', btnId: 'tabBtnMenu' },
+      operations: { panelId: 'ownerPanelOperations', btnId: 'tabBtnOperations' },
+      security: { panelId: 'ownerPanelSecurity', btnId: 'tabBtnSecurity' },
+      integrations: { panelId: 'ownerPanelIntegrations', btnId: 'tabBtnIntegrations' }
+    };
+
+    const SECTION_TO_TAB = {
+      'sectionRevenueCards': 'analytics',
+      'sectionAnalyticsBI': 'analytics',
+      'sectionLedger': 'analytics',
+      'sectionProductCatalog': 'menu',
+      'sectionTableManagement': 'operations',
+      'sectionReservations': 'operations',
+      'sectionStoreHoursAndTax': 'operations',
+      'sectionCrmMembers': 'operations',
+      'sectionSecurityPins': 'security',
+      'sectionQrisSettings': 'integrations',
+      'sectionOnlineOrdersWebhook': 'integrations',
+      'sectionBackupRestore': 'integrations',
+      'sectionGasBackend': 'integrations'
+    };
+
+    function switchOwnerTab(tabName, options) {
+      const opts = options || {};
+      const validTabs = ['analytics', 'menu', 'operations', 'security', 'integrations', 'all'];
+      const activeTab = validTabs.indexOf(tabName) !== -1 ? tabName : 'analytics';
+
+      // Switch panel visibility
+      Object.keys(OWNER_TABS).forEach(function(key) {
+        const panel = document.getElementById(OWNER_TABS[key].panelId);
+        if (!panel) return;
+        if (activeTab === 'all' || activeTab === key) {
+          panel.classList.remove('hidden');
+        } else {
+          panel.classList.add('hidden');
+        }
+      });
+
+      // Update button visual styles
+      Object.keys(OWNER_TABS).forEach(function(key) {
+        const btn = document.getElementById(OWNER_TABS[key].btnId);
+        if (!btn) return;
+        if (activeTab === key) {
+          btn.classList.add('active-tab', 'bg-white', 'dark:bg-[#0F172A]', 'text-amber-600', 'dark:text-amber-400', 'shadow-xs', 'border', 'border-stone-200/80', 'dark:border-stone-700/80', 'font-extrabold');
+          btn.classList.remove('text-stone-600', 'dark:text-stone-400', 'border-transparent', 'font-semibold');
+        } else {
+          btn.classList.remove('active-tab', 'bg-white', 'dark:bg-[#0F172A]', 'text-amber-600', 'dark:text-amber-400', 'shadow-xs', 'border', 'border-stone-200/80', 'dark:border-stone-700/80', 'font-extrabold');
+          btn.classList.add('text-stone-600', 'dark:text-stone-400', 'border-transparent', 'font-semibold');
+        }
+      });
+
+      const btnAll = document.getElementById('tabBtnAll');
+      if (btnAll) {
+        if (activeTab === 'all') {
+          btnAll.classList.add('active-tab', 'bg-white', 'dark:bg-[#0F172A]', 'text-amber-600', 'dark:text-amber-400', 'shadow-xs', 'border', 'border-stone-200/80', 'dark:border-stone-700/80', 'font-extrabold');
+          btnAll.classList.remove('text-stone-500', 'border-transparent', 'font-medium');
+        } else {
+          btnAll.classList.remove('active-tab', 'bg-white', 'dark:bg-[#0F172A]', 'text-amber-600', 'dark:text-amber-400', 'shadow-xs', 'border', 'border-stone-200/80', 'dark:border-stone-700/80', 'font-extrabold');
+          btnAll.classList.add('text-stone-500', 'border-transparent', 'font-medium');
+        }
+      }
+
+      if (!opts.silentHistory && typeof history !== 'undefined' && history.replaceState) {
+        const targetHash = opts.sectionTarget ? '#' + opts.sectionTarget : '#tab-' + activeTab;
+        try {
+          history.replaceState(null, '', window.location.pathname + window.location.search + targetHash);
+        } catch (e) {
+          // Fallback if origin or sandbox prevents history mutation
+        }
+      }
+
+      if (opts.scrollToSection && opts.sectionTarget) {
+        setTimeout(function() {
+          const targetEl = document.getElementById(opts.sectionTarget);
+          if (targetEl && typeof targetEl.scrollIntoView === 'function') {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 50);
+      }
+    }
+
+    function checkOwnerUrlHash() {
+      if (typeof window === 'undefined' || !window.location) return;
+      const rawHash = (window.location.hash || '').replace(/^#/, '');
+      if (!rawHash) {
+        switchOwnerTab('analytics', { silentHistory: true });
+        return;
+      }
+
+      const cleanTab = rawHash.replace(/^tab-/, '');
+      if (['analytics', 'menu', 'operations', 'security', 'integrations', 'all'].indexOf(cleanTab) !== -1) {
+        switchOwnerTab(cleanTab, { silentHistory: true });
+        return;
+      }
+
+      if (SECTION_TO_TAB[rawHash]) {
+        const targetTab = SECTION_TO_TAB[rawHash];
+        switchOwnerTab(targetTab, { silentHistory: true, scrollToSection: true, sectionTarget: rawHash });
+        return;
+      }
+
+      switchOwnerTab('analytics', { silentHistory: true });
+    }
+
+    window.switchOwnerTab = switchOwnerTab;
+    window.checkOwnerUrlHash = checkOwnerUrlHash;
 
     window.initSecurityPinsUI = initSecurityPinsUI;
     window.togglePinVisibility = togglePinVisibility;

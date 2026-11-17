@@ -494,7 +494,9 @@ function mountOwnerSettings(options) {
       renderOnlineOrdersStatsSummary: typeof renderOnlineOrdersStatsSummary === "function" ? renderOnlineOrdersStatsSummary : undefined,
       initSecurityPinsUI: typeof initSecurityPinsUI === "function" ? initSecurityPinsUI : undefined,
       handleSaveTenantPins: typeof handleSaveTenantPins === "function" ? handleSaveTenantPins : undefined,
-      togglePinVisibility: typeof togglePinVisibility === "function" ? togglePinVisibility : undefined
+      togglePinVisibility: typeof togglePinVisibility === "function" ? togglePinVisibility : undefined,
+      switchOwnerTab: typeof switchOwnerTab === "function" ? switchOwnerTab : undefined,
+      checkOwnerUrlHash: typeof checkOwnerUrlHash === "function" ? checkOwnerUrlHash : undefined
     };
   `;
 
@@ -844,6 +846,98 @@ test("7. Keamanan Akses: #sectionSecurityPins merender form ganti PIN dan handle
   assertEqual(RestoSync.verifyPosPin("4321", "warung-berkah"), true, "New Cashier PIN 4321 must verify successfully");
   assertEqual(RestoSync.verifyOwnerPin("9876", "warung-berkah"), true, "New Owner PIN 9876 must verify successfully");
   assertEqual(RestoSync.verifyPosPin("1234", "warung-berkah"), false, "Old Cashier PIN 1234 must now fail");
+});
+
+test("8. Owner Navigation Bar: #ownerTabNavbar merender 5 panel terurut (Analisis, Menu, Operasional, Keamanan, Integrasi) dan switchOwnerTab berfungsi", function () {
+  const { doc, api, win } = mountOwnerSettings({ search: "?tenant=warung-berkah" });
+
+  // 1. Verify Navbar & Buttons
+  const nav = doc.getElementById("ownerTabNavbar");
+  assert(Boolean(nav), "#ownerTabNavbar must exist in DOM");
+
+  const btnAnalytics = doc.getElementById("tabBtnAnalytics");
+  const btnMenu = doc.getElementById("tabBtnMenu");
+  const btnOps = doc.getElementById("tabBtnOperations");
+  const btnSec = doc.getElementById("tabBtnSecurity");
+  const btnInt = doc.getElementById("tabBtnIntegrations");
+  const btnAll = doc.getElementById("tabBtnAll");
+
+  assert(Boolean(btnAnalytics), "#tabBtnAnalytics must exist");
+  assert(Boolean(btnMenu), "#tabBtnMenu must exist");
+  assert(Boolean(btnOps), "#tabBtnOperations must exist");
+  assert(Boolean(btnSec), "#tabBtnSecurity must exist");
+  assert(Boolean(btnInt), "#tabBtnIntegrations must exist");
+  assert(Boolean(btnAll), "#tabBtnAll must exist");
+
+  // 2. Verify Panels exist
+  const panelAnalytics = doc.getElementById("ownerPanelAnalytics");
+  const panelMenu = doc.getElementById("ownerPanelMenu");
+  const panelOps = doc.getElementById("ownerPanelOperations");
+  const panelSec = doc.getElementById("ownerPanelSecurity");
+  const panelInt = doc.getElementById("ownerPanelIntegrations");
+
+  assert(Boolean(panelAnalytics), "#ownerPanelAnalytics must exist");
+  assert(Boolean(panelMenu), "#ownerPanelMenu must exist");
+  assert(Boolean(panelOps), "#ownerPanelOperations must exist");
+  assert(Boolean(panelSec), "#ownerPanelSecurity must exist");
+  assert(Boolean(panelInt), "#ownerPanelIntegrations must exist");
+
+  // 3. Initial state: Analytics visible, others hidden
+  assertEqual(panelAnalytics.classList.contains("hidden"), false, "Panel Analytics must be visible initially");
+  assertEqual(panelMenu.classList.contains("hidden"), true, "Panel Menu must be hidden initially");
+  assertEqual(panelOps.classList.contains("hidden"), true, "Panel Operations must be hidden initially");
+  assertEqual(panelSec.classList.contains("hidden"), true, "Panel Security must be hidden initially");
+  assertEqual(panelInt.classList.contains("hidden"), true, "Panel Integrations must be hidden initially");
+
+  // 4. Switch to Menu
+  assert(typeof api.switchOwnerTab === "function", "switchOwnerTab must be a function");
+  api.switchOwnerTab("menu");
+  assertEqual(panelAnalytics.classList.contains("hidden"), true, "Panel Analytics must hide after switching to menu");
+  assertEqual(panelMenu.classList.contains("hidden"), false, "Panel Menu must show after switching to menu");
+  assertEqual(btnMenu.classList.contains("active-tab"), true, "#tabBtnMenu must have active-tab class");
+
+  // 5. Switch to Operations
+  api.switchOwnerTab("operations");
+  assertEqual(panelOps.classList.contains("hidden"), false, "Panel Operations must show");
+  assertEqual(panelMenu.classList.contains("hidden"), true, "Panel Menu must hide");
+
+  // 6. Switch to Security
+  api.switchOwnerTab("security");
+  assertEqual(panelSec.classList.contains("hidden"), false, "Panel Security must show");
+  assertEqual(panelOps.classList.contains("hidden"), true, "Panel Operations must hide");
+
+  // 7. Switch to Integrations
+  api.switchOwnerTab("integrations");
+  assertEqual(panelInt.classList.contains("hidden"), false, "Panel Integrations must show");
+  assertEqual(panelSec.classList.contains("hidden"), true, "Panel Security must hide");
+
+  // 8. Switch to All (Buka Semua)
+  api.switchOwnerTab("all");
+  assertEqual(panelAnalytics.classList.contains("hidden"), false, "All: Analytics must show");
+  assertEqual(panelMenu.classList.contains("hidden"), false, "All: Menu must show");
+  assertEqual(panelOps.classList.contains("hidden"), false, "All: Operations must show");
+  assertEqual(panelSec.classList.contains("hidden"), false, "All: Security must show");
+  assertEqual(panelInt.classList.contains("hidden"), false, "All: Integrations must show");
+  assertEqual(btnAll.classList.contains("active-tab"), true, "#tabBtnAll must have active-tab class");
+
+  // 9. Deep-link hash routing via checkOwnerUrlHash
+  assert(typeof api.checkOwnerUrlHash === "function", "checkOwnerUrlHash must be a function");
+  
+  // Test #sectionQrisSettings -> switches to integrations
+  win.location.hash = "#sectionQrisSettings";
+  api.checkOwnerUrlHash();
+  assertEqual(panelInt.classList.contains("hidden"), false, "Hash #sectionQrisSettings must auto-open Integrations panel");
+  assertEqual(panelAnalytics.classList.contains("hidden"), true, "Hash #sectionQrisSettings must hide Analytics panel");
+
+  // Test #sectionSecurityPins -> switches to security
+  win.location.hash = "#sectionSecurityPins";
+  api.checkOwnerUrlHash();
+  assertEqual(panelSec.classList.contains("hidden"), false, "Hash #sectionSecurityPins must auto-open Security panel");
+
+  // Test #sectionProductCatalog -> switches to menu
+  win.location.hash = "#sectionProductCatalog";
+  api.checkOwnerUrlHash();
+  assertEqual(panelMenu.classList.contains("hidden"), false, "Hash #sectionProductCatalog must auto-open Menu panel");
 });
 
 print("===============================================================================");
