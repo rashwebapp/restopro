@@ -2994,7 +2994,39 @@ const RestoSync = {
     try {
       if (typeof localStorage !== "undefined") {
         const data = localStorage.getItem(this.TABLES_STORAGE_KEY);
-        if (data) return JSON.parse(data);
+        if (data) {
+          const parsed = JSON.parse(data);
+          if (Array.isArray(parsed)) {
+            // Bersihkan data dummy otomatis jika ada data demo lama tersisa di localStorage
+            let cleaned = false;
+            const dummyNames = [
+              "bpk. farhan",
+              "ibu rahmawati",
+              "kevin sanjaya",
+              "kevin sanjaya (qr app)",
+              "kevin sanjaya (vip gold)",
+              "keluarga dr. zulkarnain",
+              "bpk. hendra wijaya",
+              "vip: ibu diana & partner"
+            ];
+            parsed.forEach(t => {
+              const c = String(t.customer || "").toLowerCase().trim();
+              if (dummyNames.some(d => c.includes(d))) {
+                t.status = "available";
+                t.runningTotal = 0;
+                t.customer = "-";
+                t.orderCount = 0;
+                t.items = [];
+                t.elapsedMinutes = 0;
+                cleaned = true;
+              }
+            });
+            if (cleaned) {
+              this.saveTables(parsed, { silent: true });
+            }
+            return parsed;
+          }
+        }
       }
       if (this.getTenantId() === "default" && typeof RESTO_TABLES !== "undefined" && Array.isArray(RESTO_TABLES)) {
         return RESTO_TABLES;

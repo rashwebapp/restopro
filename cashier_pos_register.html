@@ -184,10 +184,16 @@
             <span class="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[18px]">table_restaurant</span>
             <h2 class="font-heading font-bold text-xs text-[#1C1917] dark:text-white">Denah Meja Resto</h2>
           </div>
-          <button onclick="openCashierReservationModal()" class="touch-btn px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-[10px] flex items-center gap-1 hover:bg-indigo-100 transition-colors" title="Lihat & Buat Reservasi Meja">
-            <span class="material-symbols-outlined text-[13px]">event_seat</span>
-            <span>Reservasi (<span id="activeReservationBadge">0</span>)</span>
-          </button>
+          <div class="flex items-center gap-1.5">
+            <button onclick="resetAllTablesToEmpty()" class="touch-btn px-2 py-1 rounded-lg bg-stone-100 hover:bg-red-50 dark:bg-stone-800 dark:hover:bg-red-950/40 text-stone-600 hover:text-red-600 dark:text-stone-300 dark:hover:text-red-400 border border-stone-200 dark:border-stone-700 font-bold text-[10px] flex items-center gap-1 transition-colors" title="Kosongkan Seluruh Meja Resto">
+              <span class="material-symbols-outlined text-[13px]">restart_alt</span>
+              <span>Reset Meja</span>
+            </button>
+            <button onclick="openCashierReservationModal()" class="touch-btn px-2 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold text-[10px] flex items-center gap-1 hover:bg-indigo-100 transition-colors" title="Lihat & Buat Reservasi Meja">
+              <span class="material-symbols-outlined text-[13px]">event_seat</span>
+              <span>Reservasi (<span id="activeReservationBadge">0</span>)</span>
+            </button>
+          </div>
         </div>
 
         <!-- Status Indicator Legend (Kosong, Terisi, Bill, Booking) -->
@@ -337,17 +343,17 @@
       <!-- Current Bill Header -->
       <div class="flex items-center justify-between pb-2.5 border-b border-[#E7DFD5] dark:border-[#334155]">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-400 font-heading font-extrabold text-xs flex items-center justify-center">
-            #<span id="activeTicketTableNumber">03</span>
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-heading font-extrabold text-xs flex items-center justify-center">
+            #<span id="activeTicketTableNumber">01</span>
           </div>
           <div>
             <div class="flex items-center gap-1.5">
-              <h3 id="activeTicketTitle" class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Meja 03</h3>
-              <span id="activeTicketStatusBadge" class="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">
-                Minta Tagihan
+              <h3 id="activeTicketTitle" class="font-heading font-bold text-sm text-[#1C1917] dark:text-white">Meja 01</h3>
+              <span id="activeTicketStatusBadge" class="text-[10px] font-semibold px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                Tersedia
               </span>
             </div>
-            <p id="activeTicketCustomer" class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Tamu: Ibu Rahmawati</p>
+            <p id="activeTicketCustomer" class="text-[11px] text-[#78716C] dark:text-[#94A3B8]">Tamu: Tamu Langsung</p>
           </div>
         </div>
 
@@ -3604,10 +3610,48 @@
     }
 
     function clearCurrentTicket() {
-      if (confirm(`Kosongkan semua pesanan untuk ${activeTableId}?`)) {
+      const table = RESTO_TABLES.find(t => t.id === activeTableId);
+      const tableName = table ? table.name : activeTableId;
+      if (confirm(`Kosongkan semua pesanan dan reset ${tableName} menjadi meja kosong?`)) {
         currentTicketItems = [];
+        if (table) {
+          table.status = "available";
+          table.runningTotal = 0;
+          table.customer = "-";
+          table.items = [];
+          table.orderCount = 0;
+          table.elapsedMinutes = 0;
+        }
+        if (typeof RestoSync !== "undefined" && typeof RestoSync.saveTables === "function") {
+          RestoSync.saveTables(RESTO_TABLES);
+        }
+        renderTablesGrid();
         renderTicketItems();
+        selectTable(activeTableId);
+        showPosNotification(`🧹 ${tableName} berhasil dikosongkan!`);
       }
+    }
+
+    function resetAllTablesToEmpty() {
+      if (!confirm("Konfirmasi: Kosongkan SELURUH meja restoran dan reset semua status meja menjadi Kosong / Tersedia (Ready / Rp0)?")) {
+        return;
+      }
+      RESTO_TABLES.forEach(table => {
+        table.status = "available";
+        table.runningTotal = 0;
+        table.customer = "-";
+        table.items = [];
+        table.orderCount = 0;
+        table.elapsedMinutes = 0;
+      });
+      currentTicketItems = [];
+      if (typeof RestoSync !== "undefined" && typeof RestoSync.saveTables === "function") {
+        RestoSync.saveTables(RESTO_TABLES);
+      }
+      renderTablesGrid();
+      renderTicketItems();
+      selectTable(activeTableId || "T01");
+      showPosNotification("✅ Seluruh meja restoran berhasil dikosongkan dan siap jualan!");
     }
 
     // ============================================================
