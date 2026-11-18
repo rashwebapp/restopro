@@ -272,44 +272,19 @@ const MENU_ITEMS = [
   }
 ];
 
-// Data 12 Meja Restoran (Tables 01-12)
+// Data 12 Meja Restoran (Tables 01-12) — Status Bersih (Siap Jualan)
 const RESTO_TABLES = [
   { id: "T01", name: "Meja 01", seats: 2, section: "Indoor AC", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
-  { id: "T02", name: "Meja 02", seats: 4, section: "Indoor AC", status: "occupied", runningTotal: 142000, elapsedMinutes: 28, customer: "Bpk. Farhan", orderCount: 3, items: [
-    { name: "Nasi Mandhi Daging Kambing", qty: 1, price: 65000, notes: "Pedas Lvl 1" },
-    { name: "Authentic Teh Tarik", qty: 2, price: 18000, notes: "Es Normal" },
-    { name: "Sambosa Daging Keju", qty: 1, price: 25000, notes: "Lvl 1" }
-  ]},
-  { id: "T03", name: "Meja 03", seats: 4, section: "Indoor AC", status: "bill_requested", runningTotal: 187000, elapsedMinutes: 46, customer: "Ibu Rahmawati", orderCount: 4, items: [
-    { name: "Tom Yum Goong Seafood", qty: 1, price: 55000, notes: "Pedas Lvl 4" },
-    { name: "Pad Thai Udang Jumbo", qty: 1, price: 48000, notes: "Pedas Lvl 2" },
-    { name: "Thai Green Tea Susu Asli", qty: 2, price: 22000, notes: "Sedikit Es" },
-    { name: "Roti Canai Kari Daging", qty: 1, price: 30000, notes: "Lvl 2" }
-  ]},
+  { id: "T02", name: "Meja 02", seats: 4, section: "Indoor AC", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
+  { id: "T03", name: "Meja 03", seats: 4, section: "Indoor AC", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
   { id: "T04", name: "Meja 04", seats: 6, section: "Indoor AC", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
-  { id: "T05", name: "Meja 05", seats: 4, section: "Indoor AC (QR Active)", status: "occupied", runningTotal: 83000, elapsedMinutes: 12, customer: "Kevin Sanjaya (QR App)", orderCount: 2, items: [
-    { name: "Nasi Lemak Sambal Sotong", qty: 1, price: 45000, notes: "Pedas Lvl 3, Nasi Regular" },
-    { name: "Authentic Teh Tarik", qty: 1, price: 18000, notes: "Es Normal" },
-    { name: "Sambosa Daging Keju", qty: 1, price: 25000, notes: "Lvl 0" }
-  ]},
+  { id: "T05", name: "Meja 05", seats: 4, section: "Indoor AC (QR Active)", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
   { id: "T06", name: "Meja 06", seats: 2, section: "Indoor AC", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
-  { id: "T07", name: "Meja 07", seats: 8, section: "Outdoor Garden", status: "occupied", runningTotal: 310000, elapsedMinutes: 55, customer: "Keluarga dr. Zulkarnain", orderCount: 6, items: [
-    { name: "Nasi Mandhi Daging Kambing", qty: 3, price: 65000, notes: "Extra Basmati (+10k)" },
-    { name: "Shawarma Ayam Panggang", qty: 2, price: 35000, notes: "Pedas Lvl 2" },
-    { name: "Jus Kurma Susu Madu", qty: 3, price: 24000, notes: "Dingin Segar" }
-  ]},
-  { id: "T08", name: "Meja 08", seats: 4, section: "Outdoor Garden", status: "bill_requested", runningTotal: 99000, elapsedMinutes: 34, customer: "Bpk. Hendra Wijaya", orderCount: 3, items: [
-    { name: "Laksa Penang Kuah Kental", qty: 1, price: 42000, notes: "Pedas Lvl 3" },
-    { name: "Roti Canai Kari Daging", qty: 1, price: 30000, notes: "Pedas Lvl 2" },
-    { name: "Qahwa Arabika Kapulaga", qty: 1, price: 25000, notes: "Panas Tradisional" }
-  ]},
+  { id: "T07", name: "Meja 07", seats: 8, section: "Outdoor Garden", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
+  { id: "T08", name: "Meja 08", seats: 4, section: "Outdoor Garden", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
   { id: "T09", name: "Meja 09", seats: 4, section: "Outdoor Garden", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
   { id: "T10", name: "Meja 10", seats: 2, section: "Outdoor Garden", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
-  { id: "T11", name: "Meja 11", seats: 4, section: "VIP Private Room", status: "occupied", runningTotal: 175000, elapsedMinutes: 22, customer: "VIP: Ibu Diana & Partner", orderCount: 3, items: [
-    { name: "Nasi Mandhi Daging Kambing", qty: 1, price: 65000, notes: "Lvl 1" },
-    { name: "Tom Yum Goong Seafood", qty: 1, price: 55000, notes: "Lvl 3" },
-    { name: "Qahwa Arabika Kapulaga", qty: 2, price: 25000, notes: "Panas" }
-  ]},
+  { id: "T11", name: "Meja 11", seats: 4, section: "VIP Private Room", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] },
   { id: "T12", name: "Meja 12", seats: 6, section: "VIP Private Room", status: "available", runningTotal: 0, elapsedMinutes: 0, customer: "-", orderCount: 0, items: [] }
 ];
 

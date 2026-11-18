@@ -1725,7 +1725,7 @@
   <script src="assets/js/resto-sync.js?v=2.7.0"></script>
   <script>
     // State Kasir
-    let activeTableId = "T03";
+    let activeTableId = "T01";
     let activeTableFilter = "all";
     let activePosFilter = "all";
     let currentTicketItems = [];
@@ -2326,12 +2326,6 @@
       // Sinkronkan status tenant terbaru dari Cloud secara non-blocking
       if (typeof RestoSync !== "undefined" && typeof RestoSync.syncTenantsFromCloud === "function") {
         RestoSync.syncTenantsFromCloud({ mode: "tenant" }).catch(() => {});
-      }
-
-      // Pre-select default VIP Member (Kevin Sanjaya) jika ada
-      const defaultVip = RestoSync.findMember("081234567890");
-      if (defaultVip) {
-        selectCashierMember(defaultVip.id);
       }
 
       // Dengarkan event pesanan baru masuk dari QR Self-Order
