@@ -49,6 +49,51 @@
 
   <!-- Resto Pro Shared Design Styles -->
   <link rel="stylesheet" href="assets/css/resto-theme.css">
+
+  <!-- Thermal Receipt Print Stylesheet (Clean 80mm / 58mm Output) -->
+  <style>
+    #thermalReceiptPrintArea {
+      display: none;
+    }
+    @media print {
+      @page {
+        size: 80mm auto;
+        margin: 0;
+      }
+      html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+      }
+      body > *:not(#thermalReceiptPrintArea) {
+        display: none !important;
+      }
+      #thermalReceiptPrintArea {
+        display: block !important;
+        visibility: visible !important;
+        position: static !important;
+        width: 80mm !important;
+        max-width: 80mm !important;
+        margin: 0 auto !important;
+        padding: 4mm 5mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Courier New', Courier, monospace !important;
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+        box-sizing: border-box !important;
+      }
+      #thermalReceiptPrintArea,
+      #thermalReceiptPrintArea * {
+        visibility: visible !important;
+        color: #000000 !important;
+      }
+    }
+  </style>
 </head>
 <body class="bg-[#FAF7F2] dark:bg-[#0F172A] text-[#1C1917] dark:text-[#F8FAFC] min-h-screen flex flex-col font-body antialiased select-none transition-colors duration-200">
 
@@ -1656,26 +1701,26 @@
   <!-- ============================================================
        HIDDEN THERMAL RECEIPT PRINT AREA (80mm)
        ============================================================ -->
-  <div id="thermalReceiptPrintArea" class="hidden">
+  <div id="thermalReceiptPrintArea">
     <div style="text-align: center; margin-bottom: 6px;">
-      <h2 style="font-size: 14px; font-weight: bold; margin: 0;">RESTO PRO</h2>
-      <p style="font-size: 10px; margin: 2px 0;">by RASH WebApp Builder</p>
-      <p style="font-size: 9px; margin: 0;">Jl. Boulevard Resto Raya No. 88, Jakarta</p>
-      <p style="font-size: 9px; margin: 0;">Telp: (021) 7890-1234 • WA: 0812-9876-5432</p>
+      <h2 id="rcptRestoName" style="font-size: 14px; font-weight: bold; margin: 0; text-transform: uppercase;">RESTO PRO</h2>
+      <p id="rcptRestoSub" style="font-size: 10px; margin: 2px 0;">Sistem Kasir POS Restoran</p>
+      <p id="rcptRestoAddress" style="font-size: 9px; margin: 0;">RASH WebApp Builder</p>
+      <p id="rcptRestoPhone" style="font-size: 9px; margin: 0;">Layanan Pelanggan (WA): 085174273313</p>
       <p style="margin: 4px 0;">================================</p>
     </div>
 
     <div style="font-size: 10px; margin-bottom: 6px;">
       <div style="display: flex; justify-content: space-between;">
-        <span>No: <strong id="rcptBillNo">RP-20261108-03</strong></span>
-        <span id="rcptDate">08/11/2026 11:45</span>
+        <span>No: <strong id="rcptBillNo">RP-20261119-01</strong></span>
+        <span id="rcptDate">19/11/2026 04:55</span>
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span>Meja: <strong id="rcptTable">03</strong></span>
+        <span>Meja: <strong id="rcptTable">01</strong></span>
         <span>Kasir: <strong id="rcptCashierName">Kasir Utama</strong></span>
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span>Tamu: <span id="rcptCustomer">Ibu Rahmawati</span></span>
+        <span>Tamu: <span id="rcptCustomer">Tamu Langsung</span></span>
         <span id="rcptShiftName">Shift 1 (Pagi)</span>
       </div>
       <p style="margin: 4px 0;">--------------------------------</p>
@@ -1715,7 +1760,7 @@
     <div style="text-align: center; margin-top: 10px; font-size: 9px;">
       <p style="margin: 2px 0;">Terima kasih atas kunjungan Anda!</p>
       <p style="margin: 2px 0;">Makanan Halal, Berkah & Thayyib</p>
-      <p style="margin: 4px 0;">WiFi Password: <strong>restopro2026</strong></p>
+      <p style="margin: 4px 0;">Etalase: <strong>lynk.id/rabiasultan</strong></p>
       <p style="margin: 2px 0;">*** LUNAS ***</p>
     </div>
   </div>
@@ -4036,10 +4081,25 @@
       document.getElementById("rcptChange").textContent = formatRupiah(change);
       document.getElementById("rcptMethod").textContent = activePaymentMethod.toUpperCase();
 
+      const rcptDateEl = document.getElementById("rcptDate");
+      const rcptCashierEl = document.getElementById("rcptCashierName");
+      const rcptShiftEl = document.getElementById("rcptShiftName");
+      const rcptRestoNameEl = document.getElementById("rcptRestoName");
+      const rcptRestoAddrEl = document.getElementById("rcptRestoAddress");
+      const tenant = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+
+      if (rcptDateEl) rcptDateEl.textContent = new Date().toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" });
+      if (rcptCashierEl) rcptCashierEl.textContent = getActiveCashierName();
+      if (rcptShiftEl) rcptShiftEl.textContent = getActiveShiftName();
+      if (tenant) {
+        if (rcptRestoNameEl) rcptRestoNameEl.textContent = tenant.name || "RESTO PRO";
+        if (rcptRestoAddrEl) rcptRestoAddrEl.textContent = tenant.city || "Resto Pro Indonesia";
+      }
+
       document.getElementById("rcptItemsList").innerHTML = currentTicketItems.map(item => `
         <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-          <span>${item.qty}x ${item.name}</span>
-          <span>${formatRupiah(item.price * item.qty)}</span>
+          <span>${item.qty}x ${escapeHtmlSafe(item.name)}${item.notes ? '<br><small style="color:#666;">*' + escapeHtmlSafe(item.notes) + '</small>' : ''}</span>
+          <span style="white-space:nowrap;">${formatRupiah(item.price * item.qty)}</span>
         </div>
       `).join("");
 
@@ -4331,6 +4391,20 @@
       const t = list.find(x => x.billNo === billNo);
       if (!t) return;
 
+      const tenant = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+      if (tenant) {
+        const rcptRestoNameEl = document.getElementById("rcptRestoName");
+        const rcptRestoAddrEl = document.getElementById("rcptRestoAddress");
+        if (rcptRestoNameEl) rcptRestoNameEl.textContent = tenant.name || "RESTO PRO";
+        if (rcptRestoAddrEl) rcptRestoAddrEl.textContent = tenant.city || "Resto Pro Indonesia";
+      }
+      const rcptDateEl = document.getElementById("rcptDate");
+      const rcptCashierEl = document.getElementById("rcptCashierName");
+      const rcptShiftEl = document.getElementById("rcptShiftName");
+      if (rcptDateEl) rcptDateEl.textContent = t.dateStr || new Date().toLocaleString("id-ID");
+      if (rcptCashierEl) rcptCashierEl.textContent = t.cashier || "Kasir Utama";
+      if (rcptShiftEl) rcptShiftEl.textContent = t.shift || "Shift 1";
+
       document.getElementById("rcptBillNo").textContent = t.billNo;
       document.getElementById("rcptTable").textContent = t.table;
       document.getElementById("rcptCustomer").textContent = t.customer;
@@ -4344,12 +4418,56 @@
 
       document.getElementById("rcptItemsList").innerHTML = (t.items || []).map(item => `
         <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-          <span>${item.qty}x ${item.name}</span>
-          <span>${formatRupiah(item.price * item.qty)}</span>
+          <span>${item.qty}x ${escapeHtmlSafe(item.name)}${item.notes ? '<br><small style="color:#666;">*' + escapeHtmlSafe(item.notes) + '</small>' : ''}</span>
+          <span style="white-space:nowrap;">${formatRupiah(item.price * item.qty)}</span>
         </div>
       `).join("");
 
       window.print();
+    }
+
+    function prepareReceiptForPrint() {
+      const tenant = typeof RestoSync !== "undefined" ? RestoSync.getTenantInfo() : null;
+      const restoNameEl = document.getElementById("rcptRestoName");
+      const restoAddrEl = document.getElementById("rcptRestoAddress");
+      const dateEl = document.getElementById("rcptDate");
+      const cashierEl = document.getElementById("rcptCashierName");
+      const shiftEl = document.getElementById("rcptShiftName");
+
+      if (tenant) {
+        if (restoNameEl) restoNameEl.textContent = tenant.name || "RESTO PRO";
+        if (restoAddrEl) restoAddrEl.textContent = tenant.city || "Resto Pro Indonesia";
+      }
+
+      if (dateEl) dateEl.textContent = new Date().toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" });
+      if (cashierEl) cashierEl.textContent = typeof getActiveCashierName === "function" ? getActiveCashierName() : "Kasir Utama";
+      if (shiftEl) shiftEl.textContent = typeof getActiveShiftName === "function" ? getActiveShiftName() : "Shift 1 (Pagi)";
+
+      const itemsList = document.getElementById("rcptItemsList");
+      if (itemsList && (!itemsList.children || itemsList.children.length === 0) && currentTicketItems && currentTicketItems.length > 0) {
+        const table = RESTO_TABLES.find(t => t.id === activeTableId);
+        document.getElementById("rcptBillNo").textContent = `RP-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${activeTableId.replace('T','')}`;
+        document.getElementById("rcptTable").textContent = activeTableId;
+        document.getElementById("rcptCustomer").textContent = activeMember ? `${activeMember.name} (${activeMember.tierLabel})` : (table ? table.customer : "Tamu");
+        document.getElementById("rcptSubtotal").textContent = formatRupiah(currentCalculatedTotals.subtotal);
+        document.getElementById("rcptDiscount").textContent = formatRupiah(currentCalculatedTotals.discount);
+        document.getElementById("rcptTax").textContent = formatRupiah(currentCalculatedTotals.tax);
+        document.getElementById("rcptTotal").textContent = formatRupiah(currentCalculatedTotals.grandTotal);
+        document.getElementById("rcptPaid").textContent = formatRupiah(currentCalculatedTotals.grandTotal);
+        document.getElementById("rcptChange").textContent = "Rp 0";
+        document.getElementById("rcptMethod").textContent = "DRAF";
+
+        itemsList.innerHTML = currentTicketItems.map(item => `
+          <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+            <span>${item.qty}x ${escapeHtmlSafe(item.name)}${item.notes ? '<br><small style="color:#666;">*' + escapeHtmlSafe(item.notes) + '</small>' : ''}</span>
+            <span style="white-space:nowrap;">${formatRupiah(item.price * item.qty)}</span>
+          </div>
+        `).join("");
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeprint", prepareReceiptForPrint);
     }
 
     function printShiftReport() {

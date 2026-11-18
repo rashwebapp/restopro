@@ -143,24 +143,51 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 /* Thermal Receipt Print Stylesheet */
+#thermalReceiptPrintArea {
+  display: none;
+}
+
 @media print {
-  body * {
-    visibility: hidden;
-  }
-  #thermalReceiptPrintArea, #thermalReceiptPrintArea * {
-    visibility: visible;
-  }
-  #thermalReceiptPrintArea {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 80mm;
+  @page {
+    size: 80mm auto;
     margin: 0;
-    padding: 4mm;
-    background: white;
-    color: black;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 11px;
-    line-height: 1.3;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Sembunyikan SEMUA elemen body selain area struk thermal */
+  body > *:not(#thermalReceiptPrintArea) {
+    display: none !important;
+  }
+
+  /* Paksa area struk thermal tampil sebagai blok terlihat di print */
+  #thermalReceiptPrintArea {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 4mm 5mm !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+    box-sizing: border-box !important;
+  }
+
+  #thermalReceiptPrintArea,
+  #thermalReceiptPrintArea * {
+    visibility: visible !important;
+    color: #000000 !important;
   }
 }
