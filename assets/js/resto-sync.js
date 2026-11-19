@@ -182,7 +182,7 @@ const RestoSync = {
   },
 
   hashTenantPin(tenantId, pin) {
-    const tid = (tenantId && String(tenantId).trim()) ? String(tenantId).trim() : "default";
+    const tid = (tenantId && String(tenantId).trim()) ? String(tenantId).trim().toLowerCase() : "default";
     return this.sha256Hex("RESTO_PRO_PIN_V1:" + tid + ":" + String(pin || "").trim());
   },
 
@@ -229,6 +229,9 @@ const RestoSync = {
   _normalizeTenantRecord(raw) {
     if (!raw || typeof raw !== "object") return raw;
     const t = Object.assign({}, raw);
+    if (t.id) {
+      t.id = String(t.id).trim().toLowerCase().replace(/[^a-z0-9_-]/g, "-");
+    }
     const planId = String(t.plan || "monthly").toLowerCase().trim();
     const cfg = this.getSaasPlanConfig(planId);
     t.plan = planId;
@@ -478,7 +481,8 @@ const RestoSync = {
 
   getTenantInfo(targetTenantId) {
     try {
-      const tenantId = targetTenantId || this.getTenantId();
+      const rawTenantId = targetTenantId || this.getTenantId();
+      const tenantId = (rawTenantId && String(rawTenantId).trim()) ? String(rawTenantId).trim().toLowerCase() : "default";
       if (!tenantId || tenantId === "default") {
         return {
           id: "default",
@@ -501,9 +505,12 @@ const RestoSync = {
         };
       }
       const all = this.getAllTenants();
-      const found = all.find(t => t.id === tenantId);
+      const found = all.find(t => String(t.id || "").trim().toLowerCase() === tenantId);
       if (found) {
-        return Object.assign({}, found, { notSynced: Boolean(found.notSynced) });
+        return Object.assign({}, found, {
+          id: String(found.id || tenantId).trim().toLowerCase(),
+          notSynced: Boolean(found.notSynced)
+        });
       }
       return {
         id: tenantId,
@@ -533,7 +540,8 @@ const RestoSync = {
   registerNewTenant(data) {
     if (!data || !data.name) throw new Error("Nama resto wajib diisi");
     const rawName = String(data.name).trim();
-    const slug = (data.id || rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")) || ("resto-" + Date.now().toString().slice(-4));
+    const rawSlug = data.id || rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const slug = (String(rawSlug || "").toLowerCase().trim().replace(/[^a-z0-9_-]/g, "-")) || ("resto-" + Date.now().toString().slice(-4));
 
     const planId = String(data.plan || "monthly").toLowerCase().trim();
     const planCfg = this.getSaasPlanConfig(planId);
@@ -566,7 +574,7 @@ const RestoSync = {
     const licenseToken = data.licenseKey || this.createLicenseToken(licensePayload);
 
     const tenants = this.getAllTenants();
-    const existingIdx = tenants.findIndex(t => t.id === slug);
+    const existingIdx = tenants.findIndex(t => String(t.id || "").trim().toLowerCase() === slug);
     const existing = existingIdx >= 0 ? tenants[existingIdx] : null;
 
     const cashierPin = data.cashierPin ? String(data.cashierPin).trim() : (existing && existing.cashierPin ? String(existing.cashierPin).trim() : "1234");
@@ -615,10 +623,11 @@ const RestoSync = {
 
   updateTenant(tenantId, updates = {}) {
     if (!tenantId) return { success: false, message: "Tenant ID wajib diisi" };
+    const cleanId = String(tenantId).trim().toLowerCase();
     const tenants = this.getAllTenants();
-    let idx = tenants.findIndex(t => t.id === tenantId);
+    let idx = tenants.findIndex(t => String(t.id || "").trim().toLowerCase() === cleanId);
     if (idx === -1) {
-      const base = this.getTenantInfo(tenantId);
+      const base = this.getTenantInfo(cleanId);
       tenants.unshift(base);
       idx = 0;
     }
@@ -743,10 +752,11 @@ const RestoSync = {
     const clean = String(pin).trim();
     if (!clean) return false;
     if (this.isEmergencyPin(clean)) return true;
-    const tid = tenantId || this.getTenantId() || "default";
+    const tid = String(tenantId || this.getTenantId() || "default").trim().toLowerCase();
     const t = this.getTenantInfo(tid);
     if (t && t.cashierPinHash) {
-      return this.hashTenantPin(tid, clean) === String(t.cashierPinHash).trim();
+      return this.hashTenantPin(tid, clean) === String(t.cashierPinHash).trim() ||
+             this.hashTenantPin(t.id, clean) === String(t.cashierPinHash).trim();
     }
     if (t && t.cashierPin) {
       return clean === String(t.cashierPin).trim();
@@ -759,10 +769,11 @@ const RestoSync = {
     const clean = String(pin).trim();
     if (!clean) return false;
     if (this.isEmergencyPin(clean)) return true;
-    const tid = tenantId || this.getTenantId() || "default";
+    const tid = String(tenantId || this.getTenantId() || "default").trim().toLowerCase();
     const t = this.getTenantInfo(tid);
     if (t && t.ownerPinHash) {
-      return this.hashTenantPin(tid, clean) === String(t.ownerPinHash).trim();
+      return this.hashTenantPin(tid, clean) === String(t.ownerPinHash).trim() ||
+             this.hashTenantPin(t.id, clean) === String(t.ownerPinHash).trim();
     }
     if (t && t.ownerPin) {
       return clean === String(t.ownerPin).trim();
@@ -833,13 +844,14 @@ const RestoSync = {
   },
 
   renewTenantSubscription(tenantId, addDays = 30) {
+    const cleanId = String(tenantId || "").trim().toLowerCase();
     const tenants = this.getAllTenants();
-    const idx = tenants.findIndex(t => t.id === tenantId);
+    const idx = tenants.findIndex(t => String(t.id || "").trim().toLowerCase() === cleanId);
     if (idx === -1) return { success: false, message: "Klien tidak ditemukan" };
 
     const t = tenants[idx];
     if (t.isLifetime || t.plan === "lifetime") {
-      return this.updateTenant(tenantId, { status: "active", isLifetime: true, expiresAt: null });
+      return this.updateTenant(cleanId, { status: "active", isLifetime: true, expiresAt: null });
     }
 
     const currentExp = t.expiresAt ? new Date(t.expiresAt).getTime() : 0;
@@ -870,7 +882,7 @@ const RestoSync = {
       isUnlimited: true
     });
 
-    const res = this.updateTenant(tenantId, updates);
+    const res = this.updateTenant(cleanId, updates);
     if (res.success) {
       return {
         success: true,
@@ -882,9 +894,10 @@ const RestoSync = {
   },
 
   deleteTenant(tenantId) {
-    const tenants = this.getAllTenants().filter(t => t.id !== tenantId);
+    const cleanId = String(tenantId || "").trim().toLowerCase();
+    const tenants = this.getAllTenants().filter(t => String(t.id || "").trim().toLowerCase() !== cleanId);
     this.saveAllTenants(tenants);
-    this.deleteTenantFromCloud(tenantId);
+    this.deleteTenantFromCloud(cleanId);
     return { success: true };
   },
 
@@ -4026,12 +4039,13 @@ const RestoSync = {
       if (json.notFound === true) {
         if (cloudInitialized) {
           const currentLocal = this._readRawTenantsArray();
-          const filtered = currentLocal.filter(t => t.id !== targetTenantId);
+          const targetClean = String(targetTenantId || "").trim().toLowerCase();
+          const filtered = currentLocal.filter(t => String(t.id || "").trim().toLowerCase() !== targetClean);
           this.saveAllTenants(filtered, { silent: true });
-          if (targetTenantId === this.getTenantId() && typeof localStorage !== "undefined" && localStorage.getItem(this.TABLES_STORAGE_KEY)) {
+          if (targetClean === String(this.getTenantId() || "").trim().toLowerCase() && typeof localStorage !== "undefined" && localStorage.getItem(this.TABLES_STORAGE_KEY)) {
             this.syncTablesForTenant();
           }
-          this.emit("TENANTS_UPDATED", { count: filtered.length, evictedTenantId: targetTenantId });
+          this.emit("TENANTS_UPDATED", { count: filtered.length, evictedTenantId: targetClean });
           return {
             success: true,
             mode: "tenant",
@@ -4056,7 +4070,8 @@ const RestoSync = {
 
       const cloudTenant = this._normalizeTenantRecord(incomingRaw);
       const localArr = this._readRawTenantsArray();
-      const idx = localArr.findIndex(t => t.id === cloudTenant.id);
+      const cloudCleanId = String(cloudTenant.id || "").trim().toLowerCase();
+      const idx = localArr.findIndex(t => String(t.id || "").trim().toLowerCase() === cloudCleanId);
       if (idx >= 0) {
         const prev = localArr[idx];
         const merged = Object.assign({}, prev, cloudTenant, { notSynced: false });
@@ -4072,7 +4087,7 @@ const RestoSync = {
       }
 
       this.saveAllTenants(localArr, { silent: true });
-      if (cloudTenant.id === this.getTenantId()) {
+      if (cloudCleanId === String(this.getTenantId() || "").trim().toLowerCase()) {
         this.syncTablesForTenant();
       }
       this.emit("TENANTS_UPDATED", { count: localArr.length, tenantId: cloudTenant.id });

@@ -88,7 +88,7 @@ function sha256Hex_(input) {
  * Helper Hash PIN Tenant: Kompatibel 100% dengan RestoSync.hashTenantPin
  */
 function hashTenantPin_(id, pin) {
-  const tid = (id && String(id).trim()) ? String(id).trim() : 'default';
+  const tid = (id && String(id).trim()) ? String(id).trim().toLowerCase() : 'default';
   const cleanPin = (pin !== undefined && pin !== null) ? String(pin).trim() : '';
   return sha256Hex_('RESTO_PRO_PIN_V1:' + tid + ':' + cleanPin);
 }

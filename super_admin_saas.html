@@ -1372,7 +1372,8 @@
       }
 
       const rawName = (data.name || "").trim();
-      const slug = (data.id || rawName.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")) || ("resto-" + Date.now().toString().slice(-4));
+      const rawSlug = data.id || (data.name ? String(data.name).toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") : "");
+      const slug = (String(rawSlug || "").toLowerCase().trim().replace(/[^a-z0-9_-]/g, "-")) || ("resto-" + Date.now().toString().slice(-4));
       const planId = String(data.plan || "monthly").toLowerCase().trim();
       const cfg = getPlanFallbackConfig(planId);
       const isLifetime = data.isLifetime !== undefined ? Boolean(data.isLifetime) : Boolean(cfg.isLifetime);
@@ -1409,7 +1410,7 @@
       };
 
       const tenants = getAllTenantsSafe();
-      const existingIdx = tenants.findIndex(t => t.id === slug);
+      const existingIdx = tenants.findIndex(t => String(t.id || "").toLowerCase() === slug);
       if (existingIdx >= 0) tenants[existingIdx] = newTenant;
       else tenants.unshift(newTenant);
 
@@ -1430,8 +1431,9 @@
         }
       }
 
+      const cleanId = String(tenantId).trim().toLowerCase();
       const tenants = getAllTenantsSafe();
-      const idx = tenants.findIndex(t => t.id === tenantId);
+      const idx = tenants.findIndex(t => String(t.id || "").toLowerCase() === cleanId);
       if (idx === -1) return { success: false, message: "Klien restoran tidak ditemukan" };
 
       const t = Object.assign({}, tenants[idx]);
@@ -1507,12 +1509,13 @@
     }
 
     function deleteTenantSafe(tenantId) {
+      const cleanId = String(tenantId).trim().toLowerCase();
       if (typeof RestoSync !== "undefined" && typeof RestoSync.deleteTenant === "function") {
         try {
-          return RestoSync.deleteTenant(tenantId);
+          return RestoSync.deleteTenant(cleanId);
         } catch (e) {}
       }
-      const tenants = getAllTenantsSafe().filter(t => t.id !== tenantId);
+      const tenants = getAllTenantsSafe().filter(t => String(t.id || "").toLowerCase() !== cleanId);
       try {
         localStorage.setItem(TENANTS_INIT_FLAG_KEY, "true");
         localStorage.setItem(TENANTS_STORAGE_KEY, JSON.stringify(tenants));
@@ -1521,12 +1524,13 @@
     }
 
     function getTenantInfoSafe(tenantId) {
+      const cleanId = String(tenantId).trim().toLowerCase();
       const all = getAllTenantsSafe();
-      const localMatch = all.find(t => t.id === tenantId);
+      const localMatch = all.find(t => String(t.id || "").toLowerCase() === cleanId);
       if (localMatch) return localMatch;
       if (typeof RestoSync !== "undefined" && typeof RestoSync.getTenantInfo === "function") {
         try {
-          const info = RestoSync.getTenantInfo(tenantId);
+          const info = RestoSync.getTenantInfo(cleanId);
           if (info && !info.notSynced) return info;
         } catch (e) {}
       }
@@ -1911,7 +1915,8 @@
     function handleCreateTenant(e) {
       e.preventDefault();
       const name = document.getElementById("inputTenantName").value.trim();
-      const slug = document.getElementById("inputTenantSlug").value.trim();
+      const rawSlug = document.getElementById("inputTenantSlug").value.trim();
+      const slug = rawSlug.toLowerCase().replace(/[^a-z0-9_-]/g, "-").replace(/-+/g, "-");
       const pic = document.getElementById("inputTenantPic").value.trim();
       const phone = document.getElementById("inputTenantPhone").value.trim();
       const cashierPhone = (document.getElementById("inputTenantCashierPhone").value || "").trim();

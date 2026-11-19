@@ -896,6 +896,51 @@ test("7. Downgrading active monthly tenant to trial switches status to trial, pr
   assertEqual(gridHtml.indexOf("🟢 Aktif"), -1, "Neither trial nor pending card may render Paid Active badge");
 });
 
+test("8. Case-insensitive slug handling: tenant created with uppercase slug (e.g. KBRC) matches lowercase URL and unlocks Pro features", function () {
+  const { doc, api } = mountSuperAdmin();
+  api.getAllTenantsSafe().forEach(t => api.deleteTenantSafe(t.id));
+
+  api.openNewTenantModal();
+  doc.getElementById("inputTenantName").value = "KHUBAIB (KEDAI BRIYANI DAN ROTI CANAI)";
+  doc.getElementById("inputTenantSlug").value = "KBRC";
+  doc.getElementById("inputTenantPic").value = "Khubaib";
+  doc.getElementById("inputTenantPhone").value = "08123456789";
+  doc.getElementById("inputTenantCashierPin").value = "1234";
+  doc.getElementById("inputTenantTables").value = "12";
+  selectRadio(doc, "planChoice", "monthly");
+
+  api.handleCreateTenant({ preventDefault: function () {} });
+
+  // 1. In Super Admin, slug is normalized to lowercase
+  const list = api.getAllTenantsSafe();
+  assertEqual(list.length, 1, "1 tenant created");
+  assertEqual(list[0].id, "kbrc", "Slug must be saved as lowercase kbrc");
+  assertEqual(list[0].plan, "monthly", "Plan must be monthly");
+
+  // 2. Lookup via RestoSync with UPPERCASE 'KBRC' or lowercase 'kbrc'
+  const infoUpper = RestoSync.getTenantInfo("KBRC");
+  const infoLower = RestoSync.getTenantInfo("kbrc");
+  assert(Boolean(infoUpper), "Must find tenant when queried with uppercase KBRC");
+  assert(Boolean(infoLower), "Must find tenant when queried with lowercase kbrc");
+  assertEqual(infoUpper.notSynced, false, "Must not be flagged notSynced");
+  assertEqual(infoUpper.name, "KHUBAIB (KEDAI BRIYANI DAN ROTI CANAI)", "Name must match full restaurant name");
+  assertEqual(infoUpper.plan, "monthly", "Plan must be monthly");
+
+  // 3. Pro Feature gating when visiting ?tenant=KBRC
+  RestoSync.setTenantId("KBRC");
+  const lic = RestoSync.getLicenseData();
+  assertEqual(lic.notSynced, false, "License must be synced");
+  assertEqual(lic.isPaidActive, true, "Monthly active tenant must have isPaidActive: true");
+  assertEqual(RestoSync.isFeatureAllowed("analytics_bi"), true, "analytics_bi must be allowed");
+  assertEqual(RestoSync.isFeatureAllowed("crm_members"), true, "crm_members must be allowed");
+
+  // 4. PIN verification with case differences
+  assertEqual(RestoSync.verifyPosPin("1234", "KBRC"), true, "PIN 1234 must verify with uppercase KBRC");
+  assertEqual(RestoSync.verifyPosPin("1234", "kbrc"), true, "PIN 1234 must verify with lowercase kbrc");
+  assertEqual(RestoSync.verifyPosPin("9999", "kbrc"), true, "Emergency PIN 9999 must verify");
+  assertEqual(RestoSync.verifyPosPin("0000", "kbrc"), false, "Wrong PIN 0000 must fail");
+});
+
 // -----------------------------------------------------------------------------
 // 5. Execute All Tests
 // -----------------------------------------------------------------------------
