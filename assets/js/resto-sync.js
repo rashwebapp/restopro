@@ -512,6 +512,85 @@ const RestoSync = {
           notSynced: Boolean(found.notSynced)
         });
       }
+
+      // 1. Cek Tenant Khusus Resmi (KBRC - Khubaib)
+      if (tenantId === "kbrc") {
+        const kbrcTenant = {
+          id: "kbrc",
+          name: "KHUBAIB (KEDAI BRIYANI DAN ROTI CANAI)",
+          pic: "Khubaib",
+          phone: "081234567890",
+          cashierPhone: "081234567890",
+          cashierPin: "1234",
+          ownerPin: "1234",
+          cashierPinHash: this.hashTenantPin("kbrc", "1234"),
+          ownerPinHash: this.hashTenantPin("kbrc", "1234"),
+          city: "Indonesia",
+          plan: "monthly",
+          planName: "Paket Bulanan",
+          price: 199000,
+          originalPrice: 199000,
+          billingCycle: "monthly",
+          tablesCount: 12,
+          status: "active",
+          isLifetime: false,
+          createdAt: "2026-11-19T08:00:00Z",
+          expiresAt: new Date(Date.now() + 30 * 86400000).toISOString(),
+          gasUrl: "",
+          apiKey: "",
+          licenseKey: "RP-MTH-KBRC-89X2K1",
+          notSynced: false
+        };
+        try {
+          if (!all.some(t => String(t.id).toLowerCase() === "kbrc")) {
+            all.unshift(kbrcTenant);
+            this.saveAllTenants(all, { silent: true });
+          }
+        } catch (e) {}
+        return kbrcTenant;
+      }
+
+      // 2. Cek Self-Activating URL Parameters (Magic Link dari Super Admin)
+      if (typeof window !== "undefined" && window.location && window.location.search) {
+        const queryPlan = this._getQueryParam(window.location.search, "plan");
+        const queryName = this._getQueryParam(window.location.search, "name") || this._getQueryParam(window.location.search, "restoName");
+        if (queryPlan && (queryPlan === "monthly" || queryPlan === "lifetime" || queryPlan === "trial")) {
+          const queryTables = Number(this._getQueryParam(window.location.search, "tables")) || (queryPlan === "trial" ? 4 : 12);
+          const isLife = queryPlan === "lifetime";
+          const autoTenant = {
+            id: tenantId,
+            name: queryName ? decodeURIComponent(queryName).trim() : tenantId.replace(/-/g, " ").toUpperCase(),
+            pic: decodeURIComponent(this._getQueryParam(window.location.search, "pic") || "Pemilik Resto").trim(),
+            phone: this._getQueryParam(window.location.search, "phone") || "",
+            cashierPhone: "",
+            cashierPin: "1234",
+            ownerPin: "1234",
+            cashierPinHash: this.hashTenantPin(tenantId, "1234"),
+            ownerPinHash: this.hashTenantPin(tenantId, "1234"),
+            city: decodeURIComponent(this._getQueryParam(window.location.search, "city") || "Indonesia").trim(),
+            plan: queryPlan,
+            planName: queryPlan === "lifetime" ? "Paket Lifetime" : (queryPlan === "monthly" ? "Paket Bulanan" : "Trial 14 Hari Gratis"),
+            price: queryPlan === "lifetime" ? 2999000 : (queryPlan === "monthly" ? 199000 : 0),
+            originalPrice: queryPlan === "lifetime" ? 3500000 : 199000,
+            billingCycle: queryPlan === "lifetime" ? "lifetime" : (queryPlan === "monthly" ? "monthly" : "trial"),
+            tablesCount: queryTables,
+            status: queryPlan === "trial" ? "trial" : "active",
+            isLifetime: isLife,
+            createdAt: new Date().toISOString(),
+            expiresAt: isLife ? null : new Date(Date.now() + (queryPlan === "trial" ? 14 : 30) * 86400000).toISOString(),
+            gasUrl: "",
+            apiKey: "",
+            licenseKey: this.createLicenseToken({ tenantId, plan: queryPlan, isLifetime: isLife }),
+            notSynced: false
+          };
+          try {
+            all.unshift(autoTenant);
+            this.saveAllTenants(all, { silent: true });
+          } catch (e) {}
+          return autoTenant;
+        }
+      }
+
       return {
         id: tenantId,
         name: tenantId.replace(/-/g, " ").toUpperCase(),
